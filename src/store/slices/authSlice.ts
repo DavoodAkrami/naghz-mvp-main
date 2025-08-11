@@ -31,6 +31,9 @@ export const loginUser = createAsyncThunk(
     'auth/loginUser',
     async ({ email, password }: { email: string; password: string }, { rejectWithValue }) => {
         try {
+            if (!supabase) {
+                return rejectWithValue('Supabase client not initialized');
+            }
             const { data, error } = await supabase.auth.signInWithPassword({ email, password });
             if (error) throw error;
             return data.user;
@@ -46,6 +49,9 @@ export const signupUser = createAsyncThunk(
     'auth/signupUser',
     async (signupData: { email: string; password: string; full_name?: string }, { rejectWithValue }) => {
       try {
+        if (!supabase) {
+          return rejectWithValue('Supabase client not initialized');
+        }
         const { email, password, full_name } = signupData;
         
         const { data, error } = await supabase.auth.signUp({
@@ -74,6 +80,9 @@ export const logoutUser = createAsyncThunk(
     'auth/logoutUser',
     async (_, { rejectWithValue }) => {
         try {
+            if (!supabase) {
+                return rejectWithValue('Supabase client not initialized');
+            }
             const { error } = await supabase.auth.signOut();
             if (error) throw error;
             return null;
@@ -89,6 +98,9 @@ export const checkAuthStatus = createAsyncThunk(
     'auth/checkAuthStatus',
     async (_, { rejectWithValue }) => {
       try {
+        if (!supabase) {
+          return rejectWithValue('Supabase client not initialized');
+        }
         const { data, error } = await supabase.auth.getUser();
   
         if (error || !data.user) {
