@@ -1,0 +1,119 @@
+@import "tailwindcss";
+
+:root {
+    --bg-color: #f5f7fa;
+    --foreground: #171717;
+    --primary-color1: #5a5fcf;
+    --primary-color2: #ffd66b;
+    --primary-color3: #f5f7fa;
+    --primary-color4: #fff;
+    --secondary-color1: #32c48d;
+    --secondary-color2: #f26464;
+    --secondary-color3: #3b9ae1;
+    --accent-color1: #d8a7ff;
+    --accent-color2: #ffe1b3;
+    --accent-color3: #222222;
+    --text-primary: #1f2937;
+    --text-secondary: #6B7280;
+    --text-desable: #9ca3af;
+    --section-color: #080F28;
+    --hover-color: #dcdee0;
+}
+
+@theme inline {
+    --color-background: var(--bg-color);
+    --color-foreground: var(--foreground);
+    --font-sans: var(--font-geist-sans);
+    --font-mono: var(--font-geist-mono);
+}
+
+body {
+    background: var(--bg-color);
+    color: var(--foreground);
+    font-family: Arial, Helvetica, sans-serif;
+    overflow-x: hidden;
+}
+
+.h1 {
+    color: var(--text-primary);
+    font-weight: 750;
+    font-size: 3rem;
+}
+
+.h2 {
+    color: var(--text-primary);
+    font-weight: 700;
+    font-size: 2.8rem;
+}
+
+.h3 {
+    color: var(--text-primary);
+    font-weight: 650;
+    font-size: 2.6rem;
+}
+
+.button-primary {
+    cursor: pointer;
+    background-color: var(--primary-color2);
+    padding: 0.8rem 1.6rem;
+    color: var(--primary-color4);
+    font-weight: 700;
+    transition: all 0.1s ease-in-out;
+}
+
+.button-primary:hover {
+    background-color: var(--accent-color2);
+}
+
+.button-secondary {
+    cursor: pointer;
+    font-weight: 700;
+    border: 1.8px solid transparent;
+    outline: 1px solid var(--text-desable);
+    padding: 0.8rem 1.6rem;
+}
+
+.button-secondary:hover {
+    outline-width: 2.2px;
+}
+
+@media (max-width: 1200px) {
+    .h1 {
+        font-size: 2.2rem;
+    }
+
+    .h2 {
+        color: var(--text-primary);
+        font-weight: 700;
+        font-size: 2rem;
+    }
+    
+    .h3 {
+        color: var(--text-primary);
+        font-weight: 650;
+        font-size: 1.8rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .h1 {
+        font-size: 1.6rem;
+    }
+
+    .h2 {
+        color: var(--text-primary);
+        font-weight: 700;
+        font-size: 1.4rem;
+    }
+    
+    .h3 {
+        color: var(--text-primary);
+        font-weight: 650;
+        font-size: 1.2rem;
+    }
+
+    .button-primary,
+    .button-secondary {
+        scale: 0.9;
+    }
+}
