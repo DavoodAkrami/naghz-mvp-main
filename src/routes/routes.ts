@@ -1,11 +1,12 @@
-interface routesType {
+export interface routesType {
     name: string;
     path: string;
-    header: boolean;
+    header?: boolean;
     profilePage?: boolean;
 }
 
-const routes: routesType[] = [
+
+const routes: routesType[]= [
     {
         name: "خانه",
         path: "/",
@@ -18,15 +19,39 @@ const routes: routesType[] = [
     },
     {
         name: "ورود",
-        path: "/auth/si-in",
+        path: "/auth/sign-in",
         header: false
     },
     {
-        name: "داشبورد",
-        path: "/dashboard",
-        header: false,
+        name: "پروفایل",
+        path: "/dashboard/profile",
+        profilePage: true
+    },
+    {
+        name: "اطلاعات اکانت",
+        path: "/dashboard/account-info",
+        profilePage: true
+    },
+    {
+        name: "دوره‌های من",
+        path: "/dashboard/my-curses",
         profilePage: true
     }
 ] 
+
+export const dashboardPages: routesType[] = [
+    {
+        name: "پروفایل",
+        path: "/dashboard/profile",
+    },
+    {
+        name: "اطلاعات اکانت",
+        path: "/dashboard/account-info"
+    },
+    {
+        name: "دوره‌های من",
+        path: "/dashboard/my-curses"
+    }
+];
 
 export default routes;

@@ -1,0 +1,26 @@
+import SideBar from "@/components/SideBar";
+import { dashboardPages } from "@/routes/routes";
+
+
+const DahsboardLayout = ({ children }: { children: React.ReactNode }) => {
+
+    return (
+        <div 
+            className="grid grid-cols-[5%_1fr_3%_1fr_1fr_5%] max-h-[80vh]"
+            dir="rtl"
+        >
+            <div 
+                className="col-start-2 col-end-3"
+            >
+                <SideBar routes={dashboardPages} />
+            </div>
+            <div
+                className="col-start-4 col-end-6 border-[1.8px] border-[var(--accent-color1)] rounded-xl px-[5px] shadow-lg"
+            >
+                {children}
+            </div>
+        </div>
+    )
+}
+
+export default DahsboardLayout;
