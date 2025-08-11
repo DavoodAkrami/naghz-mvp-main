@@ -20,7 +20,7 @@ const Header = () => {
     const [dropdownOpen, setDropdownOpen] = useState(false);
 
     useEffect(() => {
-        const timer = setTimeout(() => setShowSkeleton(false), 3000);
+        const timer = setTimeout(() => setShowSkeleton(false), 1000);
         return () => clearTimeout(timer);
     }, []);
 
@@ -76,9 +76,11 @@ const Header = () => {
                                 onMouseEnter={() => setDropdownOpen(true)}
                                 onMouseLeave={() => setDropdownOpen(false)}
                             >
-                                    <CgProfile 
-                                        className="text-[3rem] max-md:text-[2rem]"
-                                    />
+                                    <Link href="/dashboard/profile">
+                                        <CgProfile 
+                                            className="text-[3rem] max-md:text-[2rem]"
+                                        />
+                                    </Link>
                                 <AnimatePresence>
                                     {dropdownOpen && (
                                         <motion.div
@@ -87,7 +89,7 @@ const Header = () => {
                                             animate={{ opacity: 1, height: 'auto'}}
                                             transition={{ duration: 0.3 }}
                                             exit={{ opacity: 0, height: 0 }}
-                                            className="overflow-hidden absolute right-0 rounded-md min-w-[10vw] shadow-lg z-50 bg-[var(--bg-color)]"
+                                            className="overflow-hidden absolute right-0 rounded-md min-w-[20vw] shadow-lg z-50 bg-[var(--bg-color)]"
                                         >
                                             <ul 
                                                 className=""
