@@ -7,7 +7,7 @@ export default function AccountInfo() {
 
     return (
         <div>
-            Hello
+            Hello {user?.email || 'User'}
         </div>
     );
 }
