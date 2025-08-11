@@ -3,10 +3,20 @@ import { supabase } from '@/config/supabase';
 
 
 interface AuthState {
-    user: any | null;
+    user: User | null;
     isAuthenticated: boolean;
     loading: boolean;
     error: string | null;
+}
+
+interface User {
+    id: string;
+    email?: string;
+    user_metadata?: {
+        full_name?: string;
+        role?: string;
+        created_at?: string;
+    };
 }
 
 const initialState: AuthState = {
@@ -24,8 +34,9 @@ export const loginUser = createAsyncThunk(
             const { data, error } = await supabase.auth.signInWithPassword({ email, password });
             if (error) throw error;
             return data.user;
-        } catch (error: any) {
-            return rejectWithValue(error.message);
+        } catch (error: unknown) {
+            const errorMessage = error instanceof Error ? error.message : 'An error occurred';
+            return rejectWithValue(errorMessage);
         }
     }
 );
@@ -51,8 +62,9 @@ export const signupUser = createAsyncThunk(
         
         if (error) throw error;
         return data.user;
-      } catch (error: any) {
-        return rejectWithValue(error.message);
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'An error occurred';
+        return rejectWithValue(errorMessage);
       }
     }
 );
@@ -65,8 +77,9 @@ export const logoutUser = createAsyncThunk(
             const { error } = await supabase.auth.signOut();
             if (error) throw error;
             return null;
-        } catch (error: any) {
-            return rejectWithValue(error.message);
+        } catch (error: unknown) {
+            const errorMessage = error instanceof Error ? error.message : 'An error occurred';
+            return rejectWithValue(errorMessage);
         }
     }
 );
@@ -83,8 +96,9 @@ export const checkAuthStatus = createAsyncThunk(
         }
   
         return data.user;
-      } catch (err: any) {
-        return rejectWithValue(err.message);
+      } catch (err: unknown) {
+        const errorMessage = err instanceof Error ? err.message : 'An error occurred';
+        return rejectWithValue(errorMessage);
       }
     }
 );
