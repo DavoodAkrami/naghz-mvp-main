@@ -1,0 +1,99 @@
+{
+  "name": "نقظ - آموزش مهارت‌های نرم",
+  "short_name": "نقظ",
+  "description": "پلتفرم جامع آموزش مهارت‌های نرم، توسعه فردی و یادگیری مهارت‌های ضروری",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "fa-IR",
+  "dir": "rtl",
+  "categories": ["education", "productivity", "lifestyle"],
+  "icons": [
+    {
+      "src": "/Naghz-logo.jpg",
+      "sizes": "72x72",
+      "type": "image/jpeg",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/Naghz-logo.jpg",
+      "sizes": "96x96",
+      "type": "image/jpeg",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/Naghz-logo.jpg",
+      "sizes": "128x128",
+      "type": "image/jpeg",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/Naghz-logo.jpg",
+      "sizes": "144x144",
+      "type": "image/jpeg",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/Naghz-logo.jpg",
+      "sizes": "152x152",
+      "type": "image/jpeg",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/Naghz-logo.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/Naghz-logo.jpg",
+      "sizes": "384x384",
+      "type": "image/jpeg",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/Naghz-logo.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/Naghz-logo.jpg",
+      "sizes": "1280x720",
+      "type": "image/jpeg",
+      "form_factor": "wide",
+      "label": "نقظ - صفحه اصلی"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "دوره‌های من",
+      "short_name": "دوره‌ها",
+      "description": "مشاهده دوره‌های ثبت‌نام شده",
+      "url": "/dashboard/my-curses",
+      "icons": [
+        {
+          "src": "/Naghz-logo.jpg",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "پروفایل",
+      "short_name": "پروفایل",
+      "description": "مدیریت پروفایل کاربری",
+      "url": "/dashboard/profile",
+      "icons": [
+        {
+          "src": "/Naghz-logo.jpg",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ]
+} 

@@ -4,6 +4,7 @@ import "./globals.css";
 import Header from "@/components/Header";
 import Reduxrovider from "../providers/ReduxProvider";
 import AuthStatusProvider from "@/providers/authProvider";
+import { Analytics } from "@vercel/analytics/next"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,8 +17,86 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Nghaz",
-  description: "Naghz, a web app to teach soft skills",
+  metadataBase: new URL('https://thenaghz.ir'), 
+  title: "نغز | آموزش مهارت‌های نرم و توسعه فردی",
+  description: "نغز, پلتفرم جامع آموزش مهارت‌های نرم، توسعه فردی و یادگیری مهارت‌های ضروری برای موفقیت در زندگی و کار",
+  keywords: [
+    "مهارت‌های نرم", "توسعه فردی", "آموزش آنلاین", "مهارت‌های زندگی", "مهارت", "مدیریت زمان", "حل مسئله", 
+    "soft skills", "personal development", "online learning", "life skills",
+    "leadership", "communication", "teamwork", "problem solving"
+  ],
+  authors: [{ name: "نغز", url: "https://thenaghz.ir" }],
+  creator: "نغز",
+  publisher: "نغز",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  verification: {
+    google: "google-site-verification=TEb2wqUiuhi7RpjhdtVFATebdifTCHbT37JIznjdNgY", 
+  },
+  alternates: {
+    canonical: "https://thenaghz.ir",
+    languages: {
+      'fa-IR': "https://thenaghz.ir",
+      'en-US': "https://thenaghz.ir",
+    },
+  },
+  openGraph: {
+    type: "website",
+    locale: "fa_IR",
+    alternateLocale: "en_US",
+    url: "https://thenaghz.ir",
+    siteName: "نقظ",
+    title: "نقظ | آموزش مهارت‌های نرم و توسعه فردی",
+    description: "نقظ، پلتفرم جامع آموزش مهارت‌های نرم، توسعه فردی و یادگیری مهارت‌های ضروری برای موفقیت در زندگی و کار",
+    images: [
+      {
+        url: "/Naghz-logo.jpg",
+        width: 1200,
+        height: 630,
+        alt: "لوگوی نقظ - آموزش مهارت‌های نرم",
+      },
+    ],
+  },
+  icons: {
+    icon: [
+      {
+        url: "/favicon.ico",
+        sizes: "any",
+        type: "image/x-icon",
+      },
+      {
+        url: "/Naghz-logo.jpg",
+        sizes: "any",
+        type: "image/jpeg",
+      },
+    ],
+    shortcut: "/favicon.ico",
+    apple: "/Naghz-logo.jpg",
+  },
+  manifest: "/manifest.json",
+  category: "education",
+  classification: "educational",
+  other: {
+    "msapplication-TileColor": "#000000",
+    "theme-color": "#000000",
+    "apple-mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-status-bar-style": "black-translucent",
+    "apple-mobile-web-app-title": "نغز",
+  },
 };
 
 export default function RootLayout({
@@ -35,6 +114,7 @@ export default function RootLayout({
           <AuthStatusProvider>
             <Header />
             {children}
+            <Analytics />
           </AuthStatusProvider>
         </Reduxrovider>
       </body>

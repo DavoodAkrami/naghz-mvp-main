@@ -1,0 +1,23 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://thenaghz.ir/sitemap.xml
+
+# Crawl-delay for respectful crawling
+Crawl-delay: 1
+
+# Disallow admin and private areas
+Disallow: /dashboard/
+Disallow: /auth/
+Disallow: /api/
+
+# Allow important pages
+Allow: /
+Allow: /about
+Allow: /courses
+Allow: /contact
+
+# Persian and English language support
+Allow: /fa/
+Allow: /en/ 
