@@ -7,11 +7,6 @@ import { useEffect } from "react";
 const Profile = () => {
     const {loading, user} = useSelector((state: RootState) => state.auth);
 
-
-    useEffect(() => {
-        console.log(user);
-    }, [user])
-
     if (loading) {
         return <div>Loading...</div>;
     }

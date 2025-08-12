@@ -6,10 +6,12 @@ import { MdPsychologyAlt } from "react-icons/md";
 import React, { useState } from "react";
 import clsx from "clsx";
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 
 
 interface GuidedPathsType {
+    id: number;
     name: string;
     component?: React.ReactNode;
     alt?: string;
@@ -17,35 +19,39 @@ interface GuidedPathsType {
 
 const GuidedPaths: GuidedPathsType[] = [
     {
-        name: "TM",
+        id: 1,
+        name: "مدیریت‌زمان",
         component: <></>,
         alt: "Time management"
     },
     {
-        name: "Teamwork",
+        id: 2,
+        name: "کارتیمی",
         component: <></>
     },
     {
-        name: "PS",
+        id: 3,
+        name: "حل‌مسئله",
         component: <></>,
         alt: "Problem solving"
     },
     {
-        name: "Communication",
+        id: 4,
+        name: "ارتباط",
         component: <></>
     }
 ]
 
 
 const Home = () => {
-    const [selectedGuide, setSelectedGuide] = useState<string>("TM");
+    const [selectedGuide, setSelectedGuide] = useState<number>(1);
 
-    const handleNavigation = (guidedPath: string) => {
+    const handleNavigation = (guidedPath: number) => {
         setSelectedGuide(guidedPath);
     }
 
     return (
-        <div className="h-[200vh]">
+        <div className="h-[200vh]" dir="rtl">
             <section
                 className="flex flex-col items-center mb-[5vh]"
             >
@@ -53,7 +59,7 @@ const Home = () => {
                     className="my-[4vh] px-[4vw]"
                 >
                     <video 
-                        src="/learn-by-doing.webm"
+                        src="/naghz-landing-do-it.webm"
                         className="max-md:hidden"
                         autoPlay
                         muted
@@ -61,7 +67,7 @@ const Home = () => {
                         preload="auto"
                     />
                     <video 
-                        src="/learn-by-doing-mobile.webm" 
+                        src="/naghz-landing-do-it-mobile.webm" 
                         className="md:hidden"
                         autoPlay
                         muted
@@ -70,14 +76,22 @@ const Home = () => {
                     />
                 </div>
                 <p
-                    className="text-[1.6rem] max-w-[80%] mx-auto max-md:text-[1.2rem] text-center"
+                    className="text-[1.6rem] max-w-[80%] mx-auto max-md:text-[1.2rem] text-center font-[600] mb-[1rem]"
                 >
-                    Interactive problem solving that’s effective and fun. Get smarter in 15 minutes a day.
+                     گاهی فقط چند دقیقه سکوت،
+                    کافی‌ست تا چیزی درونت تکان بخورد.
+                    تمرین‌هایی ساده، کوتاه، اما اثرگذار.
+                    نه برای یاد گرفتن—برای دگرگون شدن.
+                     تجربه‌اش کن
                 </p>
                 <button
                     className="button-primary rounded-full mt-[2rem] shadow md:scale-[1.5] max-md:scale-[1.3] mb-[10vh]"
                 >
-                    Get started
+                    <Link href="/auth/sign-up"
+                        className="block w-[100%] h-[100%]"
+                    >
+                        شروع کن
+                    </Link>
                 </button>
                 <hr className="self-stretch border-t border-[var(--text-desable)] opacity-80" />
                 <div
@@ -87,25 +101,25 @@ const Home = () => {
                         <GiHiveMind
                             className="text-[3rem] text-[var(--secondary-color1)] max-md:text-[2rem]"
                         />
-                        <span className="text-[1.4rem] font-[650] max-lg:text-[1rem]">Commiunication</span>
+                        <span className="text-[1.4rem] font-[650] max-lg:text-[1rem]">ارتباطات</span>
                     </div>
                     <div className="flex gap-[0.8rem] items-center">
                         <ImClock2 
                             className="text-[2.8rem] text-[var(--secondary-color2)] max-md:text-[2rem]"
                         />
-                        <span className="text-[1.4rem] font-[650] max-lg:text-[1rem]">Time management</span>
+                        <span className="text-[1.4rem] font-[650] max-lg:text-[1rem]">مدیریت زمان</span>
                     </div>
                     <div className="flex gap-[0.8rem] items-center max-[500px]:hidden max-md:text-[2rem]">
                         <FaUsers 
                             className="text-[3rem] text-[var(--secondary-color3)]"
                         />
-                        <span className="text-[1.4rem] font-[650] max-lg:text-[1rem]">Teamwork</span>
+                        <span className="text-[1.4rem] font-[650] max-lg:text-[1rem]">کارتیمی</span>
                     </div>
                     <div className="flex gap-[0.8rem] items-center max-[580px]:hidden max-md:text-[2rem]">
                         <MdPsychologyAlt 
                             className="text-[3rem] text-[var(--accent-color2)]"
                         />
-                        <span className="text-[1.4rem] font-[650] max-lg:text-[1rem]">Problem solving</span>
+                        <span className="text-[1.4rem] font-[650] max-lg:text-[1rem]">حل مسئله</span>
                     </div>
                 </div>
             </section>
@@ -113,9 +127,18 @@ const Home = () => {
                 className="bg-[url(/social-proof-background.svg)] bg-[var(--section-color)] text-[var(--text-secondary)]"
             >
                 <div className="min-h-[80vh]">
-                    <h2 className="font-[750] text-[3rem] max-[1200px]:font-[700] max-md:text-[2rem] text-center py-[10vh]">
-                        Join over 10 million learners worldwide
+                    <h2 className="font-[750] text-[4rem] max-[1200px]:font-[700] max-md:text-[2.6rem] text-center py-[10vh] text-[var(--primary-color4)]">
+                        وقتی آگاهی، حرکت می‌شود
                     </h2>
+                    <p
+                        className="text-[2.2rem] max-w-[80%] mx-auto max-md:text-[1.6rem] text-center font-[600] mb-[1rem]"
+                    >
+                    خیلی چیزها را می‌دانیم.
+                    اما دانستن کافی نیست،
+                    اگر جایی در رفتارمان پیدا نشود.
+                    نغز کمک می‌کند آنچه در ذهن داری،
+                    در انتخاب‌ها و واکنش‌هایت جان بگیرد.
+                    </p>
                 </div>
             </section>
             <section
@@ -125,17 +148,21 @@ const Home = () => {
                     <img src="/concepts-that-click.svg" alt="concepts that click" className="w-full h-auto object-contain object-bottom max-[1100px]:object-cover" />
                 </div>
                 <div 
-                    className="px-8 flex flex-col justify-center col-start-4 col-end-7 max-md:w-[90%]"
+                    className="px-8 flex flex-col justify-center col-start-2 col-end-5 max-md:w-[90%]"
                 >
                     <h1
                         className="h1 max-w-[15vw] max-[1300px]:max-w-[20vw] max-[550px]:max-w-[30vw] max-[400px]:max-w-[40vw]"
                     >
-                        Concepts that click
+                        جزءبه‌جزء، اما معنا‌دار
                     </h1>
                     <p
                         className="text-[1.6rem] max-md:text-[1.2rem] max-w-[85%]"
                     >
-                        Interactive lessons make even complex ideas easy to grasp. Instant, custom feedback accelerates your understanding.
+                        در نغز، مهارت‌های بزرگ زندگی
+                        تبدیل می‌شوند به تمرین‌هایی کوچک، دقیق و عمیق.
+                        یاد می‌گیری که چطور یاد بگیری—
+                        کاربردی، شخصی‌سازی‌شده و بازی‌گونه.
+                        هر چیزی در جای خودش، به وقت خودش.
                     </p>
                 </div>
             </section>
@@ -146,38 +173,44 @@ const Home = () => {
                     <img src="lohp-learn-at-your-level.svg" alt="concepts that click" className="w-full h-auto object-contain object-bottom max-[1100px]:object-cover" />
                 </div>
                 <div 
-                    className="px-8 flex flex-col justify-center col-start-2 col-end-6 max-md:w-[90%] z-2"
+                    className="px-8 flex flex-col justify-center col-start-5 col-end-8 max-md:w-[90%] z-2"
                 >
                     <h1
-                        className="h1 max-w-[15vw] max-[1300px]:max-w-[20vw] max-[550px]:max-w-[30vw] max-[400px]:max-w-[40vw]"
+                        className="h1 max-w-[255vw] max-[1300px]:max-w-[30vw] max-[550px]:max-w-[35vw] max-[400px]:max-w-[45vw]"
                     >
-                        Learn at your level
+                        امتحان کن. فکر کن. جلوتر برو
                     </h1>
                     <p
                         className="text-[1.6rem] max-md:text-[1.2rem] md:max-w-[60%]"
                     >
-                        Brush up on the basics or learn new skills. Designed for learners ages 13 to 113.
+                        هر جلسه یه نقطه‌ی مکثه.
+                        یه جا برای دیدن، عمل کردن، تغییر دادن.
+                        کم‌کم چیزهایی که فقط شنیده بودی، می‌شن بخشی از خودت.
+                        از فهمیدن، به جا افتادن می‌رسی—آروم، بی‌سروصدا.
                     </p>
                 </div>
             </section>
             <section
-                className="bg-[var(--primary-color4)] grid grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr] max-[1100px]:grid-cols-[1fr] max-md:grid-rows-[1fr_1fr] overflow-x-hidden min-h-[80vh] max-md:min-h-[60vh] relative" 
+                className="bg-[var(--primary-color4)] grid grid-cols-[5%_1fr_1fr_1fr_1fr_1fr_1fr] max-[1100px]:grid-cols-1 max-md:grid-rows-[1fr_1fr] overflow-x-hidden min-h-[80vh] max-md:min-h-[60vh] relative" 
             >
-                <div className="absolute bottom-0 w-5/6 max-md:w-full ml-[-30vw] max-[1100px]:ml-[-15vw] max-md:mr-[]">
-                    <img src="/stay-motivated-v3.svg" alt="concepts that click" className="max-md:w-[100vw] w-full h-auto object-contain object-right " />
+                <div className="absolute bottom-0 left-0 w-4/5 max-md:w-full ml-[-30vw] max-[1100px]:ml-0">
+                    <img src="/stay-motivated-v3.svg" alt="concepts that click" className="w-full h-auto object-contain object-bottom max-[1100px]:object-cover" />
                 </div>
                 <div 
-                    className="px-8 flex flex-col justify-center col-start-4 col-end-7 max-md:w-[90%]"
+                    className="px-8 flex flex-col justify-center col-start-2 col-end-5 max-md:w-[90%]"
                 >
                     <h1
-                        className="h1 max-w-[15vw] max-[1300px]:max-w-[20vw] max-[550px]:max-w-[30vw] max-[400px]:max-w-[40vw]"
+                        className="h1 max-w-[25vw] max-[1300px]:max-w-[30vw] max-[550px]:max-w-[35vw] max-[400px]:max-w-[45vw]"
                     >
-                        Concepts that click
+                        کوچیک شروع کن، ادامه بده، فرقش رو حس کن
                     </h1>
                     <p
                         className="text-[1.6rem] max-md:text-[1.2rem] max-w-[85%]"
                     >
-                        Interactive lessons make even complex ideas easy to grasp. Instant, custom feedback accelerates your understanding.
+                        روزی فقط چند دقیقه.
+                        با حس واقعیِ پیشرفت،‌ بدون عجله، بدون فشار.
+                        هر قدم، گامی‌ست به‌سوی خودت—
+                        آرام، ولی ماندگار.
                     </p>
                 </div>
             </section>
@@ -188,38 +221,20 @@ const Home = () => {
                     <img src="/lohp-guided-bite-sized.svg" alt="concepts that click" className="w-full h-auto object-contain object-bottom max-[1100px]:object-cover" />
                 </div>
                 <div 
-                    className="px-8 flex flex-col justify-center col-start-2 col-end-6 max-md:w-[90%] z-2"
+                    className="px-8 flex flex-col justify-center col-start-5 col-end-8 max-md:w-[90%] z-2"
                 >
                     <h1
-                        className="h1 max-w-[15vw] max-[1300px]:max-w-[20vw] max-[550px]:max-w-[30vw] max-[400px]:max-w-[40vw]"
+                        className="h1 max-w-[25vw] max-[1300px]:max-w-[30vw] max-[550px]:max-w-[40vw] max-[400px]:max-w-[45vw]"
                     >
-                        Learn at your level
+                        مهم نیست کی هستی، کجای راهی
                     </h1>
                     <p
                         className="text-[1.6rem] max-md:text-[1.2rem] md:max-w-[60%]"
                     >
-                        Brush up on the basics or learn new skills. Designed for learners ages 13 to 113.
-                    </p>
-                </div>
-            </section>
-            <section
-                className="bg-[var(--primary-color4)] grid grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr] max-[1100px]:grid-cols-[1fr] max-md:grid-rows-[1fr_1fr] overflow-x-hidden min-h-[80vh] max-md:min-h-[60vh] relative" 
-            >
-                <div className="absolute bottom-0 w-5/6 max-md:w-full ml-[-40vw] max-[1100px]:ml-[-20vw] max-md:mr-[]">
-                    <img src="/more-effective-v3.svg" alt="concepts that click" className="max-md:w-[100vw] w-full h-auto object-contain object-right " />
-                </div>
-                <div 
-                    className="px-8 flex flex-col justify-center col-start-4 col-end-7 max-md:w-[90%]"
-                >
-                    <h1
-                        className="h1 max-w-[15vw] max-[1300px]:max-w-[20vw] max-[550px]:max-w-[30vw] max-[400px]:max-w-[40vw]"
-                    >
-                        Concepts that click
-                    </h1>
-                    <p
-                        className="text-[1.6rem] max-md:text-[1.2rem] max-w-[85%]"
-                    >
-                        Interactive lessons make even complex ideas easy to grasp. Instant, custom feedback accelerates your understanding.
+                        اگه ۱۴ سالته، یا ۱۱۴،
+                        اگه پرمشغله‌ای، خسته‌ای یا صرفاً کنجکاوی—
+                        نبض طوری طراحی شده که از جایی که هستی، باهات همراه بشه.
+                        ساده، انسانی، بدون عجله.
                     </p>
                 </div>
             </section>
@@ -227,16 +242,24 @@ const Home = () => {
                 className="bg-[url(/social-proof-background.svg)] bg-[var(--section-color)] text-[var(--text-secondary)]"
             >
                 <div className="min-h-[80vh]">
-                    <h2 className="font-[750] text-[3rem] max-[1200px]:font-[700] max-md:text-[2rem] text-center py-[10vh]">
-                        Join over 10 million learners worldwide
+                    <h2 className="font-[750] text-[4rem] max-[1200px]:font-[700] max-md:text-[2.6rem] text-center py-[10vh] text-[var(--primary-color4)]">
+                        فقط یک شروع کافیه   
                     </h2>
+                    <p
+                        className="text-[2.2rem] max-w-[80%] mx-auto max-md:text-[1.6rem] text-center font-[600] mb-[1rem]"
+                    >
+                        هیاهو لازم نیست.
+                        تغییر از همان لحظه‌ای آغاز می‌شود که تصمیم می‌گیری.
+                        آرام، ساده، اما واقعی.
+                        قدم اول را بردار.
+                    </p>
                 </div>
             </section>
             <section
                 className="bg-[var(--primary-color4)] min-h-[80vh] max-md:min-h-[60vh] relative" 
             >
                 <h2 className="font-[750] text-[var(--text-primary)] text-[5rem] max-[1200px]:font-[700] max-md:text-[3rem] text-center py-[10vh]">
-                    Guided paths for every journey
+                    راهنمایی هر مسیر
                 </h2>
                 <nav
                     className="w-[100%]"
@@ -251,10 +274,10 @@ const Home = () => {
                                 title={guidedPath.alt}   
                             >
                                 <li 
-                                    onClick={e => handleNavigation(guidedPath.name)}
+                                    onClick={e => handleNavigation(guidedPath.id)}
                                     className={clsx(
                                         "cursor-pointer font-[650] py-4 px-6 rounded-[0.8rem] transition-all duration-300 max-md:px-4",
-                                        selectedGuide === guidedPath.name 
+                                        selectedGuide === guidedPath.id 
                                             ? "bg-[var(--primary-color4)] text-[var(--text-primary)] shadow-lg"
                                             : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--hover-color)]"
                                     )}
@@ -273,7 +296,7 @@ const Home = () => {
                     transition={{ duration: 0.3, ease: "easeInOut" }}
                     className="transition-all duration-300"
                 >
-                    {GuidedPaths.find(guidedPath => guidedPath.name === selectedGuide)?.component}
+                    {GuidedPaths.find(guidedPath => guidedPath.id === selectedGuide)?.component}
                 </motion.div>
             </section>
             <section
@@ -281,12 +304,16 @@ const Home = () => {
             >
                 <div className="min-h-[80vh] flex flex-col items-center">
                     <h2 className="font-[750] text-[var(--primary-color3)] text-[5rem] max-[1200px]:font-[700] max-md:text-[3rem] text-center py-[10vh]">
-                        Start your journey
+                        مسیرتو شروع کن
                     </h2>
                     <button
                         className="button-primary rounded-full mt-[2rem] shadow-lg md:scale-[1.5] max-md:scale-[1.3] mb-[10vh] min-w-[15vw]"
                     >
-                        Get started
+                        <Link href="/auth/sign-up"
+                            className="block w-[100%] h-[100%]"
+                        >
+                            شروع کن
+                        </Link>
                     </button>
                 </div>
             </section>

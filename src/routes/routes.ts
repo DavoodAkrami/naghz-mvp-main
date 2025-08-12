@@ -54,4 +54,14 @@ export const dashboardPages: routesType[] = [
     }
 ];
 
+
+export const links = {
+    home: "/",
+    signUp: "/auth/sign-up",
+    signIn: "/auth/sign-in",
+    profile: "/dashboard/profile",
+    accountInfo: "/dashboard/account-info",
+    myCurses: "/dashboard/my-curses"
+} 
+
 export default routes;

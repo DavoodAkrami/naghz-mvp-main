@@ -8,14 +8,15 @@ import clsx from "clsx";
 
 interface sideBarTypes {
     routes: routesType[];
+    classname?: string
 }
 
-const SideBar: React.FC<sideBarTypes> = ({routes}) => {
+const SideBar: React.FC<sideBarTypes> = ({routes, classname}) => {
     const pathname = usePathname();
 
     return (
         <nav 
-            className="sticky top-[5vh] bg-[var(--primary-color4) shadow-lg min-h-[80vh] border-[1.8px] border-[var(--accent-color1)] rounded-xl px-[5px]"
+            className={clsx("sticky top-[5vh] bg-[var(--primary-color4) shadow-lg min-h-[80vh] border-[1.8px] border-[var(--accent-color1)] rounded-xl px-[5px]", classname)}
         >
             <h2
                 className="text-[3rem] max-md:text-[1.8rem] text-center my-[3vh] w-90%"
