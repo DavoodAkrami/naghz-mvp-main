@@ -43,7 +43,7 @@ body {
     -moz-font-feature-settings: "lnum", "tnum";
     -ms-font-feature-settings: "lnum", "tnum";
     unicode-bidi: isolate;
-    direction: rtl;
+    direction: ltr;
     background: var(--bg-color);
     color: var(--foreground);
     overflow-x: hidden;
