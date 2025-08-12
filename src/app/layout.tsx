@@ -19,7 +19,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL('https://thenaghz.ir'), 
   title: "نغز | آموزش مهارت‌های نرم و توسعه فردی",
-  description: "نغز, پلتفرم جامع آموزش مهارت‌های نرم، توسعه فردی و یادگیری مهارت‌های ضروری برای موفقیت در زندگی و کار",
+  description: "نغز، پلتفرم جامع آموزش مهارت‌های نرم، توسعه فردی و یادگیری مهارت‌های ضروری برای موفقیت در زندگی و کار",
   keywords: [
     "مهارت‌های نرم", "توسعه فردی", "آموزش آنلاین", "مهارت‌های زندگی", "مهارت", "مدیریت زمان", "حل مسئله", 
     "soft skills", "personal development", "online learning", "life skills",
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
       index: true,
       follow: true,
       'max-video-preview': -1,
-      'max-image-preview': 'large',
+      'max-image-preview': 'large' as const,
       'max-snippet': -1,
     },
   },
@@ -59,35 +59,29 @@ export const metadata: Metadata = {
     locale: "fa_IR",
     alternateLocale: "en_US",
     url: "https://thenaghz.ir",
-    siteName: "نقظ",
-    title: "نقظ | آموزش مهارت‌های نرم و توسعه فردی",
-    description: "نقظ، پلتفرم جامع آموزش مهارت‌های نرم، توسعه فردی و یادگیری مهارت‌های ضروری برای موفقیت در زندگی و کار",
+    siteName: "نغز",
+    title: "نغز | آموزش مهارت‌های نرم و توسعه فردی",
+    description: "نغز، پلتفرم جامع آموزش مهارت‌های نرم، توسعه فردی و یادگیری مهارت‌های ضروری برای موفقیت در زندگی و کار",
     images: [
       {
         url: "/Naghz-logo.jpg",
         width: 1200,
         height: 630,
-        alt: "لوگوی نقظ - آموزش مهارت‌های نرم",
+        alt: "لوگوی نغز - آموزش مهارت‌های نرم",
       },
     ],
   },
   icons: {
     icon: [
       {
-        url: "/favicon.ico",
-        sizes: "any",
-        type: "image/x-icon",
-      },
-      {
         url: "/Naghz-logo.jpg",
         sizes: "any",
         type: "image/jpeg",
       },
     ],
-    shortcut: "/favicon.ico",
+    shortcut: "/Naghz-logo.jpg",
     apple: "/Naghz-logo.jpg",
   },
-
   category: "education",
   classification: "educational",
   other: {
@@ -106,8 +100,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fa" dir="rtl">
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+        <meta name="format-detection" content="telephone=no" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+      </head>
       <body
-        style={{ fontFamily: 'Yekan, sans-serif' }}
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Reduxrovider>

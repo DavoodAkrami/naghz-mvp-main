@@ -143,7 +143,7 @@ const Header = () => {
                 </header>
             ) : (
                 <header
-                    className="top-0 sticky bg-[var(--bg-color)] z-1000 px-[1.8rem] py-[1rem] flex items-center justify-between"
+                    className="top-0 shadow-lg sticky bg-[var(--bg-color)] z-1000 px-[1.8rem] py-[1rem] flex items-center justify-between"
                 >
                     <IoArrowBackCircleOutline 
                         onClick={() => router.back()}

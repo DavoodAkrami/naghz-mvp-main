@@ -26,21 +26,24 @@
     --color-foreground: var(--foreground);
 }
 
+
 @font-face {
     font-family: 'Yekan';
-    src: url('/fonts/Yekan.ttf') format('truetype');
+    src: url('/font/Yekan.ttf') format('truetype'),
+         url('/font/Yekan.woff2') format('woff2'),
+         url('/font/Yekan.woff') format('woff');
     font-weight: normal;
     font-style: normal;
 }
 
 body {
-    font-family: 'Yekan', Arial, Helvetica, sans-serif;
+    font-family: 'Yekan', 'Tahoma', 'Arial', sans-serif;
     font-feature-settings: "lnum", "tnum";
     -webkit-font-feature-settings: "lnum", "tnum";
     -moz-font-feature-settings: "lnum", "tnum";
     -ms-font-feature-settings: "lnum", "tnum";
     unicode-bidi: isolate;
-    direction: ltr;
+    direction: rtl;
     background: var(--bg-color);
     color: var(--foreground);
     overflow-x: hidden;
