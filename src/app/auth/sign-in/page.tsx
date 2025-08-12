@@ -7,9 +7,6 @@ import { RootState, AppDispatch } from '@/store/store';
 import { AnimatePresence, motion } from "framer-motion";
 import clsx from 'clsx';
 import { MdNavigateNext, MdNavigateBefore } from "react-icons/md";
-import { signInMetadata } from "@/config/metadata";
-
-export const metadata = signInMetadata;
 
 
 interface LogInFormData {

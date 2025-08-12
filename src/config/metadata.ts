@@ -23,7 +23,7 @@ const baseMetadata = {
       index: true,
       follow: true,
       'max-video-preview': -1,
-      'max-image-preview': 'large',
+      'max-image-preview': 'large' as const,
       'max-snippet': -1,
     },
   },
@@ -102,7 +102,7 @@ export const homeMetadata: Metadata = {
   },
 };
 
-// Dashboard metadata
+
 export const dashboardMetadata: Metadata = {
   ...baseMetadata,
   title: "داشبورد | نقظ",
@@ -132,7 +132,7 @@ export const dashboardMetadata: Metadata = {
 };
 
 
-// Sign In metadata
+
 export const signInMetadata: Metadata = {
   ...baseMetadata,
   title: "ورود | نغز",
