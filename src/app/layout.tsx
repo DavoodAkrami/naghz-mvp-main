@@ -87,7 +87,7 @@ export const metadata: Metadata = {
     shortcut: "/favicon.ico",
     apple: "/Naghz-logo.jpg",
   },
-  manifest: "/manifest.json",
+
   category: "education",
   classification: "educational",
   other: {

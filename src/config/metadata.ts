@@ -40,17 +40,12 @@ const baseMetadata = {
   icons: {
     icon: [
       {
-        url: "/favicon.ico",
-        sizes: "any",
-        type: "image/x-icon",
-      },
-      {
         url: "/Naghz-logo.jpg",
         sizes: "any",
         type: "image/jpeg",
       },
     ],
-    shortcut: "/favicon.ico",
+    shortcut: "/Naghz-logo.jpg",
     apple: "/Naghz-logo.jpg",
   },
   category: "education",
@@ -94,8 +89,8 @@ export const homeMetadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "نقظ | آموزش مهارت‌های نرم و توسعه فردی",
-    description: "نقظ، پلتفرم جامع آموزش مهارت‌های نرم، توسعه فردی و یادگیری مهارت‌های ضروری برای موفقیت در زندگی و کار",
+    title: "نغز | آموزش مهارت‌های نرم و توسعه فردی",
+    description: "نغز، پلتفرم جامع آموزش مهارت‌های نرم، توسعه فردی و یادگیری مهارت‌های ضروری برای موفقیت در زندگی و کار",
     images: ["/Naghz-logo.jpg"],
     creator: "@naghz_official",
     site: "@naghz_official",
@@ -105,8 +100,8 @@ export const homeMetadata: Metadata = {
 
 export const dashboardMetadata: Metadata = {
   ...baseMetadata,
-  title: "داشبورد | نقظ",
-  description: "مدیریت دوره‌ها، پروفایل و پیشرفت یادگیری در پلتفرم نقظ. پیگیری مهارت‌های آموخته شده و ادامه مسیر توسعه فردی.",
+  title: "داشبورد | نغز",
+  description: "مدیریت دوره‌ها، پروفایل و پیشرفت یادگیری در پلتفرم نغز. پیگیری مهارت‌های آموخته شده و ادامه مسیر توسعه فردی.",
   keywords: [
     ...baseMetadata.keywords,
     "داشبورد کاربری", "مدیریت دوره", "پروفایل کاربری", "پیگیری پیشرفت",
@@ -116,18 +111,26 @@ export const dashboardMetadata: Metadata = {
     type: "website",
     locale: "fa_IR",
     alternateLocale: "en_US",
-    url: "https://naghz.com/dashboard",
-    siteName: "نقظ",
-    title: "داشبورد | نقظ",
-    description: "مدیریت دوره‌ها، پروفایل و پیشرفت یادگیری در پلتفرم نقظ",
+    url: "https://thenaghz.ir/dashboard",
+    siteName: "نغز",
+    title: "داشبورد | نغز",
+    description: "مدیریت دوره‌ها، پروفایل و پیشرفت یادگیری در پلتفرم نغز",
     images: [
       {
         url: "/Naghz-logo.jpg",
         width: 1200,
         height: 630,
-        alt: "داشبورد نقظ - مدیریت دوره‌ها",
+        alt: "داشبورد نغز - مدیریت دوره‌ها",
       },
     ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "داشبورد | نغز",
+    description: "مدیریت دوره‌ها، پروفایل و پیشرفت یادگیری در پلتفرم نغز",
+    images: ["/Naghz-logo.jpg"],
+    creator: "@naghz_official",
+    site: "@naghz_official",
   },
 };
 
@@ -136,7 +139,7 @@ export const dashboardMetadata: Metadata = {
 export const signInMetadata: Metadata = {
   ...baseMetadata,
   title: "ورود | نغز",
-  description: "ورود به حساب کاربری نقظ و دسترسی به دوره‌های آموزشی مهارت‌های نرم.",
+  description: "ورود به حساب کاربری نغز و دسترسی به دوره‌های آموزشی مهارت‌های نرم.",
   keywords: [
     ...baseMetadata.keywords,
     "ورود", "لاگین", "حساب کاربری", "دسترسی به دوره",
@@ -158,6 +161,14 @@ export const signInMetadata: Metadata = {
         alt: "صفحه ورود - نغز",
       },
     ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "ورود | نغز",
+    description: "ورود به حساب کاربری نغز و دسترسی به دوره‌های آموزشی",
+    images: ["/Naghz-logo.jpg"],
+    creator: "@naghz_official",
+    site: "@naghz_official",
   },
 };
 
@@ -187,6 +198,125 @@ export const signUpMetadata: Metadata = {
         alt: "صفحه ثبت‌نام - نغز",
       },
     ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "ثبت‌نام | نغز",
+    description: "ثبت‌نام در نغز و شروع یادگیری مهارت‌های نرم",
+    images: ["/Naghz-logo.jpg"],
+    creator: "@naghz_official",
+    site: "@naghz_official",
+  },
+};
+
+// Profile metadata
+export const profileMetadata: Metadata = {
+  ...baseMetadata,
+  title: "پروفایل | نغز",
+  description: "مدیریت پروفایل کاربری، تنظیمات حساب و مشاهده پیشرفت در پلتفرم نغز.",
+  keywords: [
+    ...baseMetadata.keywords,
+    "پروفایل کاربری", "تنظیمات حساب", "مدیریت اطلاعات شخصی", "پیشرفت یادگیری",
+    "user profile", "account settings", "personal information", "learning progress"
+  ],
+  openGraph: {
+    type: "website",
+    locale: "fa_IR",
+    alternateLocale: "en_US",
+    url: "https://thenaghz.ir/dashboard/profile",
+    siteName: "نغز",
+    title: "پروفایل | نغز",
+    description: "مدیریت پروفایل کاربری و تنظیمات حساب در نغز",
+    images: [
+      {
+        url: "/Naghz-logo.jpg",
+        width: 1200,
+        height: 630,
+        alt: "پروفایل کاربری - نغز",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "پروفایل | نغز",
+    description: "مدیریت پروفایل کاربری و تنظیمات حساب در نغز",
+    images: ["/Naghz-logo.jpg"],
+    creator: "@naghz_official",
+    site: "@naghz_official",
+  },
+};
+
+// My Courses metadata
+export const myCoursesMetadata: Metadata = {
+  ...baseMetadata,
+  title: "دوره‌های من | نغز",
+  description: "مشاهده و مدیریت دوره‌های ثبت‌نام شده در نغز. ادامه یادگیری مهارت‌های نرم و توسعه فردی.",
+  keywords: [
+    ...baseMetadata.keywords,
+    "دوره‌های من", "دوره‌های ثبت‌نام شده", "ادامه یادگیری", "مهارت‌های آموخته شده",
+    "my courses", "enrolled courses", "continue learning", "learned skills"
+  ],
+  openGraph: {
+    type: "website",
+    locale: "fa_IR",
+    alternateLocale: "en_US",
+    url: "https://thenaghz.ir/dashboard/my-curses",
+    siteName: "نغز",
+    title: "دوره‌های من | نغز",
+    description: "مشاهده و مدیریت دوره‌های ثبت‌نام شده در نغز",
+    images: [
+      {
+        url: "/Naghz-logo.jpg",
+        width: 1200,
+        height: 630,
+        alt: "دوره‌های من - نغز",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "دوره‌های من | نغز",
+    description: "مشاهده و مدیریت دوره‌های ثبت‌نام شده در نغز",
+    images: ["/Naghz-logo.jpg"],
+    creator: "@naghz_official",
+    site: "@naghz_official",
+  },
+};
+
+// Account Info metadata
+export const accountInfoMetadata: Metadata = {
+  ...baseMetadata,
+  title: "اطلاعات حساب | نغز",
+  description: "مدیریت اطلاعات حساب کاربری، تنظیمات امنیتی و جزئیات اشتراک در نغز.",
+  keywords: [
+    ...baseMetadata.keywords,
+    "اطلاعات حساب", "تنظیمات امنیتی", "جزئیات اشتراک", "مدیریت حساب",
+    "account information", "security settings", "subscription details", "account management"
+  ],
+  openGraph: {
+    type: "website",
+    locale: "fa_IR",
+    alternateLocale: "en_US",
+    url: "https://thenaghz.ir/dashboard/account-info",
+    siteName: "نغز",
+    title: "اطلاعات حساب | نغز",
+    description: "مدیریت اطلاعات حساب کاربری و تنظیمات امنیتی",
+    images: [
+      {
+        url: "/Naghz-logo.jpg",
+        width: 1200,
+        height: 630,
+        alt: "اطلاعات حساب - نغز",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "اطلاعات حساب | نغز",
+    description: "مدیریت اطلاعات حساب کاربری و تنظیمات امنیتی",
+    images: ["/Naghz-logo.jpg"],
+    creator: "@naghz_official",
+    site: "@naghz_official",
   },
 };
 
