@@ -12,20 +12,23 @@ import { motion } from "framer-motion";
 interface GuidedPathsType {
     name: string;
     component?: React.ReactNode;
+    alt?: string;
 }
 
 const GuidedPaths: GuidedPathsType[] = [
     {
-        name: "Time Management",
-        component: <></>
-    },
-    {
-        name: "Problem Solving",
-        component: <></>
+        name: "TM",
+        component: <></>,
+        alt: "Time management"
     },
     {
         name: "Teamwork",
         component: <></>
+    },
+    {
+        name: "PS",
+        component: <></>,
+        alt: "Problem solving"
     },
     {
         name: "Communication",
@@ -35,7 +38,7 @@ const GuidedPaths: GuidedPathsType[] = [
 
 
 const Home = () => {
-    const [selectedGuide, setSelectedGuide] = useState<string>("Time Management");
+    const [selectedGuide, setSelectedGuide] = useState<string>("TM");
 
     const handleNavigation = (guidedPath: string) => {
         setSelectedGuide(guidedPath);
@@ -67,7 +70,7 @@ const Home = () => {
                     />
                 </div>
                 <p
-                    className="text-[1.6rem] max-w-[80%] mx-auto max-md:text-[1.2rem]"
+                    className="text-[1.6rem] max-w-[80%] mx-auto max-md:text-[1.2rem] text-center"
                 >
                     Interactive problem solving that’s effective and fun. Get smarter in 15 minutes a day.
                 </p>
@@ -82,23 +85,23 @@ const Home = () => {
                 >   
                     <div className="flex gap-[0.5rem] items-center max-md:gap-[0.5rem]">
                         <GiHiveMind
-                            className="text-[3rem] text-[var(--secondary-color1)]"
+                            className="text-[3rem] text-[var(--secondary-color1)] max-md:text-[2rem]"
                         />
                         <span className="text-[1.4rem] font-[650] max-lg:text-[1rem]">Commiunication</span>
                     </div>
                     <div className="flex gap-[0.8rem] items-center">
                         <ImClock2 
-                            className="text-[2.8rem] text-[var(--secondary-color2)]"
+                            className="text-[2.8rem] text-[var(--secondary-color2)] max-md:text-[2rem]"
                         />
                         <span className="text-[1.4rem] font-[650] max-lg:text-[1rem]">Time management</span>
                     </div>
-                    <div className="flex gap-[0.8rem] items-center max-[500px]:hidden">
+                    <div className="flex gap-[0.8rem] items-center max-[500px]:hidden max-md:text-[2rem]">
                         <FaUsers 
                             className="text-[3rem] text-[var(--secondary-color3)]"
                         />
                         <span className="text-[1.4rem] font-[650] max-lg:text-[1rem]">Teamwork</span>
                     </div>
-                    <div className="flex gap-[0.8rem] items-center max-[580px]:hidden">
+                    <div className="flex gap-[0.8rem] items-center max-[580px]:hidden max-md:text-[2rem]">
                         <MdPsychologyAlt 
                             className="text-[3rem] text-[var(--accent-color2)]"
                         />
@@ -235,18 +238,24 @@ const Home = () => {
                 <h2 className="font-[750] text-[var(--text-primary)] text-[5rem] max-[1200px]:font-[700] max-md:text-[3rem] text-center py-[10vh]">
                     Guided paths for every journey
                 </h2>
-                <nav>
+                <nav
+                    className="w-[100%]"
+                >
                     <ul 
-                        className="flex justify-center items-center p-2 gap-[1.6rem] bg-[var(--primary-color3)] w-fit mx-auto rounded-[1rem]"
+                        className="flex justify-center items-center p-2 gap-[1.6rem] bg-[var(--primary-color3)] w-fit mx-auto rounded-[1rem] max-md:text-[0.8rem] max-md:gap-[0rem]"
                     >
                         {GuidedPaths.map((guidedPath, index) => (  
-                            <div key={index}>
+                            <div 
+                                key={index}
+                                className="flex items-center justify-center" 
+                                title={guidedPath.alt}   
+                            >
                                 <li 
                                     onClick={e => handleNavigation(guidedPath.name)}
                                     className={clsx(
-                                        "cursor-pointer font-[650] py-4 px-6 rounded-[0.8rem] transition-all duration-300",
+                                        "cursor-pointer font-[650] py-4 px-6 rounded-[0.8rem] transition-all duration-300 max-md:px-4",
                                         selectedGuide === guidedPath.name 
-                                            ? "bg-[var(--primary-color4)] text-[var(--text-primary)]"
+                                            ? "bg-[var(--primary-color4)] text-[var(--text-primary)] shadow-lg"
                                             : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--hover-color)]"
                                     )}
                                 >

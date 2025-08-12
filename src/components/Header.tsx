@@ -9,6 +9,9 @@ import { RootState } from "@/store/store";
 import { CgProfile } from "react-icons/cg";
 import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { MdOutlineKeyboardArrowUp } from "react-icons/md";
+import clsx from "clsx";
+
 
 
 const Header = () => {
@@ -24,14 +27,15 @@ const Header = () => {
         return () => clearTimeout(timer);
     }, []);
 
+
     if (showSkeleton && headerPage) {
         return (
             <header className="top-0 sticky shadow-lg bg-[var(--primary-color4)] z-1000">
-                <div className="py-[1rem] flex items-center justify-between w-[80%] max-lg:w-[90%] mx-auto">
-                    <div className="h-8 w-32 bg-gray-200 rounded animate-pulse" />
+                <div className="py-[1.8rem] flex items-center justify-between w-[80%] max-lg:w-[90%] mx-auto max-md:py-[1.2rem]">
+                    <div className="h-12 w-32 bg-gray-200 rounded animate-pulse max-md:w-24 max-md:h-8" />
                     <div className="flex gap-[1rem] max-md:gap-[0.2rem]">
-                        <div className="h-10 w-24 bg-gray-200 rounded-full animate-pulse" />
-                        <div className="h-10 w-32 bg-gray-200 rounded-full animate-pulse" />
+                        <div className="h-10 w-24 bg-gray-200 rounded-full animate-pulse max-md:h-8" />
+                        <div className="h-10 w-32 bg-gray-200 rounded-full animate-pulse max-md:hidden" />
                     </div>
                 </div>
                 <hr className="text-[var(--text-desable)] opacity-[0.8]" />
@@ -76,7 +80,16 @@ const Header = () => {
                                 onMouseEnter={() => setDropdownOpen(true)}
                                 onMouseLeave={() => setDropdownOpen(false)}
                             >
-                                    <Link href="/dashboard/profile">
+                                    <Link 
+                                        className="flex items-center gap-[0.6rem] p-2 hover:bg-[var(--hover-color)] rounded-lg"
+                                        href="/dashboard/profile"
+                                    >
+                                        <MdOutlineKeyboardArrowUp 
+                                            className={clsx(
+                                                "max-md:hidden text-[1.8rem] transition-all ease-in-out duration-400",
+                                                dropdownOpen ? "rotate-[180deg]" : "rotate-0"
+                                            )}
+                                        />
                                         <CgProfile 
                                             className="text-[3rem] max-md:text-[2rem]"
                                         />
@@ -85,21 +98,22 @@ const Header = () => {
                                     {dropdownOpen && (
                                         <motion.div
                                             dir="rtl"
-                                            initial={{ opacity: 0, height: 0}}
-                                            animate={{ opacity: 1, height: 'auto'}}
+                                            initial={{ height: 0}}
+                                            animate={{ height: 'auto'}}
                                             transition={{ duration: 0.3 }}
-                                            exit={{ opacity: 0, height: 0 }}
-                                            className="overflow-hidden absolute right-0 rounded-md min-w-[20vw] shadow-lg z-50 bg-[var(--bg-color)]"
+                                            exit={{ height: 0 }}
+                                            className="overflow-hidden absolute right-0 rounded-md min-w-[20vw] shadow-lg z-50 bg-[var(--bg-color)] max-lg:hidden"
                                         >
                                             <ul 
                                                 className=""
                                             >
                                                 {routes.filter(route => route.profilePage === true).map((route, index) => (
                                                     <li
-                                                        className="text-[1.4rem] max-md:text-[1.2rem] px-6 py-4 hover:bg-[var(--hover-color)] hover:cursor-pointer"
+                                                        className="text-[1.4rem] max-md:text-[1.2rem] font-bold px-6 py-4 hover:bg-[var(--hover-color)] hover:cursor-pointer"
                                                         key={index}
                                                     >
                                                         <Link
+                                                            className="block w-[100%] h-[100%]"
                                                             href={route.path}
                                                         >
                                                             {route.name}

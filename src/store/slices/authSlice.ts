@@ -6,6 +6,7 @@ interface AuthState {
     user: User | null;
     isAuthenticated: boolean;
     loading: boolean;
+    logOutLoading: boolean;
     error: string | null;
 }
 
@@ -22,7 +23,8 @@ interface User {
 const initialState: AuthState = {
     user: null,
     isAuthenticated: false,
-    loading: false,
+    loading: true,
+    logOutLoading: false,
     error: null,
 }
 
@@ -93,7 +95,7 @@ export const logoutUser = createAsyncThunk(
     }
 );
 
-// Check current auth status
+
 export const checkAuthStatus = createAsyncThunk(
     'auth/checkAuthStatus',
     async (_, { rejectWithValue }) => {
@@ -161,11 +163,19 @@ const authSlice = createSlice({
         
         // Logout
         builder
+            .addCase(logoutUser.pending, (state) => {
+                state.logOutLoading = true;
+                state.error = null;
+            })
             .addCase(logoutUser.fulfilled, (state) => {
                 state.user = null;
                 state.isAuthenticated = false;
-                state.loading = false;
+                state.logOutLoading = false;
                 state.error = null;
+            })
+            .addCase(logoutUser.rejected, (state, action) => {
+                state.logOutLoading = false;
+                state.error = action.payload as string;
             })
         
         // Check auth status

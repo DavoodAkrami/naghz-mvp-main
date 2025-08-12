@@ -274,7 +274,7 @@ const SignupPage = () => {
                 <p className="mt-2 text-center text-sm text-gray-600">
                         اکانت دارید؟{' '}
                         <button
-                            onClick={() => router.push('auth/log-in')}
+                            onClick={() => router.push('sign-in')}
                             className="font-medium text-indigo-600 hover:text-indigo-500 cursor-pointer"
                         >
                             وارد شوید

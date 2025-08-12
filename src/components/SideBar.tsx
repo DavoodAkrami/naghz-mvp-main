@@ -18,7 +18,7 @@ const SideBar: React.FC<sideBarTypes> = ({routes}) => {
             className="sticky top-[5vh] bg-[var(--primary-color4) shadow-lg min-h-[80vh] border-[1.8px] border-[var(--accent-color1)] rounded-xl px-[5px]"
         >
             <h2
-                className="text-[3rem] max-md:text-[2rem] text-center my-[3vh]"
+                className="text-[3rem] max-md:text-[1.8rem] text-center my-[3vh] w-90%"
             >
                 داشبورد
             </h2>
@@ -28,7 +28,7 @@ const SideBar: React.FC<sideBarTypes> = ({routes}) => {
                     <li 
                         key={index}
                         className={clsx(
-                            "cursor-pointer rounded-lg transition-all duration-200 text-[1.2rem] text-[var(--text-primary)] mb-1",
+                            "cursor-pointer rounded-lg transition-all duration-200 text-[1.2rem] text-[var(--text-primary)] mb-1 font-bold",
                             pathname === route.path 
                                 ? "bg-[var(--primary-color1)] text-[var(--primary-color4)] shadow-md" 
                                 : "hover:bg-[var(--hover-color)]"

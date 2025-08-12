@@ -28,6 +28,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
+        style={{ fontFamily: 'Yekan, sans-serif' }}
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Reduxrovider>

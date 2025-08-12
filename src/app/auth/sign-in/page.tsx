@@ -59,7 +59,7 @@ const LogInPage = () => {
       const validateStep2 = (): boolean => {
         const errors: Partial<LogInFormData> = {};
         if (!formData.password) errors.password = 'پسوورد را وارد کنید';
-        else if (formData.password.length < 6) errors.password = 'پسوورد باید حداقل 6 کاراکتر باشد';
+        else if (formData.password.length < 6) errors.password = 'پسوورد استباه است';
         setValidationErrors(errors);
         return Object.keys(errors).length === 0;
       };
@@ -101,7 +101,7 @@ const LogInPage = () => {
             <div className="max-w-md w-full space-y-8">
                 <div>
                     <h2 className="mt-6 text-center text-3xl font-extrabold text-[var(--text-primary)]">
-                        اکانت خود را بسازید
+                        وارد شوید
                     </h2>
                 </div>
                 
@@ -223,7 +223,7 @@ const LogInPage = () => {
                                             </svg>
                                         </div>
                                     ) : (
-                                        'ثبت نام'
+                                        'وارد شوید'
                                     )}
                                 </button>
                                 <button
@@ -245,7 +245,7 @@ const LogInPage = () => {
                 <p className="mt-2 text-center text-sm text-gray-600">
                         اکانت ندارید؟{' '}
                         <button
-                            onClick={() => router.push('auth/log-in')}
+                            onClick={() => router.push('sign-up')}
                             className="font-medium text-indigo-600 hover:text-indigo-500 cursor-pointer"
                         >
                             اکانت خود را بسازید
