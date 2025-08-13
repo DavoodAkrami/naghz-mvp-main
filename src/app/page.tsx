@@ -76,17 +76,17 @@ const Home = () => {
                     />
                 </div>
                 <h1
-                    className="font-[750] text-[4rem] max-[1200px]:font-[700] max-md:text-[2.6rem] text-center py-[5vh] text-[var(--text-proimary)] max-w-[90%]"
+                    className="font-[750] text-[4rem] max-[1200px]:font-[700] max-md:text-[2.4rem] text-center py-[5vh] text-[var(--text-proimary)] max-w-[90%]"
                 >
-                    شروع تغییر: همه چیز از لحظه‌های کوچیک شروع میشه
+                    با میکرو تمرین‌های 10 دقیقه‌ای — وضوح، تمرکز و آرامش بساز
                 </h1>
                 <p
-                    className="text-[1.6rem] max-w-[60%] mx-auto max-md:text-[1.2rem] text-center font-[600] mb-[1rem]"
+                    className="text-[1.6rem] max-w-[70%] mx-auto max-md:text-[1.2rem] text-center  mb-[1rem]"
                 >
                     گاهی فقط چند دقیقه سکوت،
-                    کافیه تا چیزی درونت تکان بخوره.
-                    تمرین‌هایی ساده، کوتاه، اما اثرگذار.
-                    نه برای یاد گرفتن—برای دگرگون شدن.
+                    کافیه تا چیزی درونت تکون بخوره
+                    تمرین‌هایی ساده، کوتاه، و اثرگذار.
+                    با نغز فقط یاد نمی‌گیری — تغییر می‌کنی.
                 </p>
                 <button
                     className="button-primary rounded-full mt-[2rem] shadow md:scale-[1.5] max-md:scale-[1.3] mb-[10vh]"
@@ -130,17 +130,19 @@ const Home = () => {
             <section
                 className="bg-[url(/social-proof-background.svg)] bg-[var(--section-color)] text-[var(--text-secondary)]"
             >
-                <div className="min-h-[80vh]">
-                    <h2 className="font-[750] text-[4rem] max-[1200px]:font-[700] max-md:text-[2.6rem] text-center pt-[10vh] pb-[5vh] text-[var(--primary-color4)]">
-                        از دونستن تا زندگی کردن: وقتی آگاهی، به رفتار میاد
+                <div className="min-h-[80vh] flex flex-col justify-center items-center ">
+                    <h2 className="font-[750] text-[4rem] max-[1200px]:font-[700] max-md:text-[2.4rem] text-center pt-[10vh] pb-[5vh] text-[var(--primary-color4)] max-w-[90%]">
+                        از دونستن تا زندگی کردن: وقتی آگاهی به رفتار میاد
                     </h2>
                     <p
-                        className="text-[2.2rem] max-w-[60%] mx-auto max-md:text-[1.6rem] text-center font-[600] mb-[1rem]"
+                        className="text-[2.2rem] max-w-[70%] mx-auto max-md:text-[1.6rem] text-center font-[600] mb-[1rem]"
                     >
-                        خیلی چیزها را می‌دونیم.
+                        خیلی چیزها رو می‌دونیم
                         اما صرفا دونستن کافی نیست،
-                        نغز کمک می‌کند آنچه در ذهن داری،
-                        در انتخاب‌ها و واکنش‌هات جان بگیرد.
+                        <span className="block">  
+                            نغز کمک می‌کنه آنچه در ذهن داری،
+                            در انتخاب‌ها و واکنش‌هات جان بگیره
+                        </span>
                     </p>
                 </div>
             </section>
@@ -162,8 +164,10 @@ const Home = () => {
                         className="text-[1.6rem] max-md:text-[1.2rem] max-w-[85%]"
                     >
                         در نغز، مهارت‌های بزرگ زندگی
-                        تبدیل میشن به تمرین‌هایی کوچک، عمیق و تاثیرگذار.
-                        اینجا این مهارتهارو بصورت کاربردی، شخصی‌سازی‌شده و بازی‌گونه یاد میگیری.
+                        تبدیل میشن به تمرین‌هایی کوچیک، عمیق و تاثیرگذار.
+                        اینجا این مهارتهارو بصورت 
+                        <span className="font-bold"> تعاملی، شخصی‌سازی‌شده و بازی‌گونه </span>
+                        یاد میگیری
                     </p>
                 </div>
             </section>
@@ -184,8 +188,16 @@ const Home = () => {
                     <p
                         className="text-[1.6rem] max-md:text-[1.2rem] md:max-w-[70%]"
                     >
-                        هر قدم یک نقطه عطفه، اون لحظه‌ی «آها!» که همه‌چیز رو برات روشن می‌کنه.
-                        با نغز از فهمیدن، به جا افتادن می‌رسی—آروم، بی‌سروصدا.
+                        هر قدم یک نقطه عطفه
+                        <span className="block">
+                        اون لحظه‌ی «آها!» که همه‌چیز رو برات روشن می‌کنه.
+                        </span>
+                        <span className="block">
+                        با نغز از فهمیدن، به جا افتادن می‌رسی—
+                        <span className="font-bold">
+                        آروم، بی‌سروصدا
+                        </span>
+                        </span>
                     </p>
                 </div>
             </section>
@@ -206,10 +218,10 @@ const Home = () => {
                     <p
                         className="text-[1.6rem] max-md:text-[1.2rem] max-w-[85%]"
                     >
-                    روزی فقط چند دقیقه.
-                    با حس واقعیِ پیشرفت،‌ بدون عجله، بدون فشار.
-                    هر قدم، گامی‌ست به‌سوی خودت—
-                    آرام، ولی ماندگار.
+                    روزی فقط چند دقیقه<br />
+                    <span className="font-bold">با حس واقعیِ پیشرفت،‌</span> بدون عجله، بدون فشار<br />
+                    هر قدم، گامیه به‌سوی خودت — 
+                    آروم، ولی ماندگار
                     </p>
                 </div>
             </section>
@@ -230,9 +242,10 @@ const Home = () => {
                     <p
                         className="text-[1.6rem] max-md:text-[1.2rem] md:max-w-[60%]"
                     >
-                        اگه ۱۴ سالته، یا ۱۱۴،
+                        اگه 
+                        <span className="font-bold"> ۱۴ سالته، یا ۱۱۴، </span>
                         اگه پرمشغله‌ای، خسته‌ای یا صرفاً کنجکاوی—
-                        نغز طوری طراحی شده که از جایی که هستی، باهات همراه بشه و تا اخرش بمونه.
+                        نغز طوری طراحی شده که از جایی که هستی، باهات همراه بشه و تا اخرش بمونه
                     </p>
                 </div>
             </section>
@@ -284,14 +297,14 @@ const Home = () => {
                 className="bg-[url(/social-proof-background.svg)] bg-[var(--section-color)] text-[var(--text-secondary)]"
             >
                 <div className="min-h-[80vh] flex flex-col justify-center items-center">
-                    <h2 className="font-[750] text-[4rem] max-[1200px]:font-[700] max-md:text-[2.6rem] text-center py-[10vh] text-[var(--primary-color4)]">
-                        با اولین قطره شروع کن،این جوریه که اقیانوس ساخته میشه  
+                    <h2 className="font-[750] text-[4rem] max-[1200px]:font-[700] max-md:text-[2.4rem] text-center py-[10vh] text-[var(--primary-color4)] max-w-[90%]">
+                        با اولین قطره شروع کن، این‌طوریه که اقیانوس ساخته میشه  
                     </h2>
                     <p
                         className="text-[2.2rem] max-w-[80%] mx-auto max-md:text-[1.6rem] text-center font-[600] mb-[1rem]"
                     >
                         تغییر نیاز به هیاهو نداره و از همون لحظه‌ای آغاز می‌شود که تصمیم می‌گیری.
-                        آرام، ساده، اما واقعی.
+                        آروم، ساده، اما واقعی
                     </p>
                     <button
                         className="button-primary rounded-full mt-[5vh] shadow-lg md:scale-[1.5] max-md:scale-[1.3] mb-[10vh] min-w-[15vw]"
@@ -299,7 +312,7 @@ const Home = () => {
                         <Link href="/auth/sign-up"
                             className="block w-[100%] h-[100%]"
                         >
-                            شروع کن
+                            قدم اولو بردار
                         </Link>
                     </button>
                 </div>

@@ -67,7 +67,9 @@ const Header = () => {
                         <h1
                             className="h1"
                         >
-                            Naghz
+                            <Link href="/">
+                                Naghz
+                            </Link>
                         </h1>
                         {!isAuthenticated ? (
                             <div
