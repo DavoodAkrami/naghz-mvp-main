@@ -4,6 +4,8 @@ import { routesType } from "@/routes/routes";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
 
 
 interface sideBarTypes {
@@ -13,6 +15,7 @@ interface sideBarTypes {
 
 const SideBar: React.FC<sideBarTypes> = ({routes, classname}) => {
     const pathname = usePathname();
+    const {user, loading} = useSelector((state: RootState) => state.auth);
 
     return (
         <nav 
@@ -25,7 +28,7 @@ const SideBar: React.FC<sideBarTypes> = ({routes, classname}) => {
             </h2>
             <hr className="text-[var(--accent-color1)]" />
             <ul className="p-2">
-                {routes.map((route, index) => (
+                {user?.user_metadata?.role === "admin" ? routes.map((route, index) => (
                     <li 
                         key={index}
                         className={clsx(
@@ -42,7 +45,25 @@ const SideBar: React.FC<sideBarTypes> = ({routes, classname}) => {
                             {route.name}
                         </Link>
                     </li>
-                ))}
+                )) : routes.filter(route => !route.adminRequaire).map((route, index) => (
+                    <li 
+                        key={index}
+                        className={clsx(
+                            "cursor-pointer rounded-lg transition-all duration-200 text-[1.2rem] text-[var(--text-primary)] mb-1 font-bold",
+                            pathname === route.path 
+                                ? "bg-[var(--primary-color1)] text-[var(--primary-color4)] shadow-md" 
+                                : "hover:bg-[var(--hover-color)]"
+                        )}
+                    >
+                        <Link 
+                            href={route.path}
+                            className="block w-full h-full p-4 rounded-lg"    
+                        >
+                            {route.name}
+                        </Link>
+                    </li>
+                ))
+                }
             </ul>
         </nav>
     )

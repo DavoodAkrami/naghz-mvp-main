@@ -3,16 +3,25 @@ import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "@/store/store";
 import { logoutUser } from "@/store/slices/authSlice";
 import { useRouter } from "next/navigation";
+import Modal from "@/components/Modal";
+import { useState } from "react";
+import { motion } from "framer-motion";
+
 
 
 const AccountInfo = () => {
     const router = useRouter();
     const { user, loading, logOutLoading } = useSelector((state: RootState) => state.auth);
     const dispatch = useDispatch<AppDispatch>();
+    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
     const handleLogOut = () => {
         dispatch(logoutUser());
         router.push('/');
+    }
+
+    const handleModalOpen = () => {
+        setIsModalOpen(!isModalOpen);
     }
 
     return (
@@ -28,9 +37,10 @@ const AccountInfo = () => {
                     {user?.email}
                 </div>
             </div>
-            <button
+            <motion.button
+                layoutId="logout"
                 className="hover:bg-[var(--hover-color)] button-primary rounded-lg flex items-center gap-[10px]"
-                onClick={handleLogOut}
+                onClick={handleModalOpen}
                 disabled={logOutLoading}
             >
                 خروج
@@ -40,7 +50,12 @@ const AccountInfo = () => {
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
                 }
-            </button>
+            </motion.button>
+            {isModalOpen &&
+                <Modal layoutId="logout" onClose={handleModalOpen}>
+                    از خروج خود اطمینان دارید؟
+                </Modal>
+            }
         </div>
     );
 }

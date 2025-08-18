@@ -32,6 +32,9 @@ const Header = () => {
         return () => clearTimeout(timer);
     }, []);
 
+    const parts = pathName.split('/').filter(Boolean);
+    const hideHeader = parts[0] === 'courses' && parts.length > 1;
+
 
     useEffect(() => {
         if (isMenuOpen) {
@@ -54,6 +57,8 @@ const Header = () => {
             </header>
         );
     }
+
+    if (hideHeader) return null;
 
     return (
         <>

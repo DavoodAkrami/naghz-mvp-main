@@ -8,7 +8,7 @@
     --primary-color2: #ffd66b;
     --primary-color3: #f5f7fa;
     --primary-color4: #fff;
-    --secondary-color1: #32c48d;
+    --secondary-color1: #06d183;
     --secondary-color2: #f26464;
     --secondary-color3: #3b9ae1;
     --accent-color1: #d8a7ff;
@@ -127,10 +127,5 @@ body {
         color: var(--text-primary);
         font-weight: 650;
         font-size: 1.2rem;
-    }
-
-    .button-primary,
-    .button-secondary {
-        scale: 0.9;
     }
 }

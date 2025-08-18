@@ -3,11 +3,13 @@ import { GiHiveMind } from "react-icons/gi";
 import { ImClock2 } from "react-icons/im";
 import { FaUsers } from "react-icons/fa";
 import { MdPsychologyAlt } from "react-icons/md";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import clsx from "clsx";
 import { motion } from "framer-motion";
 import Link from "next/link";
-
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
+import { links } from  "@/routes/routes";
 
 
 interface GuidedPathsType {
@@ -20,7 +22,7 @@ interface GuidedPathsType {
 const GuidedPaths: GuidedPathsType[] = [
     {
         id: 1,
-        name: "مدیریت‌زمان",
+        name: "نظم و تعهد شخصی",
         component: <></>,
         alt: "Time management"
     },
@@ -45,10 +47,21 @@ const GuidedPaths: GuidedPathsType[] = [
 
 const Home = () => {
     const [selectedGuide, setSelectedGuide] = useState<number>(1);
+    const { isAuthenticated, loading } = useSelector((state: RootState) => state.auth);
+    const [linkCarry, setLinkCarry] = useState<string>(links.signUp);
+
 
     const handleNavigation = (guidedPath: number) => {
         setSelectedGuide(guidedPath);
     }
+
+    useEffect(() => {
+        if (isAuthenticated) {
+            setLinkCarry(links.courses);
+        } else {
+            setLinkCarry(links.signUp);
+        }
+    }, [isAuthenticated]);
 
     return (
         <div className="h-[200vh]" dir="rtl">
@@ -91,7 +104,7 @@ const Home = () => {
                 <button
                     className="button-primary rounded-full mt-[2rem] shadow md:scale-[1.5] max-md:scale-[1.3] mb-[10vh]"
                 >
-                    <Link href="/auth/sign-up"
+                    <Link href={linkCarry}
                         className="block w-[100%] h-[100%]"
                     >
                         تجربه‌اش کن
@@ -259,7 +272,7 @@ const Home = () => {
                     className="w-[100%]"
                 >
                     <ul 
-                        className="flex justify-center items-center p-2 gap-[1.6rem] bg-[var(--primary-color3)] w-fit mx-auto rounded-[1rem] max-md:text-[0.8rem] max-md:gap-[0rem]"
+                        className="flex justify-center items-center p-2 gap-[1.6rem] bg-[var(--primary-color3)] w-fit mx-auto rounded-[1rem] max-md:text-[0.8rem] max-md:gap-[0.2rem]"
                     >
                         {GuidedPaths.map((guidedPath, index) => (  
                             <div 

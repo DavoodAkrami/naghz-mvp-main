@@ -1,0 +1,4 @@
+--Finishing modal 
+--Finishing Nav part of landing
+--Finishing test component
+----For test component we need to make that  like brilliant - We need a page for curses, levels of each curse, and text component that people can finish the curse.

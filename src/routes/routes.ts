@@ -3,6 +3,7 @@ export interface routesType {
     path: string;
     header?: boolean;
     profilePage?: boolean;
+    adminRequaire?: boolean;
 }
 
 
@@ -36,8 +37,19 @@ const routes: routesType[]= [
         name: "دوره‌های من",
         path: "/dashboard/my-curses",
         profilePage: true
-    }
+    },
+    {
+        name: "دوره‌ها",
+        path: "/dashboard/course-management",
+        adminRequaire: true  
+    },
+    {
+        name: "مدیریت دوره‌ها",
+        path: "/courses",
+        header: true
+    },
 ] 
+
 
 export const dashboardPages: routesType[] = [
     {
@@ -51,6 +63,11 @@ export const dashboardPages: routesType[] = [
     {
         name: "دوره‌های من",
         path: "/dashboard/my-curses"
+    },
+    {
+        name: "مدیریت دوره‌ها",
+        path: "/dashboard/course-management",
+        adminRequaire: true,
     }
 ];
 
@@ -61,7 +78,8 @@ export const links = {
     signIn: "/auth/sign-in",
     profile: "/dashboard/profile",
     accountInfo: "/dashboard/account-info",
-    myCurses: "/dashboard/my-curses"
+    myCurses: "/dashboard/my-curses",
+    courses: "/courses"
 } 
 
 export default routes;
