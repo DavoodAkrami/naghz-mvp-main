@@ -206,9 +206,12 @@ export default function CourseManagement() {
           .from('page_options')
           .select('id')
           .eq('page_id', pageId);
-        const existingIds = (existingOpts || []).map((o: any) => o.id as string);
-        const currentIds = pageOptions.filter(o => o.id).map(o => o.id!) as string[];
-        const optionsToDelete = existingIds.filter(id => !currentIds.includes(id));
+        const existingIds = (existingOpts || []).map((o: unknown) => {
+            if (typeof o === 'object' && o && 'id' in o) return (o as { id: string }).id;
+            return '';
+        });
+        const currentIds = pageOptions.filter(o => o.id).map(o => o.id as string);
+        const optionsToDelete = existingIds.filter(id => id && !currentIds.includes(id));
 
         if (optionsToDelete.length > 0) {
           await supabase.from('page_options').delete().in('id', optionsToDelete);
@@ -593,7 +596,7 @@ export default function CourseManagement() {
                           <label className="block text-sm font-medium mb-2">نوع آزمون</label>
                           <select
                             value={page.test_type}
-                            onChange={(e) => updatePage(index, { test_type: e.target.value as any })}
+                            onChange={(e) => updatePage(index, { test_type: e.target.value as 'Default' | 'Multiple' | 'Sequential' | 'Pluggable' })}
                             className="w-full p-2 border rounded"
                           >
                             <option value="Default">تک انتخابی</option>
@@ -606,7 +609,7 @@ export default function CourseManagement() {
                           <label className="block text-sm font-medium mb-2">طرح‌بندی</label>
                           <select
                             value={page.test_grid}
-                            onChange={(e) => updatePage(index, { test_grid: e.target.value as any })}
+                            onChange={(e) => updatePage(index, { test_grid: e.target.value as 'col' | 'grid-2' | 'grid-row' })}
                             className="w-full p-2 border rounded"
                           >
                             <option value="col">عمودی</option>
@@ -847,7 +850,7 @@ export default function CourseManagement() {
                           <label className="block text-sm font-medium mb-2">نوع آزمون</label>
                           <select
                             value={page.test_type}
-                            onChange={(e) => updatePage(index, { test_type: e.target.value as any })}
+                            onChange={(e) => updatePage(index, { test_type: e.target.value as 'Default' | 'Multiple' | 'Sequential' | 'Pluggable' })}
                             className="w-full p-2 border rounded"
                           >
                             <option value="Default">تک انتخابی</option>
@@ -860,7 +863,7 @@ export default function CourseManagement() {
                           <label className="block text-sm font-medium mb-2">طرح‌بندی</label>
                           <select
                             value={page.test_grid}
-                            onChange={(e) => updatePage(index, { test_grid: e.target.value as any })}
+                            onChange={(e) => updatePage(index, { test_grid: e.target.value as 'col' | 'grid-2' | 'grid-row' })}
                             className="w-full p-2 border rounded"
                           >
                             <option value="col">عمودی</option>
