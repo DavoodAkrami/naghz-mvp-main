@@ -1,8 +1,6 @@
 "use client"
 import { useState, useEffect } from "react";
-import CourseCard from "@/components/courseCard";
-import { CurseCardProps, CourseCardOpen } from "@/components/courseCard";
-import { LuBrain } from "react-icons/lu";
+import CourseCard, { CourseCardOpen } from "@/components/courseCard";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";

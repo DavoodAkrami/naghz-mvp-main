@@ -52,6 +52,12 @@ export default function CoursePage({ params }: { params: Promise<{ course: strin
       </div>
     )
 
+    const normalizedCorrectAnswer = Array.isArray(currentPage.correct_answer)
+        ? currentPage.correct_answer as number[]
+        : (typeof currentPage.correct_answer === 'number')
+            ? [currentPage.correct_answer as number]
+            : undefined;
+
     const transformedData = {
         id: currentPage.id,
         page_type: currentPage.page_type,
@@ -66,7 +72,7 @@ export default function CoursePage({ params }: { params: Promise<{ course: strin
             isCorrect: option.is_correct,
             icon_name: option.icon_name
         })),
-        correct_answer: currentPage.correct_answer,
+        correct_answer: normalizedCorrectAnswer,
         course_id: currentCourse?.id || "",
         page_number: currentPage.page_number,
         pageLength: currentPage.page_length
