@@ -244,7 +244,7 @@ const courseSlice = createSlice({
     setCurrentPage: (state, action: PayloadAction<number>) => {
       state.currentPageNumber = action.payload;
     },
-    setTestAnswer: (state, action: PayloadAction<{ questionId: string; answer: any }>) => {
+    setTestAnswer: (state, action: PayloadAction<{ questionId: string; answer: unknown }>) => {
       // Type assertion for currentTestAnswers as Record<string, unknown>
       (state.currentTestAnswers as Record<string, unknown>)[action.payload.questionId] = action.payload.answer;
     },
