@@ -40,7 +40,7 @@ const AccountInfo = () => {
             <motion.button
                 layoutId="logout"
                 className="hover:bg-[var(--hover-color)] button-primary rounded-lg flex items-center gap-[10px]"
-                onClick={handleModalOpen}
+                onClick={handleLogOut}
                 disabled={logOutLoading}
             >
                 خروج

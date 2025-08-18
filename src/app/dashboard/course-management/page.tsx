@@ -46,7 +46,8 @@ export default function CourseManagement() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [selectedCourse, setSelectedCourse] = useState<any>(null);
+  // TODO: Replace 'unknown' with a specific type for course if possible
+  const [selectedCourse, setSelectedCourse] = useState<unknown>(null); // FIXME: type
   const [courseFormData, setCourseFormData] = useState<CourseFormData>({
     slug: '',
     title: '',
@@ -141,7 +142,7 @@ export default function CourseManagement() {
     try {
       if (!supabase || !selectedCourse) throw new Error('Supabase not configured or no course selected');
 
-      const courseId = selectedCourse.id as string;
+      const courseId = (selectedCourse as { id: string }).id;
 
       await supabase
         .from('courses')
@@ -256,7 +257,7 @@ export default function CourseManagement() {
       await supabase
         .from('courses')
         .delete()
-        .eq('id', selectedCourse.id);
+        .eq('id', (selectedCourse as { id: string }).id);
       
       setShowDeleteModal(false);
       setSelectedCourse(null);
@@ -333,54 +334,57 @@ export default function CourseManagement() {
     });
   };
 
-  const openEditModal = (course: any) => {
+  // TODO: Replace 'unknown' with a specific type for course if possible
+  const openEditModal = (course: unknown) => {
     setSelectedCourse(course);
     setCourseFormData({
-      slug: course.slug,
-      title: course.title,
-      description: course.description,
-      icon_name: course.icon_name || '',
-      is_active: course.is_active,
-      order_index: course.order_index
+      slug: (course as { slug: string }).slug,
+      title: (course as { title: string }).title,
+      description: (course as { description: string }).description,
+      icon_name: (course as { icon_name: string }).icon_name || '',
+      is_active: (course as { is_active: boolean }).is_active,
+      order_index: (course as { order_index: number }).order_index
     });
     const loadPagesAndOptions = async () => {
       try {
         if (!supabase) return;
+        // Type guard for course
+        if (!course || typeof course !== 'object' || !('id' in course)) return;
         const { data: dbPages } = await supabase
           .from('course_pages')
           .select('*')
-          .eq('course_id', course.id)
+          .eq('course_id', (course as { id: string }).id)
           .order('page_number');
-        const pagesData: PageFormData[] = (dbPages || []).map((p: any, idx: number) => ({
-          id: p.id,
-          page_number: p.page_number,
-          page_type: p.page_type,
-          title: p.title || '',
-          content: p.content || '',
-          question: p.question || '',
-          test_type: p.test_type || 'Default',
-          test_grid: p.test_grid || 'col',
-          correct_answer: p.correct_answer || [],
-          page_length: p.page_length || (dbPages?.length || 1),
-          order_index: p.order_index || idx
+        const pagesData: PageFormData[] = (dbPages || []).map((p: Record<string, unknown>, idx: number) => ({
+          id: p.id as string,
+          page_number: p.page_number as number,
+          page_type: p.page_type as 'text' | 'test',
+          title: (p.title as string) || '',
+          content: (p.content as string) || '',
+          question: (p.question as string) || '',
+          test_type: (p.test_type as 'Default' | 'Multiple' | 'Sequential' | 'Pluggable') || 'Default',
+          test_grid: (p.test_grid as 'col' | 'grid-2' | 'grid-row') || 'col',
+          correct_answer: (p.correct_answer as number[]) || [],
+          page_length: (p.page_length as number) || (dbPages?.length || 1),
+          order_index: (p.order_index as number) || idx
         }));
         setPages(pagesData);
-        setOriginalPageIds((dbPages || []).map((p: any) => p.id));
+        setOriginalPageIds((dbPages || []).map((p: Record<string, unknown>) => p.id as string));
         const optsByPage: Record<number, OptionFormData[]> = {};
         for (let i = 0; i < (dbPages || []).length; i++) {
-          const page = (dbPages as any[])[i];
+          const page = (dbPages as Record<string, unknown>[])[i];
           const { data: dbOptions } = await supabase
             .from('page_options')
             .select('*')
             .eq('page_id', page.id)
             .order('option_order');
-          optsByPage[i] = (dbOptions || []).map((o: any) => ({
-            id: o.id,
-            page_id: o.page_id,
-            option_text: o.option_text,
-            option_order: o.option_order,
-            is_correct: o.is_correct,
-            icon_name: o.icon_name || ''
+          optsByPage[i] = (dbOptions || []).map((o: Record<string, unknown>) => ({
+            id: o.id as string,
+            page_id: o.page_id as string,
+            option_text: o.option_text as string,
+            option_order: o.option_order as number,
+            is_correct: o.is_correct as boolean,
+            icon_name: (o.icon_name as string) || ''
           }));
         }
         setOptionsByPage(optsByPage);
@@ -392,7 +396,8 @@ export default function CourseManagement() {
     setShowEditModal(true);
   };
 
-  const openDeleteModal = (course: any) => {
+  // TODO: Replace 'unknown' with a specific type for course if possible
+  const openDeleteModal = (course: unknown) => {
     setSelectedCourse(course);
     setShowDeleteModal(true);
   };
@@ -965,7 +970,11 @@ export default function CourseManagement() {
         >
           <div className="bg-white rounded-lg p-6 max-w-md w-full">
             <h2 className="text-2xl font-bold mb-4">حذف دوره</h2>
-            <p className="mb-6">آیا مطمئن هستید که می‌خواهید دوره "{selectedCourse?.title}" را حذف کنید؟</p>
+            <p className="mb-6">
+                {typeof selectedCourse === 'object' && selectedCourse && 'title' in selectedCourse
+                    ? `آیا مطمئن هستید که می‌خواهید دوره "${(selectedCourse as { title: string }).title}" را حذف کنید؟`
+                    : 'آیا مطمئن هستید که می‌خواهید این دوره را حذف کنید؟'}
+            </p>
             
             <div className="flex gap-4 justify-end">
               <button

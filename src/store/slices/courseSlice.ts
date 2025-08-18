@@ -11,6 +11,11 @@ interface Course {
   order_index: number;
 }
 
+type AnswerDict = {
+  A: number;
+  B: number;
+}
+
 interface CoursePage {
   id: string;
   course_id: string;
@@ -21,9 +26,11 @@ interface CoursePage {
   question?: string;
   test_type?: 'Default' | 'Multiple' | 'Sequential' | 'Pluggable';
   test_grid?: 'col' | 'grid-2' | 'grid-row';
-  correct_answer?: number[];
+  correct_answer?: number[] | number | AnswerDict;
   page_length: number;
   order_index: number;
+  why?: string;
+  image?: string; 
 }
 
 interface PageOption {
@@ -41,7 +48,8 @@ interface UserProgress {
   course_id: string;
   current_page: number;
   completed_pages: number[];
-  test_results: any;
+  // TODO: Replace 'unknown' with a specific type for test_results if possible
+  test_results: unknown;
   started_at: string;
   last_accessed: string;
   completed_at?: string;
@@ -51,7 +59,8 @@ interface TestAttempt {
   id: string;
   user_id: string;
   page_id: string;
-  user_answers: any;
+  // TODO: Replace 'unknown' with a specific type for user_answers if possible
+  user_answers: unknown;
   score: number;
   is_correct: boolean;
   time_taken: number;
@@ -62,7 +71,8 @@ interface TestResult {
   isCorrect: boolean;
   correctAnswers: number[];
   explanation: string;
-  userAnswers: any;
+  // TODO: Replace 'unknown' with a specific type for userAnswers if possible
+  userAnswers: unknown;
 }
 
 interface LearningState {
@@ -73,7 +83,8 @@ interface LearningState {
   userProgress: UserProgress[];
   currentProgress: UserProgress | null;
   testAttempts: TestAttempt[];
-  currentTestAnswers: any;
+  // TODO: Replace 'unknown' with a specific type for currentTestAnswers if possible
+  currentTestAnswers: unknown;
   testResult: TestResult | null;
   loading: boolean;
   error: string | null;
@@ -182,7 +193,7 @@ export const fetchPageOptions = createAsyncThunk(
 
 export const saveProgress = createAsyncThunk(
   'course/saveProgress',
-  async ({ courseId, pageNumber, testAnswers }: { courseId: string; pageNumber: number; testAnswers?: any }) => {
+  async ({ courseId, pageNumber, testAnswers }: { courseId: string; pageNumber: number; testAnswers?: unknown }) => {
     if (!supabase) throw new Error('Supabase not configured');
     
     const { data, error } = await supabase
@@ -204,7 +215,7 @@ export const saveProgress = createAsyncThunk(
 
 export const submitTest = createAsyncThunk(
   'course/submitTest',
-  async ({ pageId, answers, timeTaken }: { pageId: string; answers: any; timeTaken: number }) => {
+  async ({ pageId, answers, timeTaken }: { pageId: string; answers: unknown; timeTaken: number }) => {
     if (!supabase) throw new Error('Supabase not configured');
     
     const { data, error } = await supabase
@@ -234,7 +245,8 @@ const courseSlice = createSlice({
       state.currentPageNumber = action.payload;
     },
     setTestAnswer: (state, action: PayloadAction<{ questionId: string; answer: any }>) => {
-      state.currentTestAnswers[action.payload.questionId] = action.payload.answer;
+      // Type assertion for currentTestAnswers as Record<string, unknown>
+      (state.currentTestAnswers as Record<string, unknown>)[action.payload.questionId] = action.payload.answer;
     },
     clearTestAnswers: (state) => {
       state.currentTestAnswers = {};
@@ -359,6 +371,7 @@ const courseSlice = createSlice({
           isCorrect: result.is_correct,
           correctAnswers: result.correct_answers || [],
           explanation: result.explanation || '',
+          // TODO: Replace 'unknown' with a specific type for userAnswers if possible
           userAnswers: state.currentTestAnswers,
         };
         state.showTestResult = true;
