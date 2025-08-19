@@ -64,16 +64,16 @@ const Home = () => {
     }, [isAuthenticated]);
 
     return (
-        <div className="h-[200vh]" dir="rtl">
+        <div className="" dir="rtl">
             <section
-                className="flex flex-col items-center mb-[5vh]"
+                className="flex flex-col items-center"
             >
                 <div 
-                    className="my-[4vh] px-[4vw]"
+                    className="my-[2vh] px-[4vw]"
                 >
                     <video 
                         src="/naghz-landing-do-it.webm"
-                        className="max-md:hidden"
+                        className="max-md:hidden scale-[0.9] w-[90%] mx-auto"
                         autoPlay
                         muted
                         playsInline
@@ -112,7 +112,7 @@ const Home = () => {
                 </button>
                 <hr className="self-stretch border-t border-[var(--text-desable)] opacity-80" />
                 <div
-                    className="flex justify-between gap-[1rem] w-[80%] pt-[5vh] max-[1200px]:scale-[0.9] max-[1200px]:w-[100%] max-md:scale-[0.8] max-md:w-[115%] max-[500px]:justify-around"
+                    className="flex justify-between gap-[1rem] w-[80%] py-[5vh] max-[1200px]:scale-[0.9] max-[1200px]:w-[100%] max-md:scale-[0.8] max-md:w-[115%] max-[500px]:justify-around"
                 >   
                     <div className="flex gap-[0.5rem] items-center max-md:gap-[0.5rem]">
                         <GiHiveMind
@@ -140,7 +140,7 @@ const Home = () => {
                     </div>
                 </div>
             </section>
-            <section
+            {/* <section
                 className="bg-[url(/social-proof-background.svg)] bg-[var(--section-color)] text-[var(--text-secondary)]"
             >
                 <div className="min-h-[80vh] flex flex-col justify-center items-center ">
@@ -329,7 +329,7 @@ const Home = () => {
                         </Link>
                     </button>
                 </div>
-            </section>
+            </section> */}
         </div>
     );
 }

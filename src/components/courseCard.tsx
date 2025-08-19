@@ -14,9 +14,10 @@ export interface CurseCardProps {
     isActive: boolean;
     onClick?: () => void;
     startOnClick?: () => void;
+    classname?: string;
 }
 
-const CourseCard: React.FC<CurseCardProps> = ({title, description, icon: Icon, layoutId, isActive, onClick}) => {
+const CourseCard: React.FC<CurseCardProps> = ({title, description, icon: Icon, layoutId, isActive, onClick, classname}) => {
     const truncatedDescription = description.length > 80 ? `${description.slice(0, 80)}...` : description;
 
     return (
@@ -51,7 +52,7 @@ const CourseCard: React.FC<CurseCardProps> = ({title, description, icon: Icon, l
     )
 }
 
-export const CourseCardOpen: React.FC<CurseCardProps> = ({title, description, icon: Icon, layoutId, startOnClick}) => {
+export const CourseCardOpen: React.FC<CurseCardProps> = ({title, description, icon: Icon, layoutId, startOnClick, classname}) => {
     return (
         <AnimatePresence>
                 <motion.div

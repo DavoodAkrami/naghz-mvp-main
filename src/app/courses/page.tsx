@@ -49,7 +49,7 @@ const Curses: React.FC = () => {
         >
             <h1 className="text-center text-[4rem] font-bold maxx-md:text-[2rem] mb-[2rem]">دوره های آموزشی</h1>
             <div
-                className="px-[15vw] grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[2rem]"
+                className="w-[70%] md:grid flex flex-col justify-center items-center md:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3 gap-[2rem] mx-auto"
             >
                 <AnimatePresence>
                     {courses.map((course) => (
