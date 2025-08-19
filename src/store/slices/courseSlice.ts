@@ -234,6 +234,41 @@ export const submitTest = createAsyncThunk(
   }
 );
 
+export const uploadPageImage = createAsyncThunk(
+  'course/uploadPageImage',
+  async ({ pageId, file }: { pageId: string; file: File }) => {
+    if (!supabase) throw new Error('Supabase not configured');
+
+    const bucket = 'course-page-images';
+    const extension = file.name.split('.').pop() || 'jpg';
+    const filePath = `pages/${pageId}/${Date.now()}.${extension}`;
+
+    const { error: uploadError } = await supabase
+      .storage
+      .from(bucket)
+      .upload(filePath, file, { cacheControl: '3600', upsert: true });
+
+    if (uploadError) throw uploadError;
+
+    const { data: publicData } = supabase
+      .storage
+      .from(bucket)
+      .getPublicUrl(filePath);
+
+    const publicUrl = publicData?.publicUrl || '';
+
+    const { data, error } = await supabase
+      .from('course_pages')
+      .update({ image: publicUrl })
+      .eq('id', pageId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return { page: data, publicUrl };
+  }
+);
+
 const courseSlice = createSlice({
   name: 'course',
   initialState,

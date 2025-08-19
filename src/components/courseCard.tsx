@@ -26,7 +26,7 @@ const CourseCard: React.FC<CurseCardProps> = ({title, description, icon: Icon, l
                 layoutId={layoutId}
                 onClick={onClick}
                 className={clsx(
-                    "w-[350px] bg-[white] px-[1rem] shadow-md h-[150px] border border-[var(--bg-color-secondary)] rounded-md hover:border-[var(--bg-color-secondary)/5] cursor-pointer flex justify-baseline items-center gap-[10%] transition-all duration-150",
+                    "bg-[white] px-[1rem] shadow-md h-[150px] border border-[var(--bg-color-secondary)] rounded-md hover:border-[var(--bg-color-secondary)/5] cursor-pointer flex justify-baseline items-center gap-[10%] transition-all duration-150 w-[100%]",
                     !isActive && "opacity-[0.5] cursor-default pointer-events-none hover:border-none bg-gray-200"
                 )}
             >
@@ -57,7 +57,7 @@ export const CourseCardOpen: React.FC<CurseCardProps> = ({title, description, ic
         <AnimatePresence>
                 <motion.div
                     layoutId={layoutId}
-                    className="flex flex-col items-center justify-center gap-[1rem] bg-[white] p-8 rounded-xl md:max-w-[50vw] max-w-[95vw]"
+                    className="flex flex-col items-center justify-center gap-[1rem] bg-[white] p-8 rounded-xl md:w-[50vw] max-w-[95vw]"
                 >
                     <div 
                         className="text-center"

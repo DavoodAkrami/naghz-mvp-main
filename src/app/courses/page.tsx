@@ -49,7 +49,7 @@ const Curses: React.FC = () => {
         >
             <h1 className="text-center text-[4rem] font-bold maxx-md:text-[2rem] mb-[2rem]">دوره های آموزشی</h1>
             <div
-                className="w-[70%] md:grid flex flex-col justify-center items-center md:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3 gap-[2rem] mx-auto"
+                className="w-[70%] max-md:w-[95%] flex flex-col justify-center items-center gap-[2rem] mx-auto"
             >
                 <AnimatePresence>
                     {courses.map((course) => (
@@ -67,7 +67,7 @@ const Curses: React.FC = () => {
                 {isModalOpen !== null &&
                     <div className="fixed inset-0 z-50000 flex items-center justify-center">
                         <motion.div
-                            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                            className="absolute inset-0 bg-black/60 backdrop-blur-xl"
                             onClick={() => handleModalOpen(null)}
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}

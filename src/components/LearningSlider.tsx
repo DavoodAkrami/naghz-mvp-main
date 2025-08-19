@@ -15,6 +15,7 @@ type DbPage = {
   test_type?: "Default" | "Multiple" | "Sequential" | "Pluggable";
   test_grid?: "col" | "grid-2" | "grid-row";
   correct_answer?: number[];
+  image?: string;
 };
 
 type DbOption = {
@@ -104,6 +105,7 @@ const LearningSlider: React.FC<LearningPropsType> = (props: LearningPropsType) =
       course_id: props.course_id,
       page_number: currentIndex + 1,
       pageLength: pages.length || props.pageLength,
+      image: page.image,
     };
   }, [pages, currentIndex, optionsByPageId, props.course_id, props.pageLength]);
 
@@ -125,8 +127,8 @@ const LearningSlider: React.FC<LearningPropsType> = (props: LearningPropsType) =
   )
 
   return (
-    <div>
-      <div dir="ltr" className="flex items-center justify-center w-[70%] mx-auto py-[3vh] max-md:w-[95%]">
+    <div className="">
+      <div dir="ltr" className="flex items-center justify-center w-[70%] mx-auto py-[3vh] max-md:w-[95%] mb-0">
         <button onClick={handlePrevious} disabled={!canGoPrev} className="disabled:opacity-40">
             <MdKeyboardArrowLeft 
                 className="text-[2rem] cursor-pointer"

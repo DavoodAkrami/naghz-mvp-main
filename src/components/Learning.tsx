@@ -26,6 +26,7 @@ export interface LearningPropsType {
     pageLength: number;
     handleNext?: () => void;
     handlePrev?: () => void;
+    image?: string;
 }
 
 
@@ -100,7 +101,7 @@ const OptionCard: React.FC<OptionCardProps> = ({ icon_name, answer, id, test_typ
 }
 
 
-const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, header, test_type="Default", test_grid= "col", options, question, correct_answer, course_id, page_number, pageLength, handleNext, handlePrev}) => {
+const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, header, test_type="Default", test_grid= "col", options, question, correct_answer, course_id, page_number, pageLength, handleNext, handlePrev, image}) => {
     const router = useRouter();
 
     const [activeId, setActiveId] = useState<number | null>(null);
@@ -258,12 +259,22 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
 
     return (
         <div
-            className="h-[100vh] flex flex-col justify-center items-baseline"
+            className={clsx(
+                "h-[60vh] flex flex-col justify-center items-baseline max-md:h-auto",
+                image && "min-h-[100vh] h-auto"
+            )}
         >
             {page_type === "text" ?(
                 <div
                     className="flex flex-col justify-center items-center max-w-[80%] max-md:max-w[95%] mx-auto"
                 >
+                    {image && 
+                        <img 
+                            src={image} 
+                            alt="تصویر صفحه" 
+                            className="max-h-[70vh] max-w-[80%] max-md:max-w-[95%] max-md:max-h-max mx-auto object-cover rounded-xl mb-6"
+                        />
+                    }
                     {header &&
                         <h1
                             className="text-[3.6rem] max-md:text-[1.8rem] font-extrabold mb-[5vh] text-center"
@@ -283,6 +294,14 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                 <div
                     className="flex flex-col justify-center mx-auto"
                 >
+                    {image && 
+                        <img 
+                            src={image} 
+                            alt="تصویر صفحه" 
+                            className="max-h-[70vh] max-w-[80%] max-md:max-w-[95%] max-md:max-h-max mx-auto object-cover rounded-xl mb-6"
+                        />
+                    }
+                    
                     <p
                         className="text-[2rem] font-bold mb-[5vh] text-center max-md:max-w-[95%] mx-auto"
                     >
@@ -294,9 +313,14 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                             "w-[80%] mx-auto",
                             test_grid === "col" ? "flex flex-col gap-[1.5rem]" : 
                             test_grid === "grid-2" ? "grid grid-cols-2 gap-[1.5rem]" :
-                            test_grid === "grid-row" ? "grid grid-rows-1 gap-[1.5rem]" : 
+                            test_grid === "grid-row" ? "grid grid-rows-1 gap-[1.5rem]": 
                             "bg-red"
                         )}
+                        style={
+                            test_grid === "grid-row"
+                                ? { gridTemplateColumns: `repeat(${Math.max(1, options?.length || 1)}, minmax(0, 1fr))` }
+                                : undefined
+                        }
                     >
                         {options?.map((option, index) => (
                             <OptionCard 
@@ -309,7 +333,7 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                                 onSelect={handleActiveOption}
                                 getSequentialOrder={getSequentialOrder}
                                 getPluggablePair={getPluggablePair}
-                                classname=""
+                                classname={clsx(test_grid === "grid-row" && "flex justify-center items-center")}
                             />
                         ))}
                     </div>
@@ -324,7 +348,7 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                 onClick={page_type === "test" ? handlePopUpOpen : handleNextPage}
                 disabled={page_type === "test" ? (!activeId || isPopUpOpen) : false}
                 className={clsx(
-                    "button-primary rounded-full shadow-lg w-[10rem] mx-auto scale-[1.4] mt-[3vh]",
+                    "button-primary rounded-full shadow-lg w-[10rem] mx-auto scale-[1.4] mt-[3vh] mb-[3vh]",
                     page_type === "test" && !activeId && "disabled:opacity-50"
                 )}
             >
@@ -332,7 +356,7 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
             </button>
             {page_type === "test" && 
                 <div 
-                    className="w-[40%] mx-auto absolute bottom-[1rem] left-[50%] translate-x-[-50%] max-md:w-[95%] max-md:bottom-[0.5rem] max-md:scale-[0.92]"
+                    className="w-[40%] max-lg:w-[60%] mx-auto absolute bottom-[1rem] left-[50%] translate-x-[-50%] max-md:w-[110%] max-md:bottom-[0.5rem] max-md:scale-[0.92]"
                 >
                     <PopUp 
                         isCorrect={isCorrect}

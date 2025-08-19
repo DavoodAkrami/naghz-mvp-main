@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "@/store/store";
-import { fetchCourses } from "@/store/slices/courseSlice";
+import { fetchCourses, uploadPageImage } from "@/store/slices/courseSlice";
 import { supabase } from "@/config/supabase";
 import { FiPlus, FiEdit, FiTrash2 } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
@@ -28,6 +28,7 @@ interface PageFormData {
   correct_answer: number[];
   page_length: number;
   order_index: number;
+  image?: string;
 }
 
 interface OptionFormData {
@@ -69,11 +70,13 @@ export default function CourseManagement() {
     test_grid: 'col',
     correct_answer: [],
     page_length: 1,
-    order_index: 0
+    order_index: 0,
+    image: ''
   });
   const [optionsByPage, setOptionsByPage] = useState<Record<number, OptionFormData[]>>({});
   const [showOptionsModal, setShowOptionsModal] = useState(false);
   const [originalPageIds, setOriginalPageIds] = useState<string[]>([]);
+  const [imagesByPage, setImagesByPage] = useState<Record<number, File | null>>({});
 
   useEffect(() => {
     dispatch(fetchCourses());
@@ -103,6 +106,18 @@ export default function CourseManagement() {
           .single();
         
         if (pageError) throw pageError;
+
+        // If an image is selected for this page, upload it and update DB
+        const fileForPage = imagesByPage[i];
+        if (fileForPage) {
+          try {
+            const result = await dispatch(uploadPageImage({ pageId: pageData.id as string, file: fileForPage })).unwrap();
+            // reflect in local state
+            updatePage(i, { image: result.publicUrl });
+          } catch (e) {
+            console.error('Failed to upload page image:', e);
+          }
+        }
 
         const pageOptions = optionsByPage[i] || [];
         if (page.page_type === 'test' && pageOptions.length > 0) {
@@ -173,6 +188,7 @@ export default function CourseManagement() {
               test_type: page.test_type,
               test_grid: page.test_grid,
               correct_answer: page.correct_answer,
+              image: page.image,
               page_length: page.page_length,
               order_index: page.order_index,
             })
@@ -189,6 +205,7 @@ export default function CourseManagement() {
               test_type: page.test_type,
               test_grid: page.test_grid,
               correct_answer: page.correct_answer,
+              image: page.image,
               page_length: page.page_length,
               order_index: page.order_index,
               course_id: courseId,
@@ -197,6 +214,17 @@ export default function CourseManagement() {
             .single();
           if (insertPageError) throw insertPageError;
           pageId = insertedPage?.id as string;
+        }
+
+        // Upload a newly selected image for this page (if any)
+        const fileForPage = imagesByPage[i];
+        if (fileForPage && pageId) {
+          try {
+            const result = await dispatch(uploadPageImage({ pageId, file: fileForPage })).unwrap();
+            updatePage(i, { image: result.publicUrl });
+          } catch (e) {
+            console.error('Failed to upload page image:', e);
+          }
         }
 
         if (!pageId) continue;
@@ -368,6 +396,7 @@ export default function CourseManagement() {
           test_type: (p.test_type as 'Default' | 'Multiple' | 'Sequential' | 'Pluggable') || 'Default',
           test_grid: (p.test_grid as 'col' | 'grid-2' | 'grid-row') || 'col',
           correct_answer: (p.correct_answer as number[]) || [],
+          image: (p.image as string) || '',
           page_length: (p.page_length as number) || (dbPages?.length || 1),
           order_index: (p.order_index as number) || idx
         }));
@@ -568,6 +597,21 @@ export default function CourseManagement() {
                         className="w-full p-2 border rounded"
                         placeholder="عنوان صفحه"
                       />
+                    </div>
+                    <div>
+                    <label className="block text-sm font-medium mb-2">تصویر صفحه (اختیاری)</label>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0] || null;
+                              setImagesByPage(prev => ({ ...prev, [index]: file }));
+                            }}
+                            className="w-full p-2 border rounded"
+                          />
+                          {page.image && (
+                            <img src={page.image} alt="preview" className="mt-2 max-h-40 rounded" />
+                          )}
                     </div>
                     {page.page_type === 'text' ? (
                       <div className="col-span-2">
@@ -822,6 +866,21 @@ export default function CourseManagement() {
                         className="w-full p-2 border rounded"
                         placeholder="عنوان صفحه"
                       />
+                    </div>
+                    <div>
+                    <label className="block text-sm font-medium mb-2">تصویر صفحه (اختیاری)</label>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0] || null;
+                              setImagesByPage(prev => ({ ...prev, [index]: file }));
+                            }}
+                            className="w-full p-2 border rounded"
+                          />
+                          {page.image && (
+                            <img src={page.image} alt="preview" className="mt-2 max-h-40 rounded" />
+                          )}
                     </div>
                     {page.page_type === 'text' ? (
                       <div className="col-span-2">

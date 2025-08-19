@@ -75,7 +75,8 @@ export default function CoursePage({ params }: { params: Promise<{ course: strin
         correct_answer: normalizedCorrectAnswer,
         course_id: currentCourse?.id || "",
         page_number: currentPage.page_number,
-        pageLength: currentPage.page_length
+        pageLength: currentPage.page_length,
+        image: currentPage.image
     };
 
     return (
