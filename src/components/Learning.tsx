@@ -13,14 +13,14 @@ export interface options {
 
 export interface LearningPropsType {
     id: string;
-    page_type: "test" | "text";
+    page_type: "test" | "text" | "nextTest";
     header?: string;
     text?: string;
     test_type?: "Sequential" | "Pluggable" | "Multiple" | "Default";
     test_grid?: "col" | "grid-2" | "grid-row";
     question?: string;
     options?: options[];
-    correct_answer?: number[];
+    correct_answer?: number[] | number;
     course_id: string;
     page_number: number;
     pageLength: number;
@@ -44,7 +44,7 @@ interface OptionCardProps {
 
 const OptionCard: React.FC<OptionCardProps> = ({ icon_name, answer, id, test_type="Default", isSelected, onSelect, getSequentialOrder, getPluggablePair, classname }) => {
     const getCardStyle = () => {
-        const baseStyle = "px-[2rem] py-[1rem] rounded-full border-[2px] box-border cursor-pointer flex justify-between items-center transition-all duration-200";
+        const baseStyle = "px-[2rem] py-[1rem] rounded-full border-[2px] box-border cursor-pointer flex justify-between items-center transition-all duration-200 shadow-sm";
         
         switch (test_type) {
             case "Default":
@@ -68,7 +68,8 @@ const OptionCard: React.FC<OptionCardProps> = ({ icon_name, answer, id, test_typ
             case "Pluggable":
                 return clsx(
                     baseStyle,
-                    "border-[var(--accent-color2)] bg-[var(--accent-color2)]/10 shadow-md"
+                    "border-[var(--accent-color1)]",
+                    isSelected && "border-[3px] border-[var(--accent-color2)] bg-[var(--accent-color2)]/10 shadow-md"
                 );
             default:
                 return clsx(baseStyle, "border-[var(--accent-color1)]");
@@ -110,6 +111,10 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
     const [pluggablePairs, setPluggablePairs] = useState<{[key: number]: number | undefined}>({});
     const [isCorrect, setIsCorrect] = useState<boolean>(false);
     const [isPopUpOpen, setIsPopUpOpen] = useState<boolean>(false);
+
+    const hasPluggablePair = Object.values(pluggablePairs).some(v => v !== undefined);
+    const hasMultipleSelection = multipleSelections.length > 0;
+    const hasSequentialSelection = sequentialSelections.length > 0;
 
     useEffect(() => {
         if (activeId) {
@@ -205,12 +210,95 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
     }
 
     const handleCorrectAnswer = () => {
-        //TODO: show correct answer
+        switch (test_type) {
+            case "Default":
+                correct_answer === activeId ? setIsCorrect(true) : setIsCorrect(false);
+            case "Multiple":
+                correct_answer === multipleSelections ? setIsCorrect(true) : setIsCorrect(false);
+            case "Sequential":
+                correct_answer === sequentialSelections ? setIsCorrect(true) : setIsCorrect(false);
+            case "Pluggable":
+                correct_answer === pluggablePairs ? setIsCorrect(true) : setIsCorrect(false);
+            default: 
+                setIsCorrect(false);
+        }
     }
 
     const handlePopUpOpen = () => {
+        if (test_type === "Default") {
+            const correct =
+              typeof correct_answer === "number"
+                ? activeId !== null && activeId === correct_answer
+                : Array.isArray(correct_answer) &&
+                  activeId !== null &&
+                  correct_answer[0] === activeId;
+            setIsCorrect(!!correct);
+        } else if (test_type === "Multiple") {
+            const correct =
+            Array.isArray(correct_answer) &&
+            multipleSelections.length === correct_answer.length &&
+            correct_answer.every(id => multipleSelections.includes(id));
+            setIsCorrect(!!correct);
+        } else if (test_type === "Sequential") {
+            const correct =
+            Array.isArray(correct_answer) &&
+            sequentialSelections.length === correct_answer.length &&
+            correct_answer.every((id, idx) => sequentialSelections[idx] === id);
+            setIsCorrect(!!correct);
+        } else if (test_type === "Pluggable") {
+            // Build user pairs from the mapping { [id]: pairedId }
+            const userPairs: [number, number][] = [];
+            const seen = new Set<number>();
+            Object.keys(pluggablePairs).forEach(k => {
+                const a = parseInt(k);
+                const b = pluggablePairs[a];
+                if (typeof b !== 'number') return;
+                if (seen.has(a) || seen.has(b)) return;
+                const x = Math.min(a, b), y = Math.max(a, b);
+                seen.add(x); seen.add(y);
+                userPairs.push([x, y]);
+            });
+            userPairs.sort((p1, p2) => (p1[0] - p2[0]) || (p1[1] - p2[1]));
+
+            
+            const expectedPairs: [number, number][] = (() => {
+                if (Array.isArray(correct_answer)) {
+                    if (correct_answer.length > 0 && Array.isArray((correct_answer as unknown[])[0])) {
+
+                        const out: [number, number][] = [];
+                        for (const p of correct_answer as unknown[]) {
+                            if (Array.isArray(p) && typeof p[0] === 'number' && typeof p[1] === 'number') {
+                                const x = Math.min(p[0], p[1]);
+                                const y = Math.max(p[0], p[1]);
+                                out.push([x, y]);
+                            }
+                        }
+                        return out.sort((p1, p2) => (p1[0] - p2[0]) || (p1[1] - p2[1]));
+                    }
+                    
+                    const nums = correct_answer as number[];
+                    const out: [number, number][] = [];
+                    for (let i = 0; i + 1 < nums.length; i += 2) {
+                        const x = Math.min(nums[i], nums[i + 1]);
+                        const y = Math.max(nums[i], nums[i + 1]);
+                        out.push([x, y]);
+                    }
+                    return out.sort((p1, p2) => (p1[0] - p2[0]) || (p1[1] - p2[1]));
+                }
+                return [];
+            })();
+
+            const correct = userPairs.length === expectedPairs.length &&
+                userPairs.every((p, i) => p[0] === expectedPairs[i][0] && p[1] === expectedPairs[i][1]);
+
+            setIsCorrect(!!correct);
+        }
         setIsPopUpOpen(true);
     }
+
+    useEffect(() => {
+        setIsPopUpOpen(false);
+    }, [activeId, multipleSelections, sequentialSelections, pluggablePairs])
 
     const getSequentialOrder = (optionId: number): number => {
         return sequentialSelections.indexOf(optionId) + 1;
@@ -290,7 +378,7 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                         </p>
                     }
                 </div>
-            ) : page_type === "test" ? (
+            ) : (page_type === "test" || page_type === "nextTest") ? (
                 <div
                     className="flex flex-col justify-center mx-auto"
                 >
@@ -329,8 +417,8 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                                 icon_name={option.icon_name} 
                                 id={option.id} 
                                 test_type={test_type}
-                                isSelected={isOptionSelected(option.id)} 
-                                onSelect={handleActiveOption}
+                                isSelected={page_type === "nextTest" ? false : isOptionSelected(option.id)} 
+                                onSelect={page_type === "nextTest" ? () => handleNext?.() : handleActiveOption}
                                 getSequentialOrder={getSequentialOrder}
                                 getPluggablePair={getPluggablePair}
                                 classname={clsx(test_grid === "grid-row" && "flex justify-center items-center")}
@@ -346,10 +434,21 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
             )}
             <button
                 onClick={page_type === "test" ? handlePopUpOpen : handleNextPage}
-                disabled={page_type === "test" ? (!activeId || isPopUpOpen) : false}
+                disabled={
+                    page_type === "test"
+                      ? (test_type === "Pluggable"
+                          ? (!hasPluggablePair || isPopUpOpen)
+                          : test_type === "Multiple"
+                            ? (!hasMultipleSelection || isPopUpOpen)
+                            : test_type === "Sequential"
+                              ? (!hasSequentialSelection || isPopUpOpen)
+                              : (!activeId || isPopUpOpen))
+                      : false
+                  }
                 className={clsx(
                     "button-primary rounded-full shadow-lg w-[10rem] mx-auto scale-[1.4] mt-[3vh] mb-[3vh]",
-                    page_type === "test" && !activeId && "disabled:opacity-50"
+                    page_type === "test" && !activeId && "disabled:opacity-50",
+                    page_type === "nextTest" && "hidden" 
                 )}
             >
                 {page_number >= pageLength ? "پایان" : "ادامه"}

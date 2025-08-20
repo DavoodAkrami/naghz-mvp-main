@@ -11,22 +11,18 @@ interface Course {
   order_index: number;
 }
 
-type AnswerDict = {
-  A: number;
-  B: number;
-}
 
 interface CoursePage {
   id: string;
   course_id: string;
   page_number: number;
-  page_type: 'text' | 'test';
+  page_type: 'text' | 'test' | 'nextTest';
   title?: string;
   content?: string;
   question?: string;
   test_type?: 'Default' | 'Multiple' | 'Sequential' | 'Pluggable';
   test_grid?: 'col' | 'grid-2' | 'grid-row';
-  correct_answer?: number[] | number | AnswerDict;
+  correct_answer?: number[] | number;
   page_length: number;
   order_index: number;
   why?: string;

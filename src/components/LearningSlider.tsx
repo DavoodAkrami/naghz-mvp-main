@@ -100,7 +100,7 @@ const LearningSlider: React.FC<LearningPropsType> = (props: LearningPropsType) =
       test_type: page.test_type,
       test_grid: page.test_grid,
       question: page.question,
-      options: opts.map(o => ({ id: parseInt(o.id), text: o.option_text, isCorrect: o.is_correct, icon_name: o.icon_name })),
+      options: opts.map(o => ({ id: o.option_order, text: o.option_text, isCorrect: o.is_correct, icon_name: o.icon_name })),
       correct_answer: page.correct_answer,
       course_id: props.course_id,
       page_number: currentIndex + 1,
