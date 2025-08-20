@@ -444,6 +444,7 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                     }
                     {header &&
                         <h1
+                            style={{ whiteSpace: "pre-line" }}
                             className="text-[3.6rem] max-md:text-[1.8rem] font-extrabold mb-[5vh] text-center"
                         >
                             {header}
@@ -451,6 +452,7 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                     }
                     {text &&
                         <p
+                            style={{ whiteSpace: "pre-line" }}
                             className="text-center text-[1.2rem] font-black text-[var(--accent-color1)]"
                         >
                             {text}
@@ -469,6 +471,7 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                         />
                     }
                     <p 
+                        style={{ whiteSpace: "pre-line" }}
                         className="text-[1.2rem] text-[var(--text-primary)] text-center my-[3vh]"
                     >
                         {header}
@@ -539,7 +542,7 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
             </button>
             {page_type === "test" && 
                 <div 
-                    className="flex justify-center w-[40%] max-lg:w-[60%] mx-auto sticky bottom-[1rem] max-md:w-[100%] max-md:bottom-[0.5rem] max-md:scale-[0.92] z-10"
+className="flex justify-center w-[40%] max-lg:w-[60%] fixed bottom-[1rem] left-0 right-0 mx-auto max-lg:w-[60%] max-md:w-[100%] max-md:bottom-[1rem] max-md:scale-[0.92] z-10"
                 >
                     <PopUp 
                         isCorrect={isCorrect}
