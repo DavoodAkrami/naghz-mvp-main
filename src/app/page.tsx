@@ -137,7 +137,7 @@ const Home = () => {
                     </div>
                 </div>
             </section>
-            {/* <section
+            <section
                 className="bg-[url(/social-proof-background.svg)] bg-[var(--section-color)] text-[var(--text-secondary)]"
             >
                 <div className="min-h-[80vh] flex flex-col justify-center items-center ">
@@ -326,7 +326,7 @@ const Home = () => {
                         </Link>
                     </button>
                 </div>
-            </section> */}
+            </section>
         </div>
     );
 }
