@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "@/store/store";
-import { fetchCourses } from "@/store/slices/courseSlice";
+import { fetchCourses, fetchUserProgress } from "@/store/slices/courseSlice";
 import * as LuIcons from "react-icons/lu";
 
 const getIconComponent = (iconName?: string): typeof LuIcons.LuBrain => {
@@ -17,11 +17,19 @@ const Curses: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState<string | null>(null);
     const router = useRouter();
     const dispatch = useDispatch<AppDispatch>();
-    const { courses, loading, error } = useSelector((state: RootState) => state.course);
+    const { courses, loading, error, userProgress } = useSelector((state: RootState) => state.course);
+    const { user } = useSelector((state: RootState) => state.auth);
 
     useEffect(() => {
         dispatch(fetchCourses());
     }, [dispatch]);
+
+    useEffect(() => {
+        dispatch(fetchCourses());
+        if (user?.id) {
+            dispatch(fetchUserProgress(user.id));
+        }
+    }, [dispatch, user?.id]);
 
     const handleModalOpen = (id: string | null) => {
         setIsModalOpen(id);
@@ -30,6 +38,10 @@ const Curses: React.FC = () => {
     const handleStartOnClick = (slug: string) => {
         router.push(`/courses/${slug}`)
     }
+
+    const isCourseCompleted = (courseId: string): boolean => {
+        return userProgress.some(progress => progress.course_id === courseId);
+    };
 
     if (loading) return (
         <div className="min-h-screen flex items-center justify-center bg-[var(--bg-color)]" dir="rtl">
@@ -60,6 +72,7 @@ const Curses: React.FC = () => {
                             icon={getIconComponent(course.icon_name)}
                             layoutId={course.slug}
                             isActive={course.is_active}
+                            isCompleted={isCourseCompleted(course.id)}
                             onClick={() => handleModalOpen(course.id!)}
                         />
                     ))}

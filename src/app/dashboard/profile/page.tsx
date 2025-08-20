@@ -1,4 +1,5 @@
 "use client"
+import { useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { FiUser, FiMail, FiShield} from "react-icons/fi";
@@ -7,6 +8,7 @@ import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/store/store";
 import { useRouter } from "next/navigation";
 import { logoutUser } from "@/store/slices/authSlice";
+import Modal from "@/components/Modal";
 
 
 
@@ -14,17 +16,22 @@ const Profile = () => {
     const { user, loading, logOutLoading } = useSelector((state: RootState) => state.auth);
     const dispatch = useDispatch<AppDispatch>();
     const router = useRouter();
+    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
     const handleLogOut = () => {
         dispatch(logoutUser());
         router.push('/');
     }
 
+    const handleModalClose = () => {
+        setIsModalOpen(!isModalOpen)
+    }
+
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-[60vh]">
                 <div className="text-center">
-                    <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-[var(--primary-color1)] to-[var(--primary-color2)] rounded-full animate-spin flex items-center justify-center">
+                    <div className="w-16 h-16 mx-auto mb-4 bg-[var(--primary-color1)] rounded-full animate-spin flex items-center justify-center">
                         <FiUser className="w-8 h-8 text-[var(--primary-color4)]" />
                     </div>
                     <p className="text-lg text-[var(--text-secondary)]">در حال بارگذاری...</p>
@@ -49,10 +56,10 @@ const Profile = () => {
     return (
         <div className="space-y-8 p-12" dir="rtl">
             <div className="text-center mb-8">
-                <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-[var(--primary-color1)] to-[var(--primary-color2)] rounded-3xl mb-6 shadow-2xl">
+                <div className="inline-flex items-center justify-center w-20 h-20 bg-[var(--primary-color1)] rounded-3xl mb-6 shadow-2xl">
                     <FiUser className="w-10 h-10 text-[var(--primary-color4)]" />
                 </div>
-                <h1 className="text-4xl font-bold text-[var(--text-primary)] mb-4 bg-gradient-to-r from-[var(--primary-color1)] to-[var(--primary-color2)] bg-clip-text text-transparent">
+                <h1 className="text-4xl font-bold text-[var(--text-primary)] mb-4 bg-[var(--primary-color1)] bg-clip-text">
                     پروفایل کاربری
                 </h1>
                 <p className="text-lg text-[var(--text-secondary)] max-w-2xl mx-auto">
@@ -69,7 +76,7 @@ const Profile = () => {
                         transition={{ duration: 0.5 }}
                     >
                         <div className="relative inline-block mb-6">
-                            <div className="w-32 h-32 bg-gradient-to-br from-[var(--primary-color1)] to-[var(--primary-color2)] rounded-full flex items-center justify-center shadow-lg mx-auto">
+                            <div className="w-32 h-32 bg-[var(--primary-color1)] rounded-full flex items-center justify-center shadow-lg mx-auto">
                                 <FiUser className="w-16 h-16 text-[var(--primary-color4)]" />
                             </div>
                         </div>
@@ -79,8 +86,8 @@ const Profile = () => {
                         </h2>
 
                         <div className={user.user_metadata?.role === 'admin' 
-                            ? "inline-flex items-center gap-2 bg-gradient-to-r from-[var(--primary-color1)] to-[var(--primary-color2)] text-[var(--primary-color4)] px-4 py-2 rounded-full text-sm font-semibold"
-                            : "inline-flex items-center gap-2 bg-gradient-to-r from-[var(--accent-color1)] to-[var(--accent-color2)] text-[var(--text-primary)] px-4 py-2 rounded-full text-sm font-semibold"
+                            ? "inline-flex items-center gap-2 bg-[var(--primary-color1)] text-[var(--primary-color4)] px-4 py-2 rounded-full text-sm font-semibold"
+                            : "inline-flex items-center gap-2 bg-[var(--accent-color1)] text-[var(--text-primary)] px-4 py-2 rounded-full text-sm font-semibold"
                         }>
                             <FiShield className="w-4 h-4" />
                             {user.user_metadata?.role === 'admin' ? 'مدیر' : 'کاربر'}
@@ -119,8 +126,11 @@ const Profile = () => {
                         </div>
                     </motion.div>
                     <motion.button
-                        onClick={handleLogOut}
-                        className="w-[100%] font-semibold cursor-pointer bg-gradient-to-r from-[var(--primary-color1)] to-[var(--primary-color2)] rounded-2xl py-[1.4rem] shadow-2xl text-[var(--primary-color4)] hover:shadow-lg transition-all duration-150"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: 0.1 }}
+                        onClick={() => setIsModalOpen(true)}
+                        className="w-[100%] flex justify-center items-center font-semibold cursor-pointer bg-[var(--primary-color1)] rounded-2xl py-[1.4rem] shadow-2xl text-[var(--primary-color4)] hover:shadow-lg transition-all duration-150"
                     >
                         {logOutLoading ?
                             (<svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -129,6 +139,38 @@ const Profile = () => {
                             </svg>) : ("خروج از حساب کاربری")
                         }
                     </motion.button>
+                    <Modal
+                        onClose={handleModalClose}
+                        onOpen={isModalOpen}
+
+                    >
+                        <div
+                            className="text-center text-[2rem] font-bold mb-[2rem]"
+                        >
+                            آیا از خروج خود اطمینان دارید؟  
+                        </div>
+                        <div
+                            className="flex items-center gap-[0.8rem]"
+                        >
+                            <button
+                                onClick={handleModalClose}
+                                className="w-[100%] flex justify-center items-center font-semibold cursor-pointer bg-[var(--primary-color1)] rounded-2xl py-[1.4rem] shadow-2xl text-[var(--primary-color4)] hover:shadow-lg transition-all duration-150"
+                            > 
+                                بازگشت
+                            </button>
+                            <button
+                                onClick={handleLogOut}
+                                className="w-[100%] flex justify-center items-center font-semibold cursor-pointer bg-[var(--primary-color1)] rounded-2xl py-[1.4rem] shadow-2xl text-[var(--primary-color4)] hover:shadow-lg transition-all duration-150"
+                            >
+                                {logOutLoading ?
+                                    (<svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>) : ("خروج از حساب کاربری")
+                                }
+                            </button>
+                        </div>
+                    </Modal>
                 </div>
             </div>
         </div>

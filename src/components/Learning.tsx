@@ -4,6 +4,10 @@ import React, { useEffect, useState} from "react";
 import { useRouter } from "next/navigation";
 import PopUp from "./PopUp";
 import Modal from "./Modal";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/store/store";
+import { saveProgress } from "@/store/slices/courseSlice";
+
 
 export interface options {
     id: number;
@@ -46,7 +50,7 @@ interface OptionCardProps {
 
 const OptionCard: React.FC<OptionCardProps> = ({ icon_name, answer, id, test_type="Default", isSelected, onSelect, getSequentialOrder, getPluggablePair, classname }) => {
     const getCardStyle = () => {
-        const baseStyle = "px-[2rem] py-[1rem] rounded-full border-[2px] box-border cursor-pointer flex justify-between items-center transition-all duration-200 shadow-sm";
+        const baseStyle = "px-[2rem] py-[1.4rem] rounded-full border-[2px] box-border cursor-pointer flex justify-between items-center transition-all duration-200 shadow-sm box-border  max-md:scale-[0.85]";
         
         switch (test_type) {
             case "Default":
@@ -83,9 +87,9 @@ const OptionCard: React.FC<OptionCardProps> = ({ icon_name, answer, id, test_typ
             onClick={() => onSelect(id)}
             className={clsx(getCardStyle(), classname)}
         >
-            <div className="flex items-center gap-[0.8rem]">
+            <div className="flex items-center text-center gap-[0.8rem]">
                 {icon_name && <span className="text-[1.2rem]">📝</span>}
-                <p className="font-medium text-[1.1rem]">{answer}</p>
+                <p className="font-medium text-[1.4rem] text-center">{answer}</p>
             </div>
             <div className="flex items-center gap-[0.5rem]">
                 {test_type === "Sequential" && isSelected && getSequentialOrder && (
@@ -121,6 +125,12 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
     const hasPluggablePair = Object.values(pluggablePairs).some(v => v !== undefined);
     const hasMultipleSelection = multipleSelections.length > 0;
     const hasSequentialSelection = sequentialSelections.length > 0;
+
+    const dispatch = useDispatch<AppDispatch>();
+    const { user } = useSelector((state: RootState) => state.auth);
+    const { userProgress } = useSelector((state: RootState) => state.course);
+
+    const isCompleted = userProgress.some(progress => progress.course_id === course_id);
 
     useEffect(() => {
         if (activeId) {
@@ -202,7 +212,10 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
     };
 
     const handleNextPage = () => {
-        if (page_number >= pageLength) router.push("/courses");
+        if (page_number >= pageLength) {
+            router.push("/courses")
+            if (!isCompleted) dispatch(saveProgress({ courseId: course_id, userId: user?.id || '' }))
+        }
         else handleNext?.();
     };
 
@@ -485,10 +498,10 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                     {options && 
                         <div
                             className={clsx(
-                                "w-[80%] mx-auto",
-                                test_grid === "col" ? "flex flex-col gap-[1.5rem]" : 
-                                test_grid === "grid-2" ? "grid grid-cols-2 gap-[1.5rem]" :
-                                test_grid === "grid-row" ? "grid grid-rows-1 gap-[1.5rem]": 
+                                "w-[50vw] mx-auto max-md:w-[80vw]",
+                                test_grid === "col" ? "flex flex-col gap-[1.5rem] max-md:gap-[1rem] min-w-[40vw] max-md:min-w-[70vw]" : 
+                                test_grid === "grid-2" ? "grid grid-cols-2 gap-[1.5rem] max-md:gap-[1rem] min-[30vw] max-md:main-w-[20vw]" :
+                                test_grid === "grid-row" ? "grid grid-rows-1 gap-[1.5rem] max-md:gap-[1rem] min-w-[20vw] max-md:flex max-md:flex-col": 
                                 "bg-red"
                             )}
                             style={
@@ -542,7 +555,7 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
             </button>
             {page_type === "test" && 
                 <div 
-className="flex justify-center w-[40%] max-lg:w-[60%] fixed bottom-[1rem] left-0 right-0 mx-auto max-lg:w-[60%] max-md:w-[100%] max-md:bottom-[1rem] max-md:scale-[0.92] z-10"
+                    className="flex justify-center w-[40%] max-lg:w-[60%] fixed bottom-[1rem] left-0 right-0 mx-auto max-md:w-[100%] max-md:bottom-[1rem] max-md:scale-[0.92] z-10"
                 >
                     <PopUp 
                         isCorrect={isCorrect}

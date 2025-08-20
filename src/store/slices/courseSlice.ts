@@ -42,13 +42,7 @@ interface UserProgress {
   id: string;
   user_id: string;
   course_id: string;
-  current_page: number;
-  completed_pages: number[];
-  // TODO: Replace 'unknown' with a specific type for test_results if possible
-  test_results: unknown;
-  started_at: string;
-  last_accessed: string;
-  completed_at?: string;
+  completed_at: string;
 }
 
 interface TestAttempt {
@@ -189,23 +183,53 @@ export const fetchPageOptions = createAsyncThunk(
 
 export const saveProgress = createAsyncThunk(
   'course/saveProgress',
-  async ({ courseId, pageNumber, testAnswers }: { courseId: string; pageNumber: number; testAnswers?: unknown }) => {
+  async ({ courseId, userId }: { courseId: string; userId: string }) => {
     if (!supabase) throw new Error('Supabase not configured');
     
     const { data, error } = await supabase
       .from('user_progress')
       .upsert({
+        user_id: userId,
         course_id: courseId,
-        current_page: pageNumber,
-        completed_pages: [pageNumber],
-        test_results: testAnswers || {},
-        last_accessed: new Date().toISOString(),
+        completed_at: new Date().toISOString(),
       })
       .select()
       .single();
     
     if (error) throw error;
     return data;
+  }
+);
+
+export const fetchUserProgress = createAsyncThunk(
+  'course/fetchUserProgress',
+  async (userId: string) => {
+    if (!supabase) throw new Error('Supabase not configured');
+    
+    const { data, error } = await supabase
+      .from('user_progress')
+      .select('*')
+      .eq('user_id', userId);
+    
+    if (error) throw error;
+    return data || [];
+  }
+);
+
+export const checkCourseCompletion = createAsyncThunk(
+  'course/checkCourseCompletion',
+  async ({ courseId, userId }: { courseId: string; userId: string }) => {
+    if (!supabase) throw new Error('Supabase not configured');
+    
+    const { data, error } = await supabase
+      .from('user_progress')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('course_id', courseId)
+      .single();
+    
+    if (error && error.code !== 'PGRST116') throw error;
+    return data || null;
   }
 );
 
@@ -402,7 +426,6 @@ const courseSlice = createSlice({
           isCorrect: result.is_correct,
           correctAnswers: result.correct_answers || [],
           explanation: result.explanation || '',
-          // TODO: Replace 'unknown' with a specific type for userAnswers if possible
           userAnswers: state.currentTestAnswers,
         };
         state.showTestResult = true;
@@ -411,6 +434,18 @@ const courseSlice = createSlice({
       .addCase(submitTest.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || 'Failed to submit test';
+      })
+      .addCase(fetchUserProgress.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchUserProgress.fulfilled, (state, action) => {
+        state.loading = false;
+        state.userProgress = action.payload;
+      })
+      .addCase(fetchUserProgress.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || 'Failed to fetch user progress';
       });
   },
 });
