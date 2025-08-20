@@ -106,6 +106,7 @@ const LearningSlider: React.FC<LearningPropsType> = (props: LearningPropsType) =
       page_number: currentIndex + 1,
       pageLength: pages.length || props.pageLength,
       image: page.image,
+      why: page.why
     };
   }, [pages, currentIndex, optionsByPageId, props.course_id, props.pageLength]);
 

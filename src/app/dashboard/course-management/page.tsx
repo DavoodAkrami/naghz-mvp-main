@@ -29,6 +29,7 @@ interface PageFormData {
   page_length: number;
   order_index: number;
   image?: string;
+  why?: string | null;
 }
 
 interface OptionFormData {
@@ -71,12 +72,14 @@ export default function CourseManagement() {
     correct_answer: [],
     page_length: 1,
     order_index: 0,
-    image: ''
+    image: '',
+    why: null
   });
   const [optionsByPage, setOptionsByPage] = useState<Record<number, OptionFormData[]>>({});
   const [showOptionsModal, setShowOptionsModal] = useState(false);
   const [originalPageIds, setOriginalPageIds] = useState<string[]>([]);
   const [imagesByPage, setImagesByPage] = useState<Record<number, File | null>>({});
+  const [editLoading, setEditLoading] = useState<boolean>(false);
 
   // Converts the UI's number[] into DB JSONB per test type
   const toDbCorrectAnswer = (
@@ -198,6 +201,7 @@ export default function CourseManagement() {
   };
 
   const handleEditCourse = async () => {
+    setEditLoading(true);
     try {
       if (!supabase || !selectedCourse) throw new Error('Supabase not configured or no course selected');
 
@@ -235,6 +239,7 @@ export default function CourseManagement() {
               image: page.image,
               page_length: page.page_length,
               order_index: page.order_index,
+              why: page.why
             })
             .eq('id', pageId);
         } else {
@@ -322,6 +327,8 @@ export default function CourseManagement() {
       dispatch(fetchCourses());
     } catch (error) {
       console.error('Error updating course:', error);
+    } finally {
+      setEditLoading(false);
     }
   };
 
@@ -705,6 +712,15 @@ export default function CourseManagement() {
                             <option value="grid-2">شبکه 2 ستونه</option>
                             <option value="grid-row">شبکه سطری</option>
                           </select>
+                        </div>
+                        <div className="col-span-2">
+                          <label className="block text-sm font-medium mb-2">دلیل</label>
+                          <textarea
+                            value={page.why || ''}
+                            onChange={(e) => updatePage(index, { why: e.target.value })}
+                            className="w-full p-2 border rounded"
+                            rows={3}
+                          />
                         </div>
                         <div>
                           <label className="block text-sm font-medium mb-2">پاسخ صحیح</label>
@@ -1092,6 +1108,15 @@ export default function CourseManagement() {
                             <option value="grid-row">شبکه سطری</option>
                           </select>
                         </div>
+                        <div className="col-span-2">
+                          <label className="block text-sm font-medium mb-2">دلیل</label>
+                          <textarea
+                            value={page.why || ''}
+                            onChange={(e) => updatePage(index, { why: e.target.value })}
+                            className="w-full p-2 border rounded"
+                            rows={3}
+                          />
+                        </div>
                         <div>
                           <label className="block text-sm font-medium mb-2">پاسخ صحیح</label>
                           {page.test_type === 'Default' && (
@@ -1291,8 +1316,9 @@ export default function CourseManagement() {
               <button
                 onClick={handleEditCourse}
                 className="px-6 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700"
+                disabled={editLoading}
               >
-                ذخیره تغییرات
+                {editLoading ? 'در حال ذخیره تغییرات...' : 'ذخیره تغییرات'}
               </button>
             </div>
           </div>

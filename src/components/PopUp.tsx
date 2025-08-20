@@ -34,7 +34,7 @@ const PopUp: React.FC<PopUpProps> = ({ isCorrect, onNext, onRetry, onWhy, onCorr
                 >
                     <button
                         className="button-primary rounded-full max-md:scale-[0.9]"
-                        onClick={isCorrect ? onNext : onWhy}
+                        onClick={isCorrect ? onNext : onCorrectAnswer}
                     >   
                         {isCorrect ? "ادامه" : "؟جواب درست"}
                     </button>

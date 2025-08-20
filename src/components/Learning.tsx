@@ -3,6 +3,7 @@ import clsx from "clsx";
 import React, { useEffect, useState} from "react";
 import { useRouter } from "next/navigation";
 import PopUp from "./PopUp";
+import Modal from "./Modal";
 
 export interface options {
     id: number;
@@ -27,6 +28,7 @@ export interface LearningPropsType {
     handleNext?: () => void;
     handlePrev?: () => void;
     image?: string;
+    why?: string | null;
 }
 
 
@@ -102,7 +104,7 @@ const OptionCard: React.FC<OptionCardProps> = ({ icon_name, answer, id, test_typ
 }
 
 
-const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, header, test_type="Default", test_grid= "col", options, question, correct_answer, course_id, page_number, pageLength, handleNext, handlePrev, image}) => {
+const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, header, test_type="Default", test_grid= "col", options, question, correct_answer, course_id, page_number, pageLength, handleNext, handlePrev, image, why}) => {
     const router = useRouter();
 
     const [activeId, setActiveId] = useState<number | null>(null);
@@ -111,6 +113,10 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
     const [pluggablePairs, setPluggablePairs] = useState<{[key: number]: number | undefined}>({});
     const [isCorrect, setIsCorrect] = useState<boolean>(false);
     const [isPopUpOpen, setIsPopUpOpen] = useState<boolean>(false);
+    const [isCorrecrAnswerModalOpen, setIsCorrecrAnswerModalOpen] = useState<boolean>(false);
+    const [correctModalContent, setCorrectModalContent] = useState<string>("");
+    const [isWhyModalOpen, setIsWhyModalOpen] = useState<boolean>(false);
+    const [whyModalContent, setWhyModalContent] = useState<string>("");
 
     const hasPluggablePair = Object.values(pluggablePairs).some(v => v !== undefined);
     const hasMultipleSelection = multipleSelections.length > 0;
@@ -202,25 +208,98 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
 
     const handleRetry = () => {
         setIsPopUpOpen(false);
-        setActiveId(null);
+        switch (test_type) {
+            case "Default":
+                setActiveId(null);
+                break;
+            case "Multiple":
+                setMultipleSelections([]);
+                break;
+            case "Sequential":
+                setSequentialSelections([]);
+                break;
+            case "Pluggable":
+                setPluggablePairs({});
+                break;
+            default:
+                setActiveId(null);
+                break;
+        }
     }
 
     const handleWhy = () => {
-        //TODO: show why
+        setIsWhyModalOpen(true);
+        setWhyModalContent(why || "");
     }
 
     const handleCorrectAnswer = () => {
+        setIsCorrecrAnswerModalOpen(true);
         switch (test_type) {
-            case "Default":
-                correct_answer === activeId ? setIsCorrect(true) : setIsCorrect(false);
-            case "Multiple":
-                correct_answer === multipleSelections ? setIsCorrect(true) : setIsCorrect(false);
-            case "Sequential":
-                correct_answer === sequentialSelections ? setIsCorrect(true) : setIsCorrect(false);
-            case "Pluggable":
-                correct_answer === pluggablePairs ? setIsCorrect(true) : setIsCorrect(false);
-            default: 
-                setIsCorrect(false);
+            case "Default": {
+                const id = typeof correct_answer === 'number'
+                    ? correct_answer
+                    : Array.isArray(correct_answer) && typeof correct_answer[0] === 'number'
+                        ? correct_answer[0]
+                        : undefined;
+                const text = id !== undefined
+                    ? (options?.find(option => option.id === id)?.text || String(id))
+                    : "";
+                setCorrectModalContent(text);
+                break;
+            }
+            case "Multiple": {
+                const ids = Array.isArray(correct_answer)
+                    ? correct_answer
+                    : typeof correct_answer === 'number'
+                        ? [correct_answer]
+                        : [];
+                const texts = ids.map((id) => options?.find((o) => o.id === id)?.text || String(id));
+                setCorrectModalContent(texts.join(", ") || "");
+                break;
+            }
+            case "Sequential": {
+                const ids = Array.isArray(correct_answer)
+                    ? correct_answer
+                    : typeof correct_answer === 'number'
+                        ? [correct_answer]
+                        : [];
+                const texts = ids.map((id) => options?.find((o) => o.id === id)?.text || String(id));
+                setCorrectModalContent(texts.join(", ") || "");
+                break;
+            }
+            case "Pluggable": {
+                // Normalize correct_answer into pairs
+                const pairs: [number, number][] = (() => {
+                    if (Array.isArray(correct_answer)) {
+                        if (correct_answer.length > 0 && Array.isArray((correct_answer as unknown[])[0])) {
+                            const out: [number, number][] = [];
+                            for (const p of correct_answer as unknown[]) {
+                                if (Array.isArray(p) && typeof p[0] === 'number' && typeof p[1] === 'number') {
+                                    out.push([p[0], p[1]]);
+                                }
+                            }
+                            return out;
+                        }
+                        const nums = correct_answer as number[];
+                        const out: [number, number][] = [];
+                        for (let i = 0; i + 1 < nums.length; i += 2) {
+                            out.push([nums[i], nums[i + 1]]);
+                        }
+                        return out;
+                    }
+                    return [];
+                })();
+                const texts = pairs.map(([a, b]) => {
+                    const ta = options?.find(o => o.id === a)?.text || String(a);
+                    const tb = options?.find(o => o.id === b)?.text || String(b);
+                    return `${ta} - ${tb}`;
+                });
+                setCorrectModalContent(texts.join(", ") || "");
+                break;
+            }
+            default:
+                setCorrectModalContent("");
+                break;
         }
     }
 
@@ -455,7 +534,7 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
             </button>
             {page_type === "test" && 
                 <div 
-                    className="w-[40%] max-lg:w-[60%] mx-auto absolute bottom-[1rem] left-[50%] translate-x-[-50%] max-md:w-[110%] max-md:bottom-[0.5rem] max-md:scale-[0.92]"
+                    className="w-[40%] max-lg:w-[60%] mx-auto sticky bottom-[1rem] left-[50%] translate-x-[-50%] max-md:w-[110%] max-md:bottom-[0.5rem] max-md:scale-[0.92] z-10"
                 >
                     <PopUp 
                         isCorrect={isCorrect}
@@ -467,6 +546,35 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                     />
                 </div>
             }
+            <Modal
+                onOpen={isCorrecrAnswerModalOpen}
+                onClose={() => setIsCorrecrAnswerModalOpen(false)}
+            >
+                <div className="text-center">
+                    <h1
+                        className={clsx(
+                            "text-[2rem] font-bold",
+                            isCorrect ? "text-[var(--secondary-color1)]" : "text-[var(--secondary-color2)]"
+                        )}
+                    >
+                        {isCorrect ? "جواب درست" : "جواب اشتباه"}
+                    </h1>
+                    <p className="text-[1.5rem]">
+                        جواب درست: {correctModalContent}
+                    </p>
+                </div>
+            </Modal>
+            <Modal
+                onOpen={isWhyModalOpen}
+                onClose={() => setIsWhyModalOpen(false)}
+            >
+                <div className="text-center">
+                    <h1 className="text-[2rem] font-bold">دلیل</h1>
+                </div>
+                <p className="text-[1.5rem]">
+                    {whyModalContent}
+                </p>
+            </Modal>
         </div>
     )
 }
