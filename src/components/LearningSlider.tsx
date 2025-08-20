@@ -16,6 +16,7 @@ type DbPage = {
   test_grid?: "col" | "grid-2" | "grid-row";
   correct_answer?: number[];
   image?: string;
+  why?: string | null;
 };
 
 type DbOption = {
@@ -106,7 +107,7 @@ const LearningSlider: React.FC<LearningPropsType> = (props: LearningPropsType) =
       page_number: currentIndex + 1,
       pageLength: pages.length || props.pageLength,
       image: page.image,
-      why: page.why
+      why: page.why || null
     };
   }, [pages, currentIndex, optionsByPageId, props.course_id, props.pageLength]);
 
