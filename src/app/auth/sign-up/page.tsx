@@ -85,7 +85,7 @@ const SignupPage = () => {
                 password: formData.password,
                 full_name: formData.full_name || undefined,
             })).unwrap();
-            router.push('/');
+            router.push('/courses');
         } catch (error) {
             console.error('Signup failed:', error);
         }

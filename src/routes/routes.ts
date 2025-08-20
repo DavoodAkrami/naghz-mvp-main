@@ -31,12 +31,12 @@ const routes: routesType[]= [
     {
         name: "اطلاعات اکانت",
         path: "/dashboard/account-info",
-        profilePage: true
+        profilePage: false
     },
     {
         name: "دوره‌های من",
         path: "/dashboard/my-curses",
-        profilePage: true
+        profilePage: false
     },
     {
         name: "دوره‌ها",
@@ -56,14 +56,14 @@ export const dashboardPages: routesType[] = [
         name: "پروفایل",
         path: "/dashboard/profile",
     },
-    {
-        name: "اطلاعات اکانت",
-        path: "/dashboard/account-info"
-    },
-    {
-        name: "دوره‌های من",
-        path: "/dashboard/my-curses"
-    },
+    // {
+    //     name: "اطلاعات اکانت",
+    //     path: "/dashboard/account-info"
+    // },
+    // {
+    //     name: "دوره‌های من",
+    //     path: "/dashboard/my-curses"
+    // },
     {
         name: "مدیریت دوره‌ها",
         path: "/dashboard/course-management",

@@ -76,7 +76,7 @@ const LogInPage = () => {
                 email: formData.email,
                 password: formData.password,
             })).unwrap();
-            router.push('/');
+            router.push('/courses');
         } catch (error) {
             console.error('Signup failed:', error);
         }

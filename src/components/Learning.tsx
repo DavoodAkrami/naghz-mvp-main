@@ -468,43 +468,48 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                             className="max-h-[70vh] max-w-[80%] max-md:max-w-[95%] max-md:max-h-max mx-auto object-cover rounded-xl mb-6"
                         />
                     }
-                    
+                    <p 
+                        className="text-[1.2rem] text-[var(--text-primary)] text-center my-[3vh]"
+                    >
+                        {header}
+                    </p>
                     <p
                         className="text-[2rem] font-bold mb-[5vh] text-center max-md:max-w-[95%] mx-auto"
                     >
                         {question}
                     </p>
                     {getTestTypeIndicator()}
-                    <div
-                        className={clsx(
-                            "w-[80%] mx-auto",
-                            test_grid === "col" ? "flex flex-col gap-[1.5rem]" : 
-                            test_grid === "grid-2" ? "grid grid-cols-2 gap-[1.5rem]" :
-                            test_grid === "grid-row" ? "grid grid-rows-1 gap-[1.5rem]": 
-                            "bg-red"
-                        )}
-                        style={
-                            test_grid === "grid-row"
-                                ? { gridTemplateColumns: `repeat(${Math.max(1, options?.length || 1)}, minmax(0, 1fr))` }
-                                : undefined
-                        }
-                    >
-                        {options?.map((option, index) => (
-                            <OptionCard 
-                                key={index} 
-                                answer={option.text} 
-                                icon_name={option.icon_name} 
-                                id={option.id} 
-                                test_type={test_type}
-                                isSelected={page_type === "nextTest" ? false : isOptionSelected(option.id)} 
-                                onSelect={page_type === "nextTest" ? () => handleNext?.() : handleActiveOption}
-                                getSequentialOrder={getSequentialOrder}
-                                getPluggablePair={getPluggablePair}
-                                classname={clsx(test_grid === "grid-row" && "flex justify-center items-center")}
-                            />
-                        ))}
-                    </div>
-
+                    {options && 
+                        <div
+                            className={clsx(
+                                "w-[80%] mx-auto",
+                                test_grid === "col" ? "flex flex-col gap-[1.5rem]" : 
+                                test_grid === "grid-2" ? "grid grid-cols-2 gap-[1.5rem]" :
+                                test_grid === "grid-row" ? "grid grid-rows-1 gap-[1.5rem]": 
+                                "bg-red"
+                            )}
+                            style={
+                                test_grid === "grid-row"
+                                    ? { gridTemplateColumns: `repeat(${Math.max(1, options?.length || 1)}, minmax(0, 1fr))` }
+                                    : undefined
+                            }
+                        >
+                            {options?.map((option, index) => (
+                                <OptionCard 
+                                    key={index} 
+                                    answer={option.text} 
+                                    icon_name={option.icon_name} 
+                                    id={option.id} 
+                                    test_type={test_type}
+                                    isSelected={page_type === "nextTest" ? false : isOptionSelected(option.id)} 
+                                    onSelect={page_type === "nextTest" ? () => handleNext?.() : handleActiveOption}
+                                    getSequentialOrder={getSequentialOrder}
+                                    getPluggablePair={getPluggablePair}
+                                    classname={clsx(test_grid === "grid-row" && "flex justify-center items-center")}
+                                />
+                            ))}
+                        </div>
+                    }
                 </div>
             ) : (
                 <div>
@@ -527,14 +532,14 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                 className={clsx(
                     "button-primary rounded-full shadow-lg w-[10rem] mx-auto scale-[1.4] mt-[3vh] mb-[3vh]",
                     page_type === "test" && !activeId && "disabled:opacity-50",
-                    page_type === "nextTest" && "hidden" 
+                    page_type === "nextTest" && options && "hidden" 
                 )}
             >
                 {page_number >= pageLength ? "پایان" : "ادامه"}
             </button>
             {page_type === "test" && 
                 <div 
-                    className="w-[40%] max-lg:w-[60%] mx-auto sticky bottom-[1rem] left-[50%] translate-x-[-50%] max-md:w-[110%] max-md:bottom-[0.5rem] max-md:scale-[0.92] z-10"
+                    className="flex justify-center w-[40%] max-lg:w-[60%] mx-auto sticky bottom-[1rem] max-md:w-[100%] max-md:bottom-[0.5rem] max-md:scale-[0.92] z-10"
                 >
                     <PopUp 
                         isCorrect={isCorrect}

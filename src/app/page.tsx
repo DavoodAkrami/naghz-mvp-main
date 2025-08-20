@@ -88,19 +88,16 @@ const Home = () => {
                         preload="auto"
                     />
                 </div>
-                <h1
+                {/* <h1
                     className="font-[750] text-[4rem] max-[1200px]:font-[700] max-md:text-[2.4rem] text-center py-[5vh] text-[var(--text-proimary)] max-w-[90%]"
                 >
                     با میکرو تمرین‌های 10 دقیقه‌ای — وضوح، تمرکز و آرامش بساز
-                </h1>
-                <p
-                    className="text-[1.6rem] max-w-[70%] mx-auto max-md:text-[1.2rem] text-center  mb-[1rem]"
+                </h1> */}
+                <h1
+                    className="text-[1.8rem] max-w-[70%] mx-auto max-md:text-[1.2rem] text-center mb-[1rem] font-bold"
                 >
-                    گاهی فقط چند دقیقه سکوت،
-                    کافیه تا چیزی درونت تکون بخوره
-                    تمرین‌هایی ساده، کوتاه، و اثرگذار.
-                    با نغز فقط یاد نمی‌گیری — تغییر می‌کنی.
-                </p>
+                    روشی رایگان موثر و تعاملی برای یادگیری مهارتهای نرم  
+                </h1>
                 <button
                     className="button-primary rounded-full mt-[2rem] shadow md:scale-[1.5] max-md:scale-[1.3] mb-[10vh]"
                 >

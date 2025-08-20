@@ -6,6 +6,8 @@ import { fetchCourses, uploadPageImage } from "@/store/slices/courseSlice";
 import { supabase } from "@/config/supabase";
 import { FiPlus, FiEdit, FiTrash2 } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
+import { FaTrash } from "react-icons/fa";
+
 
 interface CourseFormData {
   slug: string;
@@ -1057,7 +1059,15 @@ export default function CourseManagement() {
                             className="w-full p-2 border rounded"
                           />
                           {page.image && (
-                            <img src={page.image} alt="preview" className="mt-2 max-h-40 rounded" />
+                            <span className="relative block">
+                              <img src={page.image} alt="preview" className="mt-2 max-h-40 rounded" />
+                              <FaTrash className="text-red-500 hover:text-red-700 absolute top-2 right-2 z-10 cursor-pointer"
+                                onClick={() => {
+                                  setImagesByPage(prev => ({ ...prev, [index]: null }));
+                                  updatePage(index, { image: '' });
+                                }} 
+                              />
+                            </span>
                           )}
                     </div>
                     {page.page_type === 'text' ? (

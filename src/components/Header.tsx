@@ -153,7 +153,7 @@ const Header = () => {
                     className="top-0 shadow-lg sticky bg-[var(--bg-color)] z-1000 px-[1.8rem] py-[1rem] flex items-center justify-between"
                 >
                     <IoArrowBackCircleOutline 
-                        onClick={() => router.back()}
+                        onClick={() => router.push("/")}
                         className="text-[4rem] text-[var(--accent-color1)] rounded-full hover:bg-[var(--accent-color1)] hover:text-[var(--primary-color4)] cursor-pointer transition-all duration-300"
                     />
                     {pathName.includes("/dashboard") &&
