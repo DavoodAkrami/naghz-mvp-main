@@ -3,8 +3,6 @@ import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "@/store/store";
 import { logoutUser } from "@/store/slices/authSlice";
 import { useRouter } from "next/navigation";
-import Modal from "@/components/Modal";
-import { useState } from "react";
 import { motion } from "framer-motion";
 
 
@@ -13,15 +11,10 @@ const AccountInfo = () => {
     const router = useRouter();
     const { user, loading, logOutLoading } = useSelector((state: RootState) => state.auth);
     const dispatch = useDispatch<AppDispatch>();
-    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
     const handleLogOut = () => {
         dispatch(logoutUser());
         router.push('/');
-    }
-
-    const handleModalOpen = () => {
-        setIsModalOpen(!isModalOpen);
     }
 
     return (
@@ -51,11 +44,6 @@ const AccountInfo = () => {
                     </svg>
                 }
             </motion.button>
-            {isModalOpen &&
-                <Modal layoutId="logout" onClose={handleModalOpen}>
-                    از خروج خود اطمینان دارید؟
-                </Modal>
-            }
         </div>
     );
 }

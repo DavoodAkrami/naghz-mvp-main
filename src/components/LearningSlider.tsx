@@ -8,7 +8,7 @@ import { supabase } from "@/config/supabase";
 type DbPage = {
   id: string;
   page_number: number;
-  page_type: "text" | "test";
+  page_type: "text" | "test" | "nextTest";
   title?: string;
   content?: string;
   question?: string;
