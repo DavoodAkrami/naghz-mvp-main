@@ -71,7 +71,7 @@ const Home = () => {
                     className="flex flex-col items-center"
                 >
                     <div 
-                        className="my-0 px-[4vw]"
+                        className="my-0 px-[4vw] mx-auto flex justify-center items-center"
                     >
                         <video 
                             src="/naghz-main-page-laptop.webm"
@@ -83,7 +83,7 @@ const Home = () => {
                         />
                         <video 
                             src="/naghz-landing-do-it-mobile.webm" 
-                            className="md:hidden"
+                            className="md:hidden mr-[1rem]"
                             autoPlay
                             muted
                             playsInline
@@ -209,7 +209,7 @@ const Home = () => {
                         className="px-8 flex flex-col justify-center col-start-5 col-end-8 max-md:w-[90%] z-2"
                     >
                         <h1
-                            className="h1 max-w-[40vw] max-[1300px]:max-w-[60vw] max-[550px]:max-w-[80vw] max-[400px]:max-w-[80vw]"
+                            className="h1 max-w-[40vw] max-[1300px]:max-w-[60vw] max-[550px]:max-w-[80vw] max-[400px]:max-w-[80vw] max-md:mt-[5vh]"
                         >
                             تلاشی که تغییرت میده: تمرین، تامل، تکرار
                         </h1>
@@ -244,7 +244,7 @@ const Home = () => {
                         className="px-8 flex flex-col justify-center col-start-2 col-end-5 max-md:w-[90%]"
                     >
                         <h1
-                            className="h1 max-w-[40vw] max-[1300px]:max-w-[60vw] max-[550px]:max-w-[80vw] max-[400px]:max-w-[80vw]"
+                            className="h1 max-w-[40vw] max-[1300px]:max-w-[60vw] max-[550px]:max-w-[80vw] max-[400px]:max-w-[80vw] max-md:mt-[5vh]"
                         >
                             انگیزه‌ای که پایداره:  کوچیک شروع کن، ادامه بده، فرقش رو حس کن        
                         </h1>
@@ -273,7 +273,7 @@ const Home = () => {
                         className="px-8 flex flex-col justify-center col-start-5 col-end-8 max-md:w-[90%] z-2"
                     >
                         <h1
-                            className="h1 max-w-[40vw] max-[1300px]:max-w-[60vw] max-[550px]:max-w-[80vw] max-[400px]:max-w-[80vw]"
+                            className="h1 max-w-[40vw] max-[1300px]:max-w-[60vw] max-[550px]:max-w-[80vw] max-[400px]:max-w-[80vw] max-md:mt-[5vh]"
                         >
                             برای زندگی‌های واقعی:  مهم نیست کی هستی، کجای راهی
                         </h1>

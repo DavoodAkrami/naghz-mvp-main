@@ -78,26 +78,26 @@ const Curses: React.FC = () => {
                     ))}
                 </AnimatePresence>
                 <div
-                    className="flex gap-[2rem] w-[100%] items-center justify-center"
+                    className="flex gap-[2rem] w-[100%] items-center justify-center max-md:flex-col"
                 >
                     <CourseCard 
                         key={1}
-                        title="عامل بودن"
-                        description="آموزش اول"
+                        title="کنترل واکنش"
+                        description="یاد گرفتن اینکه قبل از جواب دادن یا واکنش نشون دادن، یک مکث کوتاه کنی تا تصمیم بهتری بگیری. این مهارت جلوی خیلی از پشیمونی‌ها رو می‌گیره."
                         isActive={false}
                         isCompleted={false}
                     />
                     <CourseCard 
                         key={2}
-                        title="آموزش اول"
-                        description="اموزش اول"
+                        title="مدیریت تمرکز"
+                        description="حفظ توجه روی کاری که الان مهمه، بدون گم‌شدن در حواس‌پرتی‌ها و فکرهای موازی. این مهارت بهره‌وری رو چند برابر می‌کنه."
                         isActive={false}
                         isCompleted={false}
                     />
                     <CourseCard 
                         key={3}
-                        title="آموزش اول"
-                        description="اموزش اول"
+                        title="برگشت سریع بعد از افت"
+                        description="توانایی دوباره بلند شدن بعد از شکست یا عقب‌افتادگی. این مهارت مانع موندن در حس باخت میشه و حرکت رو ادامه میده."
                         isActive={false}
                         isCompleted={false}
                     />

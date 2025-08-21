@@ -114,7 +114,7 @@ const UserManagementPage: React.FC = () => {
 	}
 
 	return (
-		<div className="space-y-8 p-12" dir="rtl">
+		<div className="space-y-8 p-12 max-md:py-6 max-md:px-0 max-md:max-w-[90vw] max-md:mx-auto" dir="rtl">
 			<div className="text-center mb-4">
 				<div className="inline-flex items-center justify-center w-20 h-20 bg-[var(--primary-color1)] rounded-3xl mb-6 shadow-2xl">
 					<FiUsers className="w-10 h-10 text-[var(--primary-color4)]" />
@@ -131,10 +131,10 @@ const UserManagementPage: React.FC = () => {
 				initial={{ opacity: 0, y: 20 }}
 				animate={{ opacity: 1, y: 0 }}
 				transition={{ duration: 0.5 }}
-				className="bg-[var(--primary-color4)] rounded-2xl shadow-xl border border-[var(--accent-color1)]/20 p-6"
+				className="bg-[var(--primary-color4)] rounded-2xl shadow-xl border border-[var(--accent-color1)]/20 p-6 max-md:w-auto"
 			>
-				<div className="flex flex-col md:flex-row gap-4 md:items-center md:justify-between">
-					<div className="relative w-full md:w-2/3">
+				<div className="flex flex-col md:flex-row gap-4 md:items-center md:justify-between max-md:flex-col">
+					<div className="relative w-full max-md:w-auto md:w-2/3">
 						<FiSearch className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]" />
 						<input
 							type="text"
@@ -144,7 +144,7 @@ const UserManagementPage: React.FC = () => {
 							className="w-full pr-10 pl-4 py-3 bg-[var(--bg-color)] rounded-lg border border-[var(--accent-color1)]/20 focus:outline-none focus:border-[var(--primary-color1)]/60 text-[var(--text-primary)]"
 						/>
 					</div>
-					<div className="w-full md:w-1/3">
+					<div className="w-full max-md:w-auto md:w-1/3">
 						<select
 							value={roleFilter}
 							onChange={(e) => setRoleFilter(e.target.value)}
@@ -158,7 +158,7 @@ const UserManagementPage: React.FC = () => {
 				</div>
 
 				<div className="mt-6 overflow-x-auto">
-					<table className="min-w-full divide-y divide-[var(--accent-color1)]/20">
+					<table className="min-w-full max-md:w-auto divide-y divide-[var(--accent-color1)]/20">
 						<thead className="bg-[var(--bg-color)]">
 							<tr>
 								<th className="px-4 py-3 text-right text-xs font-semibold text-[var(--text-secondary)]">کاربر</th>

@@ -62,7 +62,7 @@ const Profile = () => {
     }
 
     return (
-        <div className="space-y-8 p-12" dir="rtl">
+        <div className="space-y-8 p-12 max-md:p-4" dir="rtl">
             <div className="text-center mb-8">
                 <div className="inline-flex items-center justify-center w-20 h-20 bg-[var(--primary-color1)] rounded-3xl mb-6 shadow-2xl">
                     <FiUser className="w-10 h-10 text-[var(--primary-color4)]" />
@@ -78,7 +78,7 @@ const Profile = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div className="lg:col-span-1">
                     <motion.div 
-                        className="bg-[var(--primary-color4)] rounded-2xl shadow-xl border border-[var(--accent-color1)]/20 p-6 text-center"
+                        className="bg-[var(--primary-color4)] rounded-xl shadow-xl border border-[var(--accent-color1)]/20 p-6 text-center"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5 }}
