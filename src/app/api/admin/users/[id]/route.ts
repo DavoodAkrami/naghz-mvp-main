@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/config/supabaseAdmin'
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, context: any) {
   if (!supabaseAdmin) {
     return NextResponse.json({ error: 'Server not configured' }, { status: 500 })
   }
-  const userId = params.id
+  const userId = context?.params?.id as string
   try {
     const authHeader = req.headers.get('authorization') || ''
     const token = authHeader.replace('Bearer ', '')
@@ -33,11 +33,11 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, context: any) {
   if (!supabaseAdmin) {
     return NextResponse.json({ error: 'Server not configured' }, { status: 500 })
   }
-  const userId = params.id
+  const userId = context?.params?.id as string
   try {
     const authHeader = req.headers.get('authorization') || ''
     const token = authHeader.replace('Bearer ', '')
