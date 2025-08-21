@@ -71,10 +71,10 @@ const Home = () => {
                     className="flex flex-col items-center"
                 >
                     <div 
-                        className="my-[2vh] px-[4vw]"
+                        className="my-0 px-[4vw]"
                     >
                         <video 
-                            src="/naghz-landing-do-it.webm"
+                            src="/naghz-main-page-laptop.webm"
                             className="max-md:hidden scale-[0.9] w-[90%] mx-auto"
                             autoPlay
                             muted
@@ -95,13 +95,13 @@ const Home = () => {
                     >
                         با میکرو تمرین‌های 10 دقیقه‌ای — وضوح، تمرکز و آرامش بساز
                     </h1> */}
-                    <h1
+                    {/* <h1
                         className="text-[1.8rem] max-w-[70%] mx-auto max-md:text-[1.2rem] text-center mb-[1rem] font-bold"
                     >
                         روشی رایگان موثر و تعاملی برای یادگیری مهارتهای نرم  
-                    </h1>
+                    </h1> */}
                     <button
-                        className="button-primary rounded-full mt-[2rem] shadow md:scale-[1.5] max-md:scale-[1.3] mb-[10vh]"
+                        className="button-primary rounded-full mt-[2rem] shadow max-md:scale-[1.3] mb-[10vh] scale-[1.8]"
                     >
                         <Link href={linkCarry}
                             className="block w-[100%] h-[100%]"
@@ -146,7 +146,7 @@ const Home = () => {
                         initial={{ y: 90, opacity: 0 }}
                         whileInView={{ y: 0, opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        transition={{  delay: 0.2, duration: 0.6}}
+                        transition={{  delay: 0.5, duration: 0.6}}
                         className="min-h-[80vh] flex flex-col justify-center items-center"
                     >
                         <h2 className="font-[750] text-[4rem] max-[1200px]:font-[700] max-md:text-[2.4rem] text-center pt-[10vh] pb-[5vh] text-[var(--primary-color4)] max-w-[90%]">
@@ -174,7 +174,8 @@ const Home = () => {
                         initial={{ x: 90, opacity: 0 }}
                         whileInView={{ x: 0, opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        transition={{  delay: 0.2, duration: 0.6}}
+                        viewport={{ once: true }}
+                        transition={{  delay: 0.5, duration: 0.6}}
                         className="px-8 flex flex-col justify-center col-start-2 col-end-5 max-md:w-[90%]"
                     >
                         <h1
@@ -203,7 +204,8 @@ const Home = () => {
                         initial={{ x: -90, opacity: 0 }}
                         whileInView={{ x: 0, opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        transition={{  delay: 0.2, duration: 0.6}}
+                        viewport={{ once: true }}
+                        transition={{  delay: 0.5, duration: 0.6}}
                         className="px-8 flex flex-col justify-center col-start-5 col-end-8 max-md:w-[90%] z-2"
                     >
                         <h1
@@ -237,7 +239,8 @@ const Home = () => {
                         initial={{ x: 90, opacity: 0 }}
                         whileInView={{ x: 0, opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        transition={{  delay: 0.2, duration: 0.6}}
+                        viewport={{ once: true }}
+                        transition={{  delay: 0.5, duration: 0.6}}
                         className="px-8 flex flex-col justify-center col-start-2 col-end-5 max-md:w-[90%]"
                     >
                         <h1
@@ -265,7 +268,8 @@ const Home = () => {
                         initial={{ x: -90, opacity: 0 }}
                         whileInView={{ x: 0, opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        transition={{  delay: 0.2, duration: 0.6}} 
+                        viewport={{ once: true }}
+                        transition={{  delay: 0.5, duration: 0.6}} 
                         className="px-8 flex flex-col justify-center col-start-5 col-end-8 max-md:w-[90%] z-2"
                     >
                         <h1
@@ -321,7 +325,8 @@ const Home = () => {
                         initial={{ opacity: 0 }}
                         whileInView={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        transition={{ duration: 0.3, ease: "easeInOut" }}
+                        viewport={{ once: true }}
+                        transition={{  delay: 0.5, duration: 0.6}}
                         className="transition-all duration-300"
                     >
                         {GuidedPaths.find(guidedPath => guidedPath.id === selectedGuide)?.component}
@@ -334,7 +339,8 @@ const Home = () => {
                         initial={{ y: 90, opacity: 0 }}
                         whileInView={{ y: 0, opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        transition={{  delay: 0.2, duration: 0.6}}
+                        viewport={{ once: true }}
+                        transition={{  delay: 0.5, duration: 0.6}}
                         className="min-h-[80vh] flex flex-col justify-center items-center"
                     >
                         <h2 className="font-[750] text-[4rem] max-[1200px]:font-[700] max-md:text-[2.4rem] text-center py-[10vh] text-[var(--primary-color4)] max-w-[90%]">

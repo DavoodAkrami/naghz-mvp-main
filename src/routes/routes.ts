@@ -48,6 +48,11 @@ const routes: routesType[]= [
         path: "/courses",
         header: true
     },
+    {
+        name: "کاربران",
+        path: "/dashboard/user-management",
+        adminRequaire: true  
+    },
 ] 
 
 
@@ -68,7 +73,12 @@ export const dashboardPages: routesType[] = [
         name: "مدیریت دوره‌ها",
         path: "/dashboard/course-management",
         adminRequaire: true,
-    }
+    },
+    {
+        name: "کاربران",
+        path: "/dashboard/user-management",
+        adminRequaire: true  
+    },
 ];
 
 

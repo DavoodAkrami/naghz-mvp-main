@@ -28,9 +28,9 @@ const CourseCard: React.FC<CurseCardProps> = ({title, description, icon: Icon, l
                 layoutId={layoutId}
                 onClick={onClick}
                 className={clsx(
-                    "bg-[white] px-[1rem] shadow-md h-[150px] border border-[var(--bg-color-secondary)] rounded-md hover:border-[var(--bg-color-secondary)/5] cursor-pointer flex justify-baseline items-center gap-[10%] transition-all duration-150 w-[100%] relative",
-                    !isActive && "opacity-[0.5] cursor-default pointer-events-none hover:border-none bg-gray-200",
-                    isCompleted && "bg-green-50 border-green-500"
+                    "bg-[var(--primary-color1)]/20 px-[1rem] shadow-lg h-[150px] border border-[var(--bg-color-secondary)] rounded-md hover:bg-[var(--primary-color1)]/30 cursor-pointer flex justify-baseline items-center gap-[10%] transition-all duration-200 w-[100%] relative",
+                    !isActive && "opacity-[0.5] cursor-default pointer-events-none hover:border-none bg-[var(--primary-color1)]/5",
+                    isCompleted && "bg-green-50 border-green-500 hover:bg-green-100"
                 )}
             >
                 {isCompleted && (

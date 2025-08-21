@@ -1,14 +1,15 @@
 "use client"
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
-import { FiUser, FiMail, FiShield} from "react-icons/fi";
+import { FiUser, FiMail, FiShield, FiCheckCircle } from "react-icons/fi";
 import { motion } from "framer-motion";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/store/store";
 import { useRouter } from "next/navigation";
 import { logoutUser } from "@/store/slices/authSlice";
 import Modal from "@/components/Modal";
+import { fetchUserProgress } from "@/store/slices/courseSlice";
 
 
 
@@ -17,6 +18,13 @@ const Profile = () => {
     const dispatch = useDispatch<AppDispatch>();
     const router = useRouter();
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+    const { userProgress } = useSelector((state: RootState) => state.course);
+
+    useEffect(() => {
+        if (user?.id) {
+            dispatch(fetchUserProgress(user.id));
+        }
+    }, [dispatch, user?.id]);
 
     const handleLogOut = () => {
         dispatch(logoutUser());
@@ -42,7 +50,7 @@ const Profile = () => {
 
     if (!user) {
         return (
-            <div className="flex items-center justify-center min-h-[60vh]">
+            <div className="flex items-center justify-center min-h-[75vh]">
                 <div className="text-center">
                     <div className="w-16 h-16 mx-auto mb-4 bg-[var(--secondary-color2)] rounded-full flex items-center justify-center">
                         <FiUser className="w-8 h-8 text-[var(--primary-color4)]" />
@@ -139,40 +147,67 @@ const Profile = () => {
                             </svg>) : ("خروج از حساب کاربری")
                         }
                     </motion.button>
-                    <Modal
-                        onClose={handleModalClose}
-                        onOpen={isModalOpen}
-
-                    >
-                        <div
-                            className="text-center text-[2rem] font-bold mb-[2rem]"
-                        >
-                            آیا از خروج خود اطمینان دارید؟  
-                        </div>
-                        <div
-                            className="flex items-center gap-[0.8rem]"
-                        >
-                            <button
-                                onClick={handleModalClose}
-                                className="w-[100%] flex justify-center items-center font-semibold cursor-pointer bg-[var(--primary-color1)] rounded-2xl py-[1.4rem] shadow-2xl text-[var(--primary-color4)] hover:shadow-lg transition-all duration-150"
-                            > 
-                                بازگشت
-                            </button>
-                            <button
-                                onClick={handleLogOut}
-                                className="w-[100%] flex justify-center items-center font-semibold cursor-pointer bg-[var(--primary-color1)] rounded-2xl py-[1.4rem] shadow-2xl text-[var(--primary-color4)] hover:shadow-lg transition-all duration-150"
-                            >
-                                {logOutLoading ?
-                                    (<svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                    </svg>) : ("خروج از حساب کاربری")
-                                }
-                            </button>
-                        </div>
-                    </Modal>
                 </div>
             </div>
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                className="bg-[var(--primary-color4)] rounded-2xl shadow-xl border border-[var(--accent-color1)]/20 px-6 py-[4.2vh]"
+            >
+                <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                        <div className="w-14 h-14 rounded-full bg-green-100 text-green-700 flex items-center justify-center shadow">
+                            <FiCheckCircle className="w-7 h-7" />
+                        </div>
+                        <div>
+                            <div className="text-[var(--text-primary)] text-3xl font-extrabold leading-7">
+                                {userProgress.length}
+                            </div>
+                            <div className="text-[var(--text-secondary)] text-sm">
+                                دوره تکمیل‌شده
+                            </div>
+                        </div>
+                    </div>
+                    <button
+                        onClick={() => router.push('/courses')}
+                        className="button-primary rounded-full px-5 py-2 shadow"
+                    >
+                        مشاهده دوره‌ها
+                    </button>
+                </div>
+            </motion.div>   
+            <Modal
+                onClose={handleModalClose}
+                onOpen={isModalOpen}
+            >
+                <div
+                    className="text-center text-[2rem] font-bold mb-[2rem]"
+                >
+                    آیا از خروج خود اطمینان دارید؟  
+                </div>
+                <div
+                    className="flex items-center gap-[0.8rem]"
+                >
+                    <button
+                        onClick={handleModalClose}
+                        className="w-[100%] flex justify-center items-center font-semibold cursor-pointer bg-[var(--primary-color1)] rounded-2xl py-[1.4rem] shadow-2xl text-[var(--primary-color4)] hover:shadow-lg transition-all duration-150"
+                    > 
+                        بازگشت
+                    </button>
+                    <button
+                        onClick={handleLogOut}
+                        className="w-[100%] flex justify-center items-center font-semibold cursor-pointer bg-[var(--primary-color1)] rounded-2xl py-[1.4rem] shadow-2xl text-[var(--primary-color4)] hover:shadow-lg transition-all duration-150"
+                    >
+                        {logOutLoading ?
+                            (<svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>) : ("خروج از حساب کاربری")
+                        }
+                    </button>
+                </div>
+            </Modal>
         </div>
     );
 }

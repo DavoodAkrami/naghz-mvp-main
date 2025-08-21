@@ -12,7 +12,8 @@ import {
     FiBookOpen, 
     FiGrid,
     FiHome,
-    FiShield
+    FiShield,
+    FiUsers
 } from "react-icons/fi";
 
 interface sideBarTypes {
@@ -35,6 +36,8 @@ const SideBar: React.FC<sideBarTypes> = ({routes, classname}) => {
                 return <FiBookOpen className="w-5 h-5" />;
             case "مدیریت دوره‌ها":
                 return <FiGrid className="w-5 h-5" />;
+            case "کاربران":
+                return <FiUsers className="w-5 h-5" />;
             default:
                 return <FiHome className="w-5 h-5" />;
         }
@@ -45,7 +48,6 @@ const SideBar: React.FC<sideBarTypes> = ({routes, classname}) => {
             "sticky top-[15vh] bg-[var(--primary-color4)] shadow-2xl min-h-[80vh] border-[1.8px] border-[var(--accent-color1)] rounded-xl px-[5px]",
             classname
         )}>
-            {/* Header */}
             <div className="text-center my-[3vh]">
                 <div className="w-16 h-16 mx-auto mb-4 bg-[var(--primary-color1)] rounded-2xl flex items-center justify-center shadow-lg">
                     <FiShield className="w-8 h-8 text-[var(--primary-color4)]" />

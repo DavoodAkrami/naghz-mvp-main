@@ -1,6 +1,6 @@
 "use client"
 import clsx from "clsx";
-import React, { useEffect, useState} from "react";
+import React, { useEffect, useState, useMemo} from "react";
 import { useRouter } from "next/navigation";
 import PopUp from "./PopUp";
 import Modal from "./Modal";
@@ -122,13 +122,17 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
     const [isWhyModalOpen, setIsWhyModalOpen] = useState<boolean>(false);
     const [whyModalContent, setWhyModalContent] = useState<string>("");
 
+    const successSound = useMemo(() => new Audio('/game-se-1.wav'), []);
+    const wrongSound = useMemo(() => new Audio('/game-se-2.wav'), []);
+    const endSound = useMemo(() => new Audio('/game-se-3.wav'), []);
+
     const hasPluggablePair = Object.values(pluggablePairs).some(v => v !== undefined);
     const hasMultipleSelection = multipleSelections.length > 0;
     const hasSequentialSelection = sequentialSelections.length > 0;
 
     const dispatch = useDispatch<AppDispatch>();
     const { user } = useSelector((state: RootState) => state.auth);
-    const { userProgress } = useSelector((state: RootState) => state.course);
+    const { userProgress, loading: courseLoading } = useSelector((state: RootState) => state.course);
 
     const isCompleted = userProgress.some(progress => progress.course_id === course_id);
 
@@ -213,10 +217,12 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
 
     const handleNextPage = () => {
         if (page_number >= pageLength) {
+            endSound.play();
             router.push("/courses")
             if (!isCompleted) dispatch(saveProgress({ courseId: course_id, userId: user?.id || '' }))
+        } else {
+            handleNext?.();
         }
-        else handleNext?.();
     };
 
     const handleRetry = () => {
@@ -325,18 +331,21 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                   activeId !== null &&
                   correct_answer[0] === activeId;
             setIsCorrect(!!correct);
+            correct ? successSound.play() : wrongSound.play();
         } else if (test_type === "Multiple") {
             const correct =
             Array.isArray(correct_answer) &&
             multipleSelections.length === correct_answer.length &&
             correct_answer.every(id => multipleSelections.includes(id));
             setIsCorrect(!!correct);
+            correct ? successSound.play() : wrongSound.play();
         } else if (test_type === "Sequential") {
             const correct =
             Array.isArray(correct_answer) &&
             sequentialSelections.length === correct_answer.length &&
             correct_answer.every((id, idx) => sequentialSelections[idx] === id);
             setIsCorrect(!!correct);
+            correct ? successSound.play() : wrongSound.play();
         } else if (test_type === "Pluggable") {
             // Build user pairs from the mapping { [id]: pairedId }
             const userPairs: [number, number][] = [];
@@ -384,6 +393,7 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                 userPairs.every((p, i) => p[0] === expectedPairs[i][0] && p[1] === expectedPairs[i][1]);
 
             setIsCorrect(!!correct);
+            correct ? successSound.play() : wrongSound.play();
         }
         setIsPopUpOpen(true);
     }
@@ -448,13 +458,17 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                 <div
                     className="flex flex-col justify-center items-center max-w-[80%] max-md:max-w[95%] mx-auto"
                 >
-                    {image && 
-                        <img 
-                            src={image} 
-                            alt="تصویر صفحه" 
-                            className="max-h-[70vh] max-w-[80%] max-md:max-w-[95%] max-md:max-h-max mx-auto object-cover rounded-xl mb-6"
-                        />
-                    }
+                    {image && (
+                        courseLoading ? (
+                            <div className="animate-pulse bg-[var(--hover-color)]/60 max-h-[70vh] h-[40vh] max-w-[80%] max-md:max-w-[95%] mx-auto rounded-xl mb-6" />
+                        ) : (
+                            <img 
+                                src={image} 
+                                alt="تصویر صفحه" 
+                                className="max-h-[70vh] max-w-[80%] max-md:max-w-[95%] max-md:max-h-max mx-auto object-cover rounded-xl mb-6"
+                            />
+                        )
+                    )}
                     {header &&
                         <h1
                             style={{ whiteSpace: "pre-line" }}
@@ -476,13 +490,17 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                 <div
                     className="flex flex-col justify-center mx-auto"
                 >
-                    {image && 
-                        <img 
-                            src={image} 
-                            alt="تصویر صفحه" 
-                            className="max-h-[70vh] max-w-[80%] max-md:max-w-[95%] max-md:max-h-max mx-auto object-cover rounded-xl mb-6"
-                        />
-                    }
+                    {image && (
+                        courseLoading ? (
+                            <div className="animate-pulse bg-[var(--hover-color)]/60 max-h-[70vh] h-[40vh] max-w-[80%] max-md:max-w-[95%] mx-auto rounded-xl mb-6" />
+                        ) : (
+                            <img 
+                                src={image} 
+                                alt="تصویر صفحه" 
+                                className="max-h-[70vh] max-w-[80%] max-md:max-w-[95%] max-md:max-h-max mx-auto object-cover rounded-xl mb-6"
+                            />
+                        )
+                    )}
                     <p 
                         style={{ whiteSpace: "pre-line" }}
                         className="text-[1.2rem] text-[var(--text-primary)] text-center my-[3vh]"
@@ -495,7 +513,7 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                         {question}
                     </p>
                     {getTestTypeIndicator()}
-                    {options && 
+                    {(options && !courseLoading) && (
                         <div
                             className={clsx(
                                 "w-[50vw] mx-auto max-md:w-[80vw]",
@@ -525,7 +543,27 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                                 />
                             ))}
                         </div>
-                    }
+                    )}
+                    {(options && courseLoading) && (
+                        <div
+                            className={clsx(
+                                "w-[50vw] mx-auto max-md:w-[80vw]",
+                                test_grid === "col" ? "flex flex-col gap-[1.5rem] max-md:gap-[1rem] min-w-[40vw] max-md:min-w-[70vw]" : 
+                                test_grid === "grid-2" ? "grid grid-cols-2 gap-[1.5rem] max-md:gap-[1rem] min-[30vw] max-md:main-w-[20vw]" :
+                                test_grid === "grid-row" ? "grid grid-rows-1 gap-[1.5rem] max-md:gap-[1rem] min-w-[20vw] max-md:flex max-md:flex-col": 
+                                "bg-red"
+                            )}
+                            style={
+                                test_grid === "grid-row"
+                                    ? { gridTemplateColumns: `repeat(${Math.max(1, (options?.length || 4))}, minmax(0, 1fr))` }
+                                    : undefined
+                            }
+                        >
+                            {Array.from({ length: options?.length || 4 }).map((_, idx) => (
+                                <div key={idx} className="animate-pulse px-[2rem] py-[1.4rem] rounded-full border-[2px] border-[var(--accent-color1)] bg-[var(--hover-color)]/40 h-[3.2rem]" />
+                            ))}
+                        </div>
+                    )}
                 </div>
             ) : (
                 <div>
@@ -546,7 +584,7 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                       : false
                   }
                 className={clsx(
-                    "button-primary rounded-full shadow-lg w-[10rem] mx-auto scale-[1.4] mt-[3vh] mb-[3vh]",
+                    "button-primary rounded-full shadow-xl hover:bg active:shadow-none w-[10rem] mx-auto scale-[1.4] mt-[3vh] mb-[3vh]",
                     page_type === "test" && !activeId && "disabled:opacity-50",
                     page_type === "nextTest" && options && "hidden" 
                 )}

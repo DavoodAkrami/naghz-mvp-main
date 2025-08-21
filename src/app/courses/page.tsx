@@ -77,6 +77,31 @@ const Curses: React.FC = () => {
                         />
                     ))}
                 </AnimatePresence>
+                <div
+                    className="flex gap-[2rem] w-[100%] items-center justify-center"
+                >
+                    <CourseCard 
+                        key={1}
+                        title="عامل بودن"
+                        description="آموزش اول"
+                        isActive={false}
+                        isCompleted={false}
+                    />
+                    <CourseCard 
+                        key={2}
+                        title="آموزش اول"
+                        description="اموزش اول"
+                        isActive={false}
+                        isCompleted={false}
+                    />
+                    <CourseCard 
+                        key={3}
+                        title="آموزش اول"
+                        description="اموزش اول"
+                        isActive={false}
+                        isCompleted={false}
+                    />
+                </div>
                 {isModalOpen !== null &&
                     <div className="fixed inset-0 z-50000 flex items-center justify-center">
                         <motion.div
