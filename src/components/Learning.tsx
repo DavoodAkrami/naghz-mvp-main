@@ -333,6 +333,7 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                 setSaveProgressLoading(false)
             }
         } else {
+            successSound.play();
             handleNext?.();
         }
     };
@@ -651,7 +652,7 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                                     id={option.id} 
                                     test_type={test_type}
                                     isSelected={page_type === "testNext" ? false : isOptionSelected(option.id)} 
-                                    onSelect={page_type === "testNext" ? () => handleNext?.() : handleActiveOption}
+                                    onSelect={page_type === "testNext" ? () => handleNextPage() : handleActiveOption}
                                     getSequentialOrder={getSequentialOrder}
                                     getPluggablePair={getPluggablePair}
                                     classname={clsx(test_grid === "grid-row" && "flex justify-center items-center")}
