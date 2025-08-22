@@ -181,16 +181,13 @@ const Home = () => {
                         <h1
                             className="h1 max-w-[450vw] max-[1300px]:max-w-[45vw] max-[550px]:max-w-[80vw] max-[400px]:max-w-[80vw]"
                         >
-                            روش نَغز: تدریجی، اما معنا‌دار
+                            رایگان. سرگرم کننده. موثر
                         </h1>
                         <p
                             className="text-[1.6rem] max-md:text-[1.2rem] max-w-[85%]"
                         >
-                            در نغز، مهارت‌های بزرگ زندگی
-                            تبدیل میشن به تمرین‌هایی کوچیک، عمیق و تاثیرگذار.
-                            اینجا این مهارتهارو بصورت 
-                            <span className="font-bold"> تعاملی، شخصی‌سازی‌شده و بازی‌گونه </span>
-                            یاد میگیری
+                            یادگیری با نغز، نغزه و تحقیقات نشون میده که این نوع یادگیری واقعا کار میکنه!<br />
+                            با آموزش های <span className="font-bold">میکرو و گیمیفیکیشن</span>، مهارتهای نرم رو بصورت <span className="font-bold">تعاملی و کاربردی</span> یاد میگیری.
                         </p>
                     </motion.div>
                 </section>
@@ -211,21 +208,12 @@ const Home = () => {
                         <h1
                             className="h1 max-w-[40vw] max-[1300px]:max-w-[60vw] max-[550px]:max-w-[80vw] max-[400px]:max-w-[80vw] max-md:mt-[5vh]"
                         >
-                            تلاشی که تغییرت میده: تمرین، تامل، تکرار
+                            پشتیبانی توسط علم
                         </h1>
                         <p
                             className="text-[1.6rem] max-md:text-[1.2rem] md:max-w-[70%]"
                         >
-                            هر قدم یک نقطه عطفه
-                            <span className="block">
-                            اون لحظه‌ی «آها!» که همه‌چیز رو برات روشن می‌کنه.
-                            </span>
-                            <span className="block">
-                            با نغز از فهمیدن، به جا افتادن می‌رسی—
-                            <span className="font-bold">
-                            آروم، بی‌سروصدا
-                            </span>
-                            </span>
+                            ما ترکیبی از <span className="font-bold">متد های اموزشی</span> که تحقیقات زیادی را پشت سر گذاشتن و محتوای لذت بخش رو برای ساختن مسیر های یادگیری که مهارتهای حیاتی زندگی رو اموزش میدن استفاده میکنیم!
                         </p>
                     </motion.div>
                 </section>
@@ -246,15 +234,12 @@ const Home = () => {
                         <h1
                             className="h1 max-w-[40vw] max-[1300px]:max-w-[60vw] max-[550px]:max-w-[80vw] max-[400px]:max-w-[80vw] max-md:mt-[5vh]"
                         >
-                            انگیزه‌ای که پایداره:  کوچیک شروع کن، ادامه بده، فرقش رو حس کن        
+                            انگیزه‌تو حفظ کن
                         </h1>
                         <p
                             className="text-[1.6rem] max-md:text-[1.2rem] max-w-[85%]"
                         >
-                        روزی فقط چند دقیقه<br />
-                        <span className="font-bold">با حس واقعیِ پیشرفت،‌</span> بدون عجله، بدون فشار<br />
-                        هر قدم، گامیه به‌سوی خودت — 
-                        آروم، ولی ماندگار
+                        ما با ویژگی‌های <span className="font-bold">شبیه بازی</span>، چالش‌های سرگرم‌کننده و یادآوری‌های مسکات دوست‌داشتنی‌مون، <span className="font-bold">Niro</span>،عادت یادگیری مهارتهای نرم رو براتون آسون می‌کنیم.
                         </p>
                     </motion.div>
                 </section>
@@ -275,19 +260,17 @@ const Home = () => {
                         <h1
                             className="h1 max-w-[40vw] max-[1300px]:max-w-[60vw] max-[550px]:max-w-[80vw] max-[400px]:max-w-[80vw] max-md:mt-[5vh]"
                         >
-                            برای زندگی‌های واقعی:  مهم نیست کی هستی، کجای راهی
+                            برای زندگی‌های واقعی
                         </h1>
                         <p
                             className="text-[1.6rem] max-md:text-[1.2rem] md:max-w-[60%]"
                         >
-                            اگه 
-                            <span className="font-bold"> ۱۴ سالته، یا ۱۱۴، </span>
-                            اگه پرمشغله‌ای، خسته‌ای یا صرفاً کنجکاوی—
-                            نغز طوری طراحی شده که از جایی که هستی، باهات همراه بشه و تا اخرش بمونه
+                            اگه <span className="font-bold">۱۴ سالته، یا ۱۱۴</span>، اگه پرمشغله‌ای، خسته‌ای یا صرفاً کنجکاوی— <span className="font-bold">مهم نیست کی هستی، کجای راهی</span>.<br />
+                            نغز طوری طراحی شده که از جایی که هستی، باهات همراه بشه و تا اخرش کنارت باشه.
                         </p>
                     </motion.div>
                 </section>
-                <section
+                {/* <section
                     className="bg-[var(--primary-color4)] min-h-[80vh] max-md:min-h-[60vh] relative" 
                 >
                     <h2 className="font-[750] text-[var(--text-primary)] text-[5rem] max-[1200px]:font-[700] max-md:text-[3rem] text-center py-[10vh]">
@@ -331,7 +314,7 @@ const Home = () => {
                     >
                         {GuidedPaths.find(guidedPath => guidedPath.id === selectedGuide)?.component}
                     </motion.div>
-                </section>
+                </section> */}
                 <section
                     className="bg-[url(/social-proof-background.svg)] bg-[var(--section-color)] text-[var(--text-secondary)]"
                 >

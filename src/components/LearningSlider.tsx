@@ -111,6 +111,13 @@ const LearningSlider: React.FC<LearningPropsType> = (props: LearningPropsType) =
     };
   }, [pages, currentIndex, optionsByPageId, props.course_id, props.pageLength]);
 
+  // Collect all images for preloading
+  const allImages = useMemo(() => {
+    return pages
+      .map(page => page.image)
+      .filter(Boolean) as string[];
+  }, [pages]);
+
   const variants = {
     enter: (dir: 1 | -1) => ({ x: dir > 0 ? 60 : -60, opacity: 0 }),
     center: { x: 0, opacity: 1 },
@@ -160,6 +167,7 @@ const LearningSlider: React.FC<LearningPropsType> = (props: LearningPropsType) =
             {...currentTransformed}
             handleNext={handleNext}
             handlePrev={handlePrevious}
+            preloadedImages={allImages}
           />
         </motion.div>
       </AnimatePresence>

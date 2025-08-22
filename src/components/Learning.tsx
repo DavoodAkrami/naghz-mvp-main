@@ -7,6 +7,7 @@ import Modal from "./Modal";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import { saveProgress } from "@/store/slices/courseSlice";
+import Image from "next/image";
 
 
 export interface options {
@@ -33,6 +34,7 @@ export interface LearningPropsType {
     handlePrev?: () => void;
     image?: string;
     why?: string | null;
+    preloadedImages?: string[]; // New prop for preloaded images
 }
 
 
@@ -107,8 +109,108 @@ const OptionCard: React.FC<OptionCardProps> = ({ icon_name, answer, id, test_typ
     )
 }
 
+// Helper function to parse and render rich text
+const renderRichText = (text: string) => {
+  if (!text) return '';
+  
+  // Convert markdown-like syntax to HTML
+  let html = text
+    // Bold: **text** or __text__
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/__(.*?)__/g, '<strong>$1</strong>')
+    // Italic: *text* or _text_
+    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    .replace(/_(.*?)_/g, '<em>$1</em>')
+    // Underline: ~text~
+    .replace(/~(.*?)~/g, '<u>$1</u>')
+    // Strikethrough: ~~text~~
+    .replace(/~~(.*?)~~/g, '<del>$1</del>')
+    // Code: `text`
+    .replace(/`(.*?)`/g, '<code class="bg-gray-100 px-1 rounded text-sm">$1</code>')
+    // Line breaks
+    .replace(/\n/g, '<br />');
 
-const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, header, test_type="Default", test_grid= "col", options, question, correct_answer, course_id, page_number, pageLength, handleNext, handlePrev, image, why}) => {
+  return html;
+};
+
+
+const RichText: React.FC<{ content: string; className?: string }> = ({ content, className }) => {
+  const htmlContent = useMemo(() => renderRichText(content), [content]);
+  
+  return (
+    <div 
+      className={className}
+      dangerouslySetInnerHTML={{ __html: htmlContent }}
+    />
+  );
+};
+
+// Image Preloader Component
+const ImagePreloader: React.FC<{ images: string[] }> = ({ images }) => {
+  const [loadedImages, setLoadedImages] = useState<Set<string>>(new Set());
+  const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (!images || images.length === 0) return;
+
+    const loadImage = (imageUrl: string): Promise<void> => {
+      return new Promise((resolve, reject) => {
+        const img = new window.Image();
+        
+        img.onload = () => {
+          setLoadedImages(prev => new Set(prev).add(imageUrl));
+          resolve();
+        };
+        
+        img.onerror = () => {
+          setFailedImages(prev => new Set(prev).add(imageUrl));
+          console.warn(`Failed to preload image: ${imageUrl}`);
+          reject(new Error(`Failed to load image: ${imageUrl}`));
+        };
+
+        // Set crossOrigin for CORS images (like Supabase)
+        img.crossOrigin = 'anonymous';
+        img.src = imageUrl;
+      });
+    };
+
+    // Load images with concurrency control (max 3 at a time)
+    const loadImagesWithConcurrency = async () => {
+      const concurrency = 3;
+      const chunks = [];
+      
+      for (let i = 0; i < images.length; i += concurrency) {
+        chunks.push(images.slice(i, i + concurrency));
+      }
+
+      for (const chunk of chunks) {
+        await Promise.allSettled(
+          chunk.map(imageUrl => loadImage(imageUrl))
+        );
+      }
+    };
+
+    loadImagesWithConcurrency();
+  }, [images]);
+
+  // Optional: Log loading progress
+  useEffect(() => {
+    if (images.length > 0) {
+      const total = images.length;
+      const loaded = loadedImages.size;
+      const failed = failedImages.size;
+      
+      if (loaded + failed === total) {
+        console.log(`Image preloading complete: ${loaded}/${total} loaded, ${failed} failed`);
+      }
+    }
+  }, [loadedImages, failedImages, images.length]);
+
+  return null; // This component doesn't render anything
+};
+
+
+const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, header, test_type="Default", test_grid= "col", options, question, correct_answer, course_id, page_number, pageLength, handleNext, handlePrev, image, why, preloadedImages}) => {
     const router = useRouter();
 
     const [activeId, setActiveId] = useState<number | null>(null);
@@ -467,28 +569,27 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                         courseLoading || saveProgressLoading ? (
                             <div className="animate-pulse bg-[var(--hover-color)]/60 max-h-[70vh] h-[40vh] max-w-[80%] max-md:max-w-[95%] mx-auto rounded-xl mb-6" />
                         ) : (
-                            <img 
+                            <Image 
                                 src={image} 
+                                width={500}
+                                height={500}
                                 alt="تصویر صفحه" 
+                                priority
                                 className="max-h-[70vh] max-w-[80%] max-md:max-w-[95%] max-md:max-h-max mx-auto object-cover rounded-xl mb-6"
                             />
                         )
                     )}
                     {header &&
-                        <h1
-                            style={{ whiteSpace: "pre-line" }}
+                        <RichText
+                            content={header}
                             className="text-[3.6rem] max-md:text-[1.8rem] font-extrabold mb-[5vh] text-center"
-                        >
-                            {header}
-                        </h1>
+                        />
                     }
                     {text &&
-                        <p
-                            style={{ whiteSpace: "pre-line" }}
+                        <RichText
+                            content={text}
                             className="text-justify text-[1.2rem] font-black text-[var(--accent-color1)]"
-                        >
-                            {text}
-                        </p>
+                        />
                     }
                 </div>
             ) : (page_type === "test" || page_type === "testNext") ? (
@@ -499,25 +600,28 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                         courseLoading ? (
                             <div className="animate-pulse bg-[var(--hover-color)]/60 max-h-[70vh] h-[40vh] max-w-[80%] max-md:max-w-[95%] mx-auto rounded-xl mb-6" />
                         ) : (
-                            <img 
+                            <Image 
                                 src={image} 
-                                alt="تصویر صفحه" 
+                                width={500}
+                                height={500}
+                                alt="تصویر صفحه"
+                                priority 
                                 className="max-h-[70vh] max-w-[80%] max-md:max-w-[95%] max-md:max-h-max mx-auto object-cover rounded-xl mb-6"
                             />
                         )
                     )}
-                    <p 
-                        style={{ whiteSpace: "pre-line" }}
-                        className="text-[1.2rem] text-[var(--text-primary)] text-justify my-[3vh]"
-                    >
-                        {header}
-                    </p>
-                    <p
-                        style={{ whiteSpace: "pre-line" }}
-                        className="text-[2rem] font-bold mb-[5vh] text-center max-md:max-w-[95%] mx-auto"
-                    >
-                        {question}
-                    </p>
+                    {header && (
+                        <RichText
+                            content={header}
+                            className="text-[1.2rem] text-[var(--text-primary)] text-justify my-[3vh]"
+                        />
+                    )}
+                    {question && (
+                        <RichText
+                            content={question}
+                            className="text-[2rem] font-bold mb-[5vh] text-center max-md:max-w-[95%] mx-auto"
+                        />
+                    )}
                     {getTestTypeIndicator()}
                     {(options && !courseLoading) && (
                         <div
@@ -640,6 +744,7 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                     {whyModalContent}
                 </p>
             </Modal>
+            {preloadedImages && <ImagePreloader images={preloadedImages} />}
         </div>
     )
 }
