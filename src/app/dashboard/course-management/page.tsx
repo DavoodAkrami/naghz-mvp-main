@@ -794,14 +794,24 @@ export default function CourseManagement() {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium mb-2">عنوان</label>
-                      <input
-                        type="text"
-                        value={page.title}
-                        onChange={(e) => updatePage(index, { title: e.target.value })}
-                        className="w-full p-2 border rounded"
-                        placeholder="عنوان صفحه"
-                      />
+                      <label className="block text-sm font-medium mb-2">{page.page_type === "text" ? "عنوان" : "توضیحات"}</label>
+                      {page.page_type === "text" ? (
+                        <input
+                          type="text"
+                          value={page.title}
+                          onChange={(e) => updatePage(index, { title: e.target.value })}
+                          className="w-full p-2 border rounded"
+                          placeholder="عنوان صفحه"
+                        />
+                      ) : (
+                        <textarea
+                          value={page.title}
+                          onChange={(e) => updatePage(index, { title: e.target.value })}
+                          className="w-full p-2 border rounded resize-none"
+                          placeholder="عنوان صفحه"
+                          rows={5}
+                        />
+                      )}
                     </div>
                     <div>
                     <label className="block text-sm font-medium mb-2">تصویر صفحه (اختیاری)</label>
@@ -1203,14 +1213,24 @@ export default function CourseManagement() {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium mb-2">عنوان</label>
-                      <input
-                        type="text"
-                        value={page.title}
-                        onChange={(e) => updatePage(index, { title: e.target.value })}
-                        className="w-full p-2 border rounded"
-                        placeholder="عنوان صفحه"
-                      />
+                      <label className="block text-sm font-medium mb-2">{page.page_type === "text" ? "عنوان" : "توضیحات"}</label>
+                      {page.page_type === "text" ? (
+                        <input
+                          type="text"
+                          value={page.title}
+                          onChange={(e) => updatePage(index, { title: e.target.value })}
+                          className="w-full p-2 border rounded"
+                          placeholder="عنوان صفحه"
+                        />
+                      ) : (
+                        <textarea
+                          value={page.title}
+                          onChange={(e) => updatePage(index, { title: e.target.value })}
+                          className="w-full p-2 border rounded resize-none"
+                          placeholder="عنوان صفحه"
+                          rows={3}
+                        />
+                      )}
                     </div>
                     <div>
                     <label className="block text-sm font-medium mb-2">تصویر صفحه (اختیاری)</label>

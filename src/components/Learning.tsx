@@ -587,13 +587,13 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                     {header &&
                         <RichText
                             content={header}
-                            className="text-[3.6rem] max-md:text-[1.8rem] font-extrabold mb-[3vh] text-center"
+                            className="text-[3.6rem] whitespace-pre-wrap max-md:text-[1.8rem] font-extrabold mb-[3vh] text-center"
                         />
                     }
                     {text &&
                         <RichText
                             content={text}
-                            className="text-justify text-[1.2rem] font-black text-[var(--text-primary)] my-[2vh]"
+                            className="text-justify whitespace-pre-wrap text-[1.2rem] font-black text-[var(--text-primary)] my-[2vh]"
                         />
                     }
                 </div>
@@ -618,13 +618,13 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                     {header && (
                         <RichText
                             content={header}
-                            className="text-[1.2rem] text-[var(--text-primary)] text-justify my-[3vh]"
+                            className="text-[1.2rem] whitespace-pre-wrap text-[var(--text-primary)] text-justify my-[3vh]"
                         />
                     )}
                     {question && (
                         <RichText
                             content={question}
-                            className="text-[2rem] font-bold mb-[5vh] text-center max-md:max-w-[95%] mx-auto"
+                            className="text-[2rem] whitespace-pre-wrap font-bold mb-[5vh] text-center max-md:max-w-[95%] mx-auto"
                         />
                     )}
                     {getTestTypeIndicator()}

@@ -218,10 +218,10 @@ const Home = () => {
                     </motion.div>
                 </section>
                 <section
-                    className="bg-[var(--primary-color4)] grid grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr] max-[1100px]:grid-cols-1 max-md:grid-rows-[1fr_1fr] overflow-x-hidden min-h-[80vh] max-md:min-h-[60vh] relative" 
+                    className="bg-[var(--primary-color4)] grid grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr] max-[1100px]:grid-cols-1 max-md:grid-rows-[1fr_1fr] overflow-x-hidden min-h-[80vh] max-md:min-h-[85vh] relative" 
                 >
-                    <div className="absolute bottom-0 left-0 w-4/5 max-md:w-full ml-[-30vw] max-[1100px]:ml-0">
-                        <img src="/concepts-that-click.svg" alt="concepts that click" className="w-full h-auto object-contain object-bottom max-[1100px]:object-cover" />
+                    <div className="absolute top-[13vh] left-[5vw] w-4/5 max-md:w-full max-w-[40vw] flex items-center max-md:max-w-[90vw] max-md:mt-[20vh]">
+                        <img src="/section1.landing1.jpg" alt="concepts that click" className="w-full h-auto object-contain max-[1100px]:object-cover rounded-3xl" />
                     </div>
                     <motion.div
                         initial={{ x: 90, opacity: 0 }}
@@ -229,15 +229,15 @@ const Home = () => {
                         exit={{ opacity: 0 }}
                         viewport={{ once: true }}
                         transition={{  delay: 0.5, duration: 0.6}}
-                        className="px-8 flex flex-col justify-center col-start-2 col-end-5 max-md:w-[90%]"
+                        className="px-8 flex flex-col justify-center col-start-2 col-end-5 max-md:w-[90%] mb-[3vh]"
                     >
                         <h1
-                            className="h1 max-w-[450vw] max-[1300px]:max-w-[45vw] max-[550px]:max-w-[80vw] max-[400px]:max-w-[80vw]"
+                            className="h1 max-w-[45vw] max-[1300px]:max-w-[45vw] max-[550px]:max-w-[80vw] max-[400px]:max-w-[80vw]"
                         >
                             رایگان. سرگرم کننده. موثر
                         </h1>
                         <p
-                            className="text-[1.6rem] max-md:text-[1.2rem] max-w-[85%]"
+                            className="text-[1.6rem] max-md:text-[1.2rem] max-w-[70%]"
                         >
                             یادگیری با نغز، نغزه و تحقیقات نشون میده که این نوع یادگیری واقعا کار میکنه!<br />
                             با آموزش های <span className="font-bold">میکرو و گیمیفیکیشن</span>، مهارتهای نرم رو بصورت <span className="font-bold">تعاملی و کاربردی</span> یاد میگیری.
@@ -245,10 +245,10 @@ const Home = () => {
                     </motion.div>
                 </section>
                 <section
-                    className="grid grid-cols-[5%_1fr_1fr_1fr_1fr_1fr_1fr] max-[1100px]:grid-cols-1 max-md:grid-rows-[1fr_1fr] overflow-x-hidden min-h-[80vh] max-md:min-h-[60vh] relative" 
+                    className="grid grid-cols-[5%_1fr_1fr_1fr_1fr_1fr_1fr] max-[1100px]:grid-cols-1 max-md:grid-rows-[1fr_1fr] overflow-x-hidden min-h-[80vh] max-md:min-h-[85vh] relative" 
                 >
-                    <div className="absolute bottom-0 right-0 w-4/5 max-md:w-full mr-[-30vw] max-md:mr-0">
-                        <img src="lohp-learn-at-your-level.svg" alt="concepts that click" className="w-full h-auto object-contain object-bottom max-[1100px]:object-cover" />
+                    <div className="absolute top-[13vh] right-[5vw] w-4/5 max-md:w-full max-w-[40vw] flex items-center max-md:max-w-[90vw] max-md:mt-[20vh]">
+                        <img src="/section1.landing2.jpg" alt="concepts that click" className="w-full h-auto object-contain max-[1100px]:object-cover rounded-3xl" />
                     </div>
                     <motion.div 
                         initial={{ x: -90, opacity: 0 }}
@@ -256,7 +256,7 @@ const Home = () => {
                         exit={{ opacity: 0 }}
                         viewport={{ once: true }}
                         transition={{  delay: 0.5, duration: 0.6}}
-                        className="px-8 flex flex-col justify-center col-start-5 col-end-8 max-md:w-[90%] z-2"
+                        className="px-8 flex flex-col justify-center col-start-5 col-end-8 max-md:w-[90%] z-2 mb-[8vh]"
                     >
                         <h1
                             className="h1 max-w-[40vw] max-[1300px]:max-w-[60vw] max-[550px]:max-w-[80vw] max-[400px]:max-w-[80vw] max-md:mt-[5vh]"
@@ -271,10 +271,10 @@ const Home = () => {
                     </motion.div>
                 </section>
                 <section
-                    className="bg-[var(--primary-color4)] grid grid-cols-[5%_1fr_1fr_1fr_1fr_1fr_1fr] max-[1100px]:grid-cols-1 max-md:grid-rows-[1fr_1fr] overflow-x-hidden min-h-[80vh] max-md:min-h-[60vh] relative" 
+                    className="bg-[var(--primary-color4)] grid grid-cols-[5%_1fr_1fr_1fr_1fr_1fr_1fr] max-[1100px]:grid-cols-1 max-md:grid-rows-[1fr_1fr] overflow-x-hidden min-h-[80vh] max-md:min-h-[85vh] relative" 
                 >
-                    <div className="absolute bottom-0 left-0 w-4/5 max-md:w-full ml-[-30vw] max-[1100px]:ml-0">
-                        <img src="/stay-motivated-v3.svg" alt="concepts that click" className="w-full h-auto object-contain object-bottom max-[1100px]:object-cover" />
+                    <div className="absolute top-[13vh] left-[5vw] w-4/5 max-md:w-full max-w-[40vw] flex items-center max-md:max-w-[90vw] max-md:mt-[20vh]">
+                        <img src="/section1.landing3.jpg" alt="concepts that click" className="w-full h-auto object-contain max-[1100px]:object-cover rounded-3xl" />
                     </div>
                     <motion.div 
                         initial={{ x: 90, opacity: 0 }}
@@ -282,7 +282,7 @@ const Home = () => {
                         exit={{ opacity: 0 }}
                         viewport={{ once: true }}
                         transition={{  delay: 0.5, duration: 0.6}}
-                        className="px-8 flex flex-col justify-center col-start-2 col-end-5 max-md:w-[90%]"
+                        className="px-8 flex flex-col justify-center col-start-2 col-end-5 max-md:w-[90%] mb-[8vh]"
                     >
                         <h1
                             className="h1 max-w-[40vw] max-[1300px]:max-w-[60vw] max-[550px]:max-w-[80vw] max-[400px]:max-w-[80vw] max-md:mt-[5vh]"
@@ -297,10 +297,10 @@ const Home = () => {
                     </motion.div>
                 </section>
                 <section
-                    className="grid grid-cols-[5%_1fr_1fr_1fr_1fr_1fr_1fr] max-[1100px]:grid-cols-1 max-md:grid-rows-[1fr_1fr] overflow-x-hidden min-h-[80vh] max-md:min-h-[60vh] relative" 
+                    className="grid grid-cols-[5%_1fr_1fr_1fr_1fr_1fr_1fr] max-[1100px]:grid-cols-1 max-md:grid-rows-[1fr_1fr] overflow-x-hidden min-h-[80vh] max-md:min-h-[80vh] relative" 
                 >
-                    <div className="absolute bottom-0 right-0 w-4/5 max-md:w-full mr-[-30vw] max-md:mr-[-20vw]">
-                        <img src="/lohp-guided-bite-sized.svg" alt="concepts that click" className="w-full h-auto object-contain object-bottom max-[1100px]:object-cover" />
+                    <div className="absolute top-[13vh] right-[5vw] w-4/5 max-md:w-full max-w-[40vw] flex items-center max-md:max-w-[90vw] max-md:mt-[20vh]">
+                        <img src="/section4.landing.jpg" alt="concepts that click" className="w-full h-auto object-contain max-[1100px]:object-cover rounded-3xl" />
                     </div>
                     <motion.div
                         initial={{ x: -90, opacity: 0 }}
@@ -308,7 +308,7 @@ const Home = () => {
                         exit={{ opacity: 0 }}
                         viewport={{ once: true }}
                         transition={{  delay: 0.5, duration: 0.6}} 
-                        className="px-8 flex flex-col justify-center col-start-5 col-end-8 max-md:w-[90%] z-2"
+                        className="px-8 flex flex-col justify-center col-start-5 col-end-8 max-md:w-[90%] z-2 mb-[5vh]"
                     >
                         <h1
                             className="h1 max-w-[40vw] max-[1300px]:max-w-[60vw] max-[550px]:max-w-[80vw] max-[400px]:max-w-[80vw] max-md:mt-[5vh]"
