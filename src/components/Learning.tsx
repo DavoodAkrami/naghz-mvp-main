@@ -121,6 +121,7 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
     const [correctModalContent, setCorrectModalContent] = useState<string>("");
     const [isWhyModalOpen, setIsWhyModalOpen] = useState<boolean>(false);
     const [whyModalContent, setWhyModalContent] = useState<string>("");
+    const [saveProgressLoading, setSaveProgressLoading] = useState<boolean>(false);
 
     const successSound = useMemo(() => new Audio('/game-se-1.wav'), []);
     const wrongSound = useMemo(() => new Audio('/game-se-2.wav'), []);
@@ -219,7 +220,11 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
         if (page_number >= pageLength) {
             endSound.play();
             router.push("/courses")
-            if (!isCompleted) dispatch(saveProgress({ courseId: course_id, userId: user?.id || '' }))
+            if (!isCompleted){ 
+                setSaveProgressLoading(true)
+                dispatch(saveProgress({ courseId: course_id, userId: user?.id || '' }))
+                setSaveProgressLoading(false)
+            }
         } else {
             handleNext?.();
         }
@@ -450,7 +455,7 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
     return (
         <div
             className={clsx(
-                "h-[60vh] flex flex-col justify-center items-baseline max-md:h-auto",
+                "h-[75vh] flex flex-col justify-center items-baseline max-md:h-auto",
                 image && "min-h-[100vh] h-auto"
             )}
         >
@@ -459,7 +464,7 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                     className="flex flex-col justify-center items-center max-w-[80%] max-md:max-w[95%] mx-auto"
                 >
                     {image && (
-                        courseLoading ? (
+                        courseLoading || saveProgressLoading ? (
                             <div className="animate-pulse bg-[var(--hover-color)]/60 max-h-[70vh] h-[40vh] max-w-[80%] max-md:max-w-[95%] mx-auto rounded-xl mb-6" />
                         ) : (
                             <img 

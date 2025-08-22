@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "@/store/store";
 import { fetchCourses, uploadPageImage } from "@/store/slices/courseSlice";
 import { supabase } from "@/config/supabase";
-import { FiPlus, FiEdit, FiTrash2 } from "react-icons/fi";
+import { FiPlus, FiEdit, FiTrash2, FiMove, FiChevronUp, FiChevronDown } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaTrash } from "react-icons/fa";
 
@@ -82,6 +82,10 @@ export default function CourseManagement() {
   const [originalPageIds, setOriginalPageIds] = useState<string[]>([]);
   const [imagesByPage, setImagesByPage] = useState<Record<number, File | null>>({});
   const [editLoading, setEditLoading] = useState<boolean>(false);
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [reorderPages, setReorderPages] = useState<PageFormData[]>([]);
+  const [reorderOptionsByPage, setReorderOptionsByPage] = useState<Record<number, OptionFormData[]>>({});
+  const [showReorderModal, setShowReorderModal] = useState(false);
 
   // Converts the UI's number[] into DB JSONB per test type
   const toDbCorrectAnswer = (
@@ -126,6 +130,101 @@ export default function CourseManagement() {
     return [];
   };
 
+  const getPageDisplayText = (page: PageFormData) => {
+    if (page.title && page.title.trim()) {
+      return page.title;
+    }
+    if (page.question && page.question.trim()) {
+      return page.question;
+    }
+    return `صفحه ${page.page_number}`;
+  };
+
+  const swapArrayItems = <T,>(arr: T[], i: number, j: number) => {
+    const copy = [...arr];
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+    return copy;
+  };
+  
+  const swapObjKeys = <T extends Record<number, any>>(obj: T, i: number, j: number): T => {
+    const copy: T = { ...obj };
+    const ti = copy[i];
+    const tj = copy[j];
+    copy[i] = tj;
+    copy[j] = ti;
+    return copy;
+  };
+  
+  const renumberPagesInPlace = (list: PageFormData[]) => {
+    list.forEach((p, idx) => {
+      p.page_number = idx + 1;
+      p.order_index = idx;
+    });
+  };
+  
+
+  const movePageUp = (pageIndex: number) => {
+    if (pageIndex === 0) return;
+  
+    const newPages = swapArrayItems(pages, pageIndex, pageIndex - 1);
+    setOptionsByPage(prev => swapObjKeys(prev, pageIndex, pageIndex - 1));
+    setImagesByPage(prev => swapObjKeys(prev, pageIndex, pageIndex - 1));
+  
+    renumberPagesInPlace(newPages);
+    setPages(newPages);
+  };
+  
+  const movePageDown = (pageIndex: number) => {
+    if (pageIndex === pages.length - 1) return;
+  
+    const newPages = swapArrayItems(pages, pageIndex, pageIndex + 1);
+    setOptionsByPage(prev => swapObjKeys(prev, pageIndex, pageIndex + 1));
+    setImagesByPage(prev => swapObjKeys(prev, pageIndex, pageIndex + 1));
+  
+    renumberPagesInPlace(newPages);
+    setPages(newPages);
+  };
+  
+
+  const openReorderModal = () => {
+    setReorderPages([...pages]);
+    setReorderOptionsByPage({...optionsByPage});
+    setShowReorderModal(true);
+  };
+
+  const moveReorderPageUp = (pageIndex: number) => {
+    if (pageIndex === 0) return;
+  
+    const newPages = swapArrayItems(reorderPages, pageIndex, pageIndex - 1);
+    const newOpts = swapObjKeys(reorderOptionsByPage, pageIndex, pageIndex - 1);
+  
+    renumberPagesInPlace(newPages);
+    setReorderPages(newPages);
+    setReorderOptionsByPage(newOpts);
+  };
+  
+  const moveReorderPageDown = (pageIndex: number) => {
+    if (pageIndex === reorderPages.length - 1) return;
+  
+    const newPages = swapArrayItems(reorderPages, pageIndex, pageIndex + 1);
+    const newOpts = swapObjKeys(reorderOptionsByPage, pageIndex, pageIndex + 1);
+  
+    renumberPagesInPlace(newPages);
+    setReorderPages(newPages);
+    setReorderOptionsByPage(newOpts);
+  };
+  
+
+  const confirmReorder = () => {
+    setPages(reorderPages);
+    setOptionsByPage(reorderOptionsByPage);
+    setShowReorderModal(false);
+  };
+
+  const cancelReorder = () => {
+    setShowReorderModal(false);
+  };
+
   useEffect(() => {
     dispatch(fetchCourses());
   }, [dispatch]);
@@ -133,69 +232,51 @@ export default function CourseManagement() {
   const handleCreateCourse = async () => {
     try {
       if (!supabase) throw new Error('Supabase not configured');
-  
+      
       const { data: course, error: courseError } = await supabase
         .from('courses')
         .insert(courseFormData)
         .select()
         .single();
+      
       if (courseError) throw courseError;
-  
-      const annotatedPages = pages.map((p, idx) => ({
-        ...p,
-        __origIndex: idx as number
-      }));
-  
-      const sortedPages = [...annotatedPages].sort((a, b) => {
-        const ao = a.order_index ?? a.page_number ?? a.__origIndex;
-        const bo = b.order_index ?? b.page_number ?? b.__origIndex;
-        return ao - bo;
-      });
-  
-      sortedPages.forEach((p, i) => {
-        p.order_index = i;
-        p.page_number = i + 1;
-      });
-  
-      for (let i = 0; i < sortedPages.length; i++) {
-        const page = sortedPages[i];
-        const orig = page.__origIndex as number;
-  
+
+      // Normalize page ordering just before persisting
+      const orderedPages = pages
+        .slice()
+        .map((p, idx) => ({ ...p, page_number: idx + 1, order_index: idx, page_length: pages.length }));
+
+      for (let i = 0; i < orderedPages.length; i++) {
+        const page = orderedPages[i];
         const { data: pageData, error: pageError } = await supabase
           .from('course_pages')
           .insert({
-            title: page.title,
-            content: page.content,
-            image: page.image,
-            page_type: page.page_type,
-            test_type: page.test_type,
+            ...page,
             correct_answer: toDbCorrectAnswer(page.test_type, page.correct_answer),
-            order_index: page.order_index,
-            page_number: page.page_number,
             course_id: course.id
           })
           .select()
           .single();
-  
+        
         if (pageError) throw pageError;
-  
-        const fileForPage = imagesByPage[orig];
+
+        // If an image is selected for this page, upload it and update DB
+        const fileForPage = imagesByPage[i];
         if (fileForPage) {
           try {
-            const result = await dispatch(
-              uploadPageImage({ pageId: pageData.id as string, file: fileForPage })
-            ).unwrap();
-            updatePage(orig, { image: result.publicUrl });
+            const result = await dispatch(uploadPageImage({ pageId: pageData.id as string, file: fileForPage })).unwrap();
+            // reflect in local state
+            updatePage(i, { image: result.publicUrl });
           } catch (e) {
             console.error('Failed to upload page image:', e);
           }
         }
-  
-        const pageOptions = optionsByPage[orig] || [];
-        if ((page.page_type === 'test' || page.page_type === 'testNext') && pageOptions.length > 0) {
+
+        const pageOptions = optionsByPage[i] || [];
+        if (page.page_type === 'test' && pageOptions.length > 0) {
           for (let j = 0; j < pageOptions.length; j++) {
             const option = pageOptions[j];
-            const { error: optErr } = await supabase
+            await supabase
               .from('page_options')
               .insert({
                 option_text: option.option_text,
@@ -204,11 +285,10 @@ export default function CourseManagement() {
                 icon_name: option.icon_name,
                 page_id: pageData.id
               });
-            if (optErr) throw optErr;
           }
         }
       }
-  
+
       setShowCreateModal(false);
       setCourseFormData({
         slug: '',
@@ -225,151 +305,159 @@ export default function CourseManagement() {
       console.error('Error creating course:', error);
     }
   };
-  
 
   const handleEditCourse = async () => {
-    setEditLoading(true);
-    try {
-      if (!supabase || !selectedCourse) throw new Error('Supabase not configured or no course selected');
-  
-      const courseId = (selectedCourse as { id: string }).id;
-  
-      await supabase
+  setEditLoading(true);
+  try {
+    if (!supabase || !selectedCourse) throw new Error('Supabase not configured or no course selected');
+
+    const courseId = (selectedCourse as { id: string }).id;
+
+    {
+      const { error } = await supabase
         .from('courses')
         .update(courseFormData)
         .eq('id', courseId);
-  
-      const annotatedPages = pages.map((p, idx) => ({ ...p, __origIndex: idx as number }));
-      const sortedPages = [...annotatedPages].sort((a, b) => {
-        const ao = a.order_index ?? a.page_number ?? a.__origIndex;
-        const bo = b.order_index ?? b.page_number ?? b.__origIndex;
-        return ao - bo;
-      });
-      sortedPages.forEach((p, i) => {
-        p.order_index = i;
-        p.page_number = i + 1;
-      });
-  
-      const currentPageIds = sortedPages.filter(p => p.id).map(p => p.id!) as string[];
-      const pagesToDelete = originalPageIds.filter(id => !currentPageIds.includes(id));
-  
-      for (const pageId of pagesToDelete) {
-        await supabase.from('page_options').delete().eq('page_id', pageId);
-        await supabase.from('course_pages').delete().eq('id', pageId);
-      }
-  
-      for (let i = 0; i < sortedPages.length; i++) {
-        const page = sortedPages[i];
-        const orig = page.__origIndex as number;
-        let pageId: string | undefined = page.id;
-  
-        if (pageId) {
-          await supabase
-            .from('course_pages')
-            .update({
-              page_number: page.page_number,
-              page_type: page.page_type,
-              title: page.title,
-              content: page.content,
-              question: page.question,
-              test_type: page.test_type,
-              test_grid: page.test_grid,
-              correct_answer: toDbCorrectAnswer(page.test_type, page.correct_answer),
-              image: page.image,
-              page_length: page.page_length,
-              order_index: page.order_index,
-              why: page.why
-            })
-            .eq('id', pageId);
-        } else {
-          const { data: insertedPage, error: insertPageError } = await supabase
-            .from('course_pages')
-            .insert({
-              page_number: page.page_number,
-              page_type: page.page_type,
-              title: page.title,
-              content: page.content,
-              question: page.question,
-              test_type: page.test_type,
-              test_grid: page.test_grid,
-              correct_answer: toDbCorrectAnswer(page.test_type, page.correct_answer),
-              image: page.image,
-              page_length: page.page_length,
-              order_index: page.order_index,
-              course_id: courseId,
-            })
-            .select()
-            .single();
-          if (insertPageError) throw insertPageError;
-          pageId = insertedPage?.id as string;
-        }
-  
-        const fileForPage = imagesByPage[orig];
-        if (fileForPage && pageId) {
-          try {
-            const result = await dispatch(uploadPageImage({ pageId, file: fileForPage })).unwrap();
-            updatePage(orig, { image: result.publicUrl });
-          } catch (e) {
-            console.error('Failed to upload page image:', e);
-          }
-        }
-  
-        if (!pageId) continue;
-  
-        const pageOptions = optionsByPage[orig] || [];
-        const { data: existingOpts } = await supabase
-          .from('page_options')
-          .select('id')
-          .eq('page_id', pageId);
-        const existingIds = (existingOpts || []).map((o: unknown) => {
-          if (typeof o === 'object' && o && 'id' in o) return (o as { id: string }).id;
-          return '';
-        });
-        const currentIds = pageOptions.filter(o => o.id).map(o => o.id as string);
-        const optionsToDelete = existingIds.filter(id => id && !currentIds.includes(id));
-  
-        if (optionsToDelete.length > 0) {
-          await supabase.from('page_options').delete().in('id', optionsToDelete);
-        }
-  
-        for (const opt of pageOptions) {
-          if (opt.id) {
-            await supabase
-              .from('page_options')
-              .update({
-                option_text: opt.option_text,
-                option_order: opt.option_order,
-                is_correct: opt.is_correct,
-                icon_name: opt.icon_name,
-              })
-              .eq('id', opt.id);
-          } else {
-            await supabase
-              .from('page_options')
-              .insert({
-                page_id: pageId,
-                option_text: opt.option_text,
-                option_order: opt.option_order,
-                is_correct: opt.is_correct,
-                icon_name: opt.icon_name,
-              });
-          }
-        }
-      }
-  
-      setShowEditModal(false);
-      setSelectedCourse(null);
-      setPages([]);
-      setOptionsByPage({});
-      setOriginalPageIds([]);
-      dispatch(fetchCourses());
-    } catch (error) {
-      console.error('Error updating course:', error);
-    } finally {
-      setEditLoading(false);
+      if (error) throw error;
     }
-  };
-  
+
+    const orderedPages = pages
+      .slice()
+      .map((p, idx) => ({ ...p, page_number: idx + 1, order_index: idx, page_length: pages.length }));
+
+    const currentPageIds = orderedPages.filter(p => p.id).map(p => p.id!) as string[];
+    const pagesToDelete = originalPageIds.filter(id => !currentPageIds.includes(id));
+
+    for (const pageId of pagesToDelete) {
+      const { error: delOptErr } = await supabase.from('page_options').delete().eq('page_id', pageId);
+      if (delOptErr) throw delOptErr;
+      const { error: delPageErr } = await supabase.from('course_pages').delete().eq('id', pageId);
+      if (delPageErr) throw delPageErr;
+    }
+
+    for (const p of orderedPages) {
+      if (!p.id) continue;
+      const { error: tmpErr } = await supabase
+        .from('course_pages')
+        .update({ page_number: 1000 + p.order_index })
+        .eq('id', p.id);
+      if (tmpErr) throw tmpErr;
+    }
+
+    for (let i = 0; i < orderedPages.length; i++) {
+      const page = orderedPages[i];
+      let pageId: string | undefined = page.id;
+
+      if (pageId) {
+        const { error: updErr } = await supabase
+          .from('course_pages')
+          .update({
+            page_number: page.page_number,
+            page_type: page.page_type,
+            title: page.title,
+            content: page.content,
+            question: page.question,
+            test_type: page.test_type,
+            test_grid: page.test_grid,
+            correct_answer: toDbCorrectAnswer(page.test_type, page.correct_answer),
+            image: page.image,
+            page_length: page.page_length,
+            order_index: page.order_index,
+            why: page.why
+          })
+          .eq('id', pageId);
+        if (updErr) throw updErr;
+      } else {
+        const { data: insertedPage, error: insertPageError } = await supabase
+          .from('course_pages')
+          .insert({
+            page_number: page.page_number,
+            page_type: page.page_type,
+            title: page.title,
+            content: page.content,
+            question: page.question,
+            test_type: page.test_type,
+            test_grid: page.test_grid,
+            correct_answer: toDbCorrectAnswer(page.test_type, page.correct_answer),
+            image: page.image,
+            page_length: page.page_length,
+            order_index: page.order_index,
+            course_id: courseId,
+          })
+          .select()
+          .single();
+        if (insertPageError) throw insertPageError;
+        pageId = insertedPage!.id as string;
+      }
+
+      const fileForPage = imagesByPage[i];
+      if (fileForPage && pageId) {
+        try {
+          const result = await dispatch(uploadPageImage({ pageId, file: fileForPage })).unwrap();
+          updatePage(i, { image: result.publicUrl });
+        } catch (e) {
+          console.error('Failed to upload page image:', e);
+        }
+      }
+
+      if (!pageId) continue;
+
+      const pageOptions = optionsByPage[i] || [];
+      const { data: existingOpts, error: fetchOptErr } = await supabase
+        .from('page_options')
+        .select('id')
+        .eq('page_id', pageId);
+      if (fetchOptErr) throw fetchOptErr;
+
+      const existingIds = (existingOpts || []).map((o: any) => o?.id).filter(Boolean) as string[];
+      const currentIds = pageOptions.filter(o => o.id).map(o => o.id as string);
+      const optionsToDelete = existingIds.filter(id => !currentIds.includes(id));
+
+      if (optionsToDelete.length > 0) {
+        const { error: delOptsErr } = await supabase.from('page_options').delete().in('id', optionsToDelete);
+        if (delOptsErr) throw delOptsErr;
+      }
+
+      for (const opt of pageOptions) {
+        if (opt.id) {
+          const { error: updOptErr } = await supabase
+            .from('page_options')
+            .update({
+              option_text: opt.option_text,
+              option_order: opt.option_order,
+              is_correct: opt.is_correct,
+              icon_name: opt.icon_name,
+            })
+            .eq('id', opt.id);
+          if (updOptErr) throw updOptErr;
+        } else {
+          const { error: insOptErr } = await supabase
+            .from('page_options')
+            .insert({
+              page_id: pageId,
+              option_text: opt.option_text,
+              option_order: opt.option_order,
+              is_correct: opt.is_correct,
+              icon_name: opt.icon_name,
+            });
+          if (insOptErr) throw insOptErr;
+        }
+      }
+    }
+
+    setShowEditModal(false);
+    setSelectedCourse(null);
+    setPages([]);
+    setOptionsByPage({});
+    setOriginalPageIds([]);
+    dispatch(fetchCourses());
+  } catch (error) {
+    console.error('Error updating course:', error);
+  } finally {
+    setEditLoading(false);
+  }
+};
+
 
   const handleDeleteCourse = async () => {
     try {
@@ -410,32 +498,30 @@ export default function CourseManagement() {
     setPages(newPages);
   };
 
-  const movePageUp = (i: number) => {
-    if (i === 0) return;
-    const copy = [...pages];
-    [copy[i - 1], copy[i]] = [copy[i], copy[i - 1]];
-    copy.forEach((p, idx) => p.order_index = idx);
-    setPages(copy);
-  };
-  
-  const movePageDown = (i: number) => {
-    if (i === pages.length - 1) return;
-    const copy = [...pages];
-    [copy[i], copy[i + 1]] = [copy[i + 1], copy[i]];
-    copy.forEach((p, idx) => p.order_index = idx);
-    setPages(copy);
-  };
-  
-
   const removePage = (index: number) => {
     const newPages = pages.filter((_, i) => i !== index);
+    renumberPagesInPlace(newPages);
     setPages(newPages);
+  
     const newOptions: Record<number, OptionFormData[]> = {};
-    newPages.forEach((_, i) => {
-      newOptions[i] = optionsByPage[i] || [];
-    });
+    let ptr = 0;
+    for (let i = 0; i < pages.length; i++) {
+      if (i === index) continue;
+      newOptions[ptr] = optionsByPage[i] || [];
+      ptr++;
+    }
     setOptionsByPage(newOptions);
+  
+    const newImages: Record<number, File | null> = {};
+    ptr = 0;
+    for (let i = 0; i < pages.length; i++) {
+      if (i === index) continue;
+      newImages[ptr] = imagesByPage[i] || null;
+      ptr++;
+    }
+    setImagesByPage(newImages);
   };
+  
 
   const addOptionForPage = (pageIndex: number) => {
     setOptionsByPage(prev => {
@@ -663,12 +749,23 @@ export default function CourseManagement() {
             <div className="mb-6">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-xl font-semibold">صفحات دوره</h3>
-                <button
-                  onClick={addPage}
-                  className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-                >
-                  افزودن صفحه
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={addPage}
+                    className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                  >
+                    افزودن صفحه
+                  </button>
+                  {pages.length > 1 && (
+                    <button
+                      onClick={openReorderModal}
+                      className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 flex items-center gap-2"
+                    >
+                      <FiMove size={16} />
+                      تغییر ترتیب
+                    </button>
+                  )}
+                </div>
               </div>
               
               {pages.map((page, index) => (
@@ -721,20 +818,6 @@ export default function CourseManagement() {
                             <img src={page.image} alt="preview" className="mt-2 max-h-40 rounded" />
                           )}
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-2">ترتیب نمایش</label>
-                      <input
-                        type="number"
-                        min={0}
-                        value={page.order_index ?? index}
-                        onChange={(e) => updatePage(index, { order_index: Number(e.target.value) })}
-                        className="w-full p-2 border rounded"
-                      />
-                    </div>
-                    <div className="flex gap-2">
-                      <button onClick={() => movePageUp(index)} className="px-2 py-1 border rounded">⬆️</button>
-                      <button onClick={() => movePageDown(index)} className="px-2 py-1 border rounded">⬇️</button>
-                    </div>
                     {page.page_type === 'text' ? (
                       <div className="col-span-2">
                         <label className="block text-sm font-medium mb-2">محتوای متن</label>
@@ -783,144 +866,144 @@ export default function CourseManagement() {
                             <option value="grid-row">شبکه سطری</option>
                           </select>
                         </div>
-                        {page.page_type != "testNext" && (
+                        {page.page_type != "testNext" &&
                           <>
                           <div className="col-span-2">
-                            <label className="block text-sm font-medium mb-2">دلیل</label>
-                            <textarea
-                              value={page.why || ''}
-                              onChange={(e) => updatePage(index, { why: e.target.value })}
-                              className="w-full p-2 border rounded"
-                              rows={3}
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium mb-2">پاسخ صحیح</label>
-                            {page.test_type === 'Default' && (
-                              <select
-                                value={page.correct_answer[0] || ''}
-                                onChange={(e) => {
-                                  const selectedId = parseInt(e.target.value);
-                                  updatePage(index, { correct_answer: selectedId ? [selectedId] : [] });
-                                }}
-                              className="w-full p-2 border rounded"
-                              >
-                                <option value="">انتخاب کنید</option>
-                                {(optionsByPage[index] || []).map((option, optIndex) => (
-                                  <option key={optIndex} value={option.option_order}>
-                                    گزینه {optIndex + 1}: {option.option_text}
-                                  </option>
-                                ))}
-                              </select>
-                            )}
-                            {page.test_type === 'Multiple' && (
-                              <div className="space-y-2">
-                                {(optionsByPage[index] || []).map((option, optIndex) => (
-                                  <label key={optIndex} className="flex items-center gap-2">
-                                    <input
-                                      type="checkbox"
-                                      checked={page.correct_answer.includes(option.option_order)}
-                                      onChange={(e) => {
-                                        const newCorrect = e.target.checked
-                                          ? [...page.correct_answer, option.option_order]
-                                          : page.correct_answer.filter(id => id !== option.option_order);
-                                        updatePage(index, { correct_answer: newCorrect });
-                                      }}
-                                    />
-                                    <span className="text-sm">گزینه {optIndex + 1}: {option.option_text}</span>
-                                  </label>
-                                ))}
-                              </div>
-                            )}
-                            {page.test_type === 'Sequential' && (
-                              <div className="space-y-2">
-                                <p className="text-xs text-gray-600">ترتیب صحیح گزینه‌ها را مشخص کنید:</p>
-                                {(optionsByPage[index] || []).map((option, optIndex) => (
-                                  <div key={optIndex} className="flex items-center gap-2">
-                                    <input
-                                      type="number"
-                                      min="1"
-                                      max={(optionsByPage[index] || []).length}
-                                      value={page.correct_answer.indexOf(option.option_order) + 1 || ''}
-                                      onChange={(e) => {
-                                        const order = parseInt(e.target.value);
-                                        if (order && order >= 1 && order <= (optionsByPage[index] || []).length) {
-                                          const newCorrect = [...page.correct_answer];
-                                          const currentIndex = newCorrect.indexOf(option.option_order);
-                                          if (currentIndex !== -1) {
-                                            newCorrect.splice(currentIndex, 1);
-                                          }
-                                          newCorrect.splice(order - 1, 0, option.option_order);
-                                          updatePage(index, { correct_answer: newCorrect });
-                                        }
-                                      }}
-                                      className="w-16 p-1 border rounded text-sm"
-                                      placeholder="ترتیب"
-                                    />
-                                    <span className="text-sm">گزینه {optIndex + 1}: {option.option_text}</span>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                            {page.test_type === 'Pluggable' && (
-                              <div className="space-y-2">
-                                <p className="text-xs text-gray-600">جفت‌های صحیح را مشخص کنید:</p>
-                                {(optionsByPage[index] || []).map((option, optIndex) => (
-                                  <div key={optIndex} className="flex items-center gap-2">
-                                    <span className="text-sm w-20">گزینه {optIndex + 1}:</span>
-                                    <select
-                                      value={(() => {
-                                        const pairIndex = Math.floor(optIndex / 2);
-                                        const isFirstInPair = optIndex % 2 === 0;
-                                        if (isFirstInPair && page.correct_answer.length > pairIndex * 2 + 1) {
-                                          return page.correct_answer[pairIndex * 2 + 1];
-                                        } else if (!isFirstInPair && page.correct_answer.length > pairIndex * 2) {
-                                          return page.correct_answer[pairIndex * 2];
-                                        }
-                                        return '';
-                                      })()}
-                                      onChange={(e) => {
-                                        const selectedId = parseInt(e.target.value);
-                                        const pairIndex = Math.floor(optIndex / 2);
-                                        const isFirstInPair = optIndex % 2 === 0;
+                          <label className="block text-sm font-medium mb-2">دلیل</label>
+                          <textarea
+                            value={page.why || ''}
+                            onChange={(e) => updatePage(index, { why: e.target.value })}
+                            className="w-full p-2 border rounded"
+                            rows={3}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium mb-2">پاسخ صحیح</label>
+                          {page.test_type === 'Default' && (
+                            <select
+                              value={page.correct_answer[0] || ''}
+                              onChange={(e) => {
+                                const selectedId = parseInt(e.target.value);
+                                updatePage(index, { correct_answer: selectedId ? [selectedId] : [] });
+                              }}
+                            className="w-full p-2 border rounded"
+                            >
+                              <option value="">انتخاب کنید</option>
+                              {(optionsByPage[index] || []).map((option, optIndex) => (
+                                <option key={optIndex} value={option.option_order}>
+                                  گزینه {optIndex + 1}: {option.option_text}
+                                </option>
+                              ))}
+                            </select>
+                          )}
+                          {page.test_type === 'Multiple' && (
+                            <div className="space-y-2">
+                              {(optionsByPage[index] || []).map((option, optIndex) => (
+                                <label key={optIndex} className="flex items-center gap-2">
+                                  <input
+                                    type="checkbox"
+                                    checked={page.correct_answer.includes(option.option_order)}
+                                    onChange={(e) => {
+                                      const newCorrect = e.target.checked
+                                        ? [...page.correct_answer, option.option_order]
+                                        : page.correct_answer.filter(id => id !== option.option_order);
+                                      updatePage(index, { correct_answer: newCorrect });
+                                    }}
+                                  />
+                                  <span className="text-sm">گزینه {optIndex + 1}: {option.option_text}</span>
+                                </label>
+                              ))}
+                            </div>
+                          )}
+                          {page.test_type === 'Sequential' && (
+                            <div className="space-y-2">
+                              <p className="text-xs text-gray-600">ترتیب صحیح گزینه‌ها را مشخص کنید:</p>
+                              {(optionsByPage[index] || []).map((option, optIndex) => (
+                                <div key={optIndex} className="flex items-center gap-2">
+                                  <input
+                                    type="number"
+                                    min="1"
+                                    max={(optionsByPage[index] || []).length}
+                                    value={page.correct_answer.indexOf(option.option_order) + 1 || ''}
+                                    onChange={(e) => {
+                                      const order = parseInt(e.target.value);
+                                      if (order && order >= 1 && order <= (optionsByPage[index] || []).length) {
                                         const newCorrect = [...page.correct_answer];
-                                        
-                                        if (isFirstInPair) {
-                                          if (newCorrect.length <= pairIndex * 2) {
-                                            newCorrect.push(option.option_order, selectedId);
-                                          } else {
-                                            newCorrect[pairIndex * 2] = option.option_order;
-                                            newCorrect[pairIndex * 2 + 1] = selectedId;
-                                          }
-                                        } else {
-                                          if (newCorrect.length <= pairIndex * 2) {
-                                            newCorrect.push(selectedId, option.option_order);
-                                          } else {
-                                            newCorrect[pairIndex * 2] = selectedId;
-                                            newCorrect[pairIndex * 2 + 1] = option.option_order;
-                                          }
+                                        const currentIndex = newCorrect.indexOf(option.option_order);
+                                        if (currentIndex !== -1) {
+                                          newCorrect.splice(currentIndex, 1);
                                         }
-                                        
+                                        newCorrect.splice(order - 1, 0, option.option_order);
                                         updatePage(index, { correct_answer: newCorrect });
-                                      }}
-                                      className="flex-1 p-1 border rounded text-sm"
-                                    >
-                                      <option value="">انتخاب کنید</option>
-                                      {(optionsByPage[index] || []).map((otherOption, otherIndex) => (
-                                        optIndex !== otherIndex && (
-                                          <option key={otherIndex} value={otherOption.option_order}>
-                                            گزینه {otherIndex + 1}: {otherOption.option_text}
-                                          </option>
-                                        )
-                                      ))}
-                                    </select>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                          </>
-                        )}
+                                      }
+                                    }}
+                                    className="w-16 p-1 border rounded text-sm"
+                                    placeholder="ترتیب"
+                                  />
+                                  <span className="text-sm">گزینه {optIndex + 1}: {option.option_text}</span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                          {page.test_type === 'Pluggable' && (
+                            <div className="space-y-2">
+                              <p className="text-xs text-gray-600">جفت‌های صحیح را مشخص کنید:</p>
+                              {(optionsByPage[index] || []).map((option, optIndex) => (
+                                <div key={optIndex} className="flex items-center gap-2">
+                                  <span className="text-sm w-20">گزینه {optIndex + 1}:</span>
+                                  <select
+                                    value={(() => {
+                                      const pairIndex = Math.floor(optIndex / 2);
+                                      const isFirstInPair = optIndex % 2 === 0;
+                                      if (isFirstInPair && page.correct_answer.length > pairIndex * 2 + 1) {
+                                        return page.correct_answer[pairIndex * 2 + 1];
+                                      } else if (!isFirstInPair && page.correct_answer.length > pairIndex * 2) {
+                                        return page.correct_answer[pairIndex * 2];
+                                      }
+                                      return '';
+                                    })()}
+                                    onChange={(e) => {
+                                      const selectedId = parseInt(e.target.value);
+                                      const pairIndex = Math.floor(optIndex / 2);
+                                      const isFirstInPair = optIndex % 2 === 0;
+                                      const newCorrect = [...page.correct_answer];
+                                      
+                                      if (isFirstInPair) {
+                                        if (newCorrect.length <= pairIndex * 2) {
+                                          newCorrect.push(option.option_order, selectedId);
+                                        } else {
+                                          newCorrect[pairIndex * 2] = option.option_order;
+                                          newCorrect[pairIndex * 2 + 1] = selectedId;
+                                        }
+                                      } else {
+                                        if (newCorrect.length <= pairIndex * 2) {
+                                          newCorrect.push(selectedId, option.option_order);
+                                        } else {
+                                          newCorrect[pairIndex * 2] = selectedId;
+                                          newCorrect[pairIndex * 2 + 1] = option.option_order;
+                                        }
+                                      }
+                                      
+                                      updatePage(index, { correct_answer: newCorrect });
+                                    }}
+                                    className="flex-1 p-1 border rounded text-sm"
+                                  >
+                                    <option value="">انتخاب کنید</option>
+                                    {(optionsByPage[index] || []).map((otherOption, otherIndex) => (
+                                      optIndex !== otherIndex && (
+                                        <option key={otherIndex} value={otherOption.option_order}>
+                                          گزینه {otherIndex + 1}: {otherOption.option_text}
+                                        </option>
+                                      )
+                                    ))}
+                                  </select>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                        </>
+                        }
                         <div className="col-span-2">
                           <div className="flex justify-between items-center mb-2">
                             <h5 className="font-medium">گزینه‌های آزمون</h5>
@@ -1074,12 +1157,23 @@ export default function CourseManagement() {
             <div className="mb-6">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-xl font-semibold">صفحات دوره</h3>
-                <button
-                  onClick={addPage}
-                  className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-                >
-                  افزودن صفحه
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={addPage}
+                    className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                  >
+                    افزودن صفحه
+                  </button>
+                  {pages.length > 1 && (
+                    <button
+                      onClick={openReorderModal}
+                      className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 flex items-center gap-2"
+                    >
+                      <FiMove size={16} />
+                      تغییر ترتیب
+                    </button>
+                  )}
+                </div>
               </div>
 
               {pages.map((page, index) => (
@@ -1141,21 +1235,6 @@ export default function CourseManagement() {
                             </span>
                           )}
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-2">ترتیب نمایش</label>
-                      <input
-                        type="number"
-                        min={0}
-                        value={page.order_index ?? index}
-                        onChange={(e) => updatePage(index, { order_index: Number(e.target.value) })}
-                        className="w-full p-2 border rounded"
-                      />
-                    </div>
-                    <div className="flex gap-2">
-                      <button onClick={() => movePageUp(index)} className="px-2 py-1 border rounded">⬆️</button>
-                      <button onClick={() => movePageDown(index)} className="px-2 py-1 border rounded">⬇️</button>
-                    </div>
-
                     {page.page_type === 'text' ? (
                       <div className="col-span-2">
                         <label className="block text-sm font-medium mb-2">محتوای متن</label>
@@ -1204,145 +1283,144 @@ export default function CourseManagement() {
                             <option value="grid-row">شبکه سطری</option>
                           </select>
                         </div>
-                        {page.page_type != "testNext" && (
+                        {page.page_type != "testNext" &&
                           <>
-                            <div className="col-span-2">
-                              <label className="block text-sm font-medium mb-2">دلیل</label>
-                              <textarea
-                                value={page.why || ''}
-                                onChange={(e) => updatePage(index, { why: e.target.value })}
-                                className="w-full p-2 border rounded"
-                                rows={3}
-                              />
+                          <div className="col-span-2">
+                          <label className="block text-sm font-medium mb-2">دلیل</label>
+                          <textarea
+                            value={page.why || ''}
+                            onChange={(e) => updatePage(index, { why: e.target.value })}
+                            className="w-full p-2 border rounded"
+                            rows={3}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium mb-2">پاسخ صحیح</label>
+                          {page.test_type === 'Default' && (
+                            <select
+                              value={page.correct_answer[0] || ''}
+                              onChange={(e) => {
+                                const selectedId = parseInt(e.target.value);
+                                updatePage(index, { correct_answer: selectedId ? [selectedId] : [] });
+                              }}
+                            className="w-full p-2 border rounded"
+                            >
+                              <option value="">انتخاب کنید</option>
+                              {(optionsByPage[index] || []).map((option, optIndex) => (
+                                <option key={optIndex} value={option.option_order}>
+                                  گزینه {optIndex + 1}: {option.option_text}
+                                </option>
+                              ))}
+                            </select>
+                          )}
+                          {page.test_type === 'Multiple' && (
+                            <div className="space-y-2">
+                              {(optionsByPage[index] || []).map((option, optIndex) => (
+                                <label key={optIndex} className="flex items-center gap-2">
+                                  <input
+                                    type="checkbox"
+                                    checked={page.correct_answer.includes(option.option_order)}
+                                    onChange={(e) => {
+                                      const newCorrect = e.target.checked
+                                        ? [...page.correct_answer, option.option_order]
+                                        : page.correct_answer.filter(id => id !== option.option_order);
+                                      updatePage(index, { correct_answer: newCorrect });
+                                    }}
+                                  />
+                                  <span className="text-sm">گزینه {optIndex + 1}: {option.option_text}</span>
+                                </label>
+                              ))}
                             </div>
-                            <div>
-                              <label className="block text-sm font-medium mb-2">پاسخ صحیح</label>
-                              {page.test_type === 'Default' && (
-                                <select
-                                  value={page.correct_answer[0] || ''}
-                                  onChange={(e) => {
-                                    const selectedId = parseInt(e.target.value);
-                                    updatePage(index, { correct_answer: selectedId ? [selectedId] : [] });
-                                  }}
-                                className="w-full p-2 border rounded"
-                                >
-                                  <option value="">انتخاب کنید</option>
-                                  {(optionsByPage[index] || []).map((option, optIndex) => (
-                                    <option key={optIndex} value={option.option_order}>
-                                      گزینه {optIndex + 1}: {option.option_text}
-                                    </option>
-                                  ))}
-                                </select>
-                              )}
-                              {page.test_type === 'Multiple' && (
-                                <div className="space-y-2">
-                                  {(optionsByPage[index] || []).map((option, optIndex) => (
-                                    <label key={optIndex} className="flex items-center gap-2">
-                                      <input
-                                        type="checkbox"
-                                        checked={page.correct_answer.includes(option.option_order)}
-                                        onChange={(e) => {
-                                          const newCorrect = e.target.checked
-                                            ? [...page.correct_answer, option.option_order]
-                                            : page.correct_answer.filter(id => id !== option.option_order);
-                                          updatePage(index, { correct_answer: newCorrect });
-                                        }}
-                                      />
-                                      <span className="text-sm">گزینه {optIndex + 1}: {option.option_text}</span>
-                                    </label>
-                                  ))}
+                          )}
+                          {page.test_type === 'Sequential' && (
+                            <div className="space-y-2">
+                              <p className="text-xs text-gray-600">ترتیب صحیح گزینه‌ها را مشخص کنید:</p>
+                              {(optionsByPage[index] || []).map((option, optIndex) => (
+                                <div key={optIndex} className="flex items-center gap-2">
+                                  <input
+                                    type="number"
+                                    min="1"
+                                    max={(optionsByPage[index] || []).length}
+                                    value={page.correct_answer.indexOf(option.option_order) + 1 || ''}
+                                    onChange={(e) => {
+                                      const order = parseInt(e.target.value);
+                                      if (order && order >= 1 && order <= (optionsByPage[index] || []).length) {
+                                        const newCorrect = [...page.correct_answer];
+                                        const currentIndex = newCorrect.indexOf(option.option_order);
+                                        if (currentIndex !== -1) {
+                                          newCorrect.splice(currentIndex, 1);
+                                        }
+                                        newCorrect.splice(order - 1, 0, option.option_order);
+                                        updatePage(index, { correct_answer: newCorrect });
+                                      }
+                                    }}
+                                    className="w-16 p-1 border rounded text-sm"
+                                    placeholder="ترتیب"
+                                  />
+                                  <span className="text-sm">گزینه {optIndex + 1}: {option.option_text}</span>
                                 </div>
-                              )}
-                              {page.test_type === 'Sequential' && (
-                                <div className="space-y-2">
-                                  <p className="text-xs text-gray-600">ترتیب صحیح گزینه‌ها را مشخص کنید:</p>
-                                  {(optionsByPage[index] || []).map((option, optIndex) => (
-                                    <div key={optIndex} className="flex items-center gap-2">
-                                      <input
-                                        type="number"
-                                        min="1"
-                                        max={(optionsByPage[index] || []).length}
-                                        value={page.correct_answer.indexOf(option.option_order) + 1 || ''}
-                                        onChange={(e) => {
-                                          const order = parseInt(e.target.value);
-                                          if (order && order >= 1 && order <= (optionsByPage[index] || []).length) {
-                                            const newCorrect = [...page.correct_answer];
-                                            const currentIndex = newCorrect.indexOf(option.option_order);
-                                            if (currentIndex !== -1) {
-                                              newCorrect.splice(currentIndex, 1);
-                                            }
-                                            newCorrect.splice(order - 1, 0, option.option_order);
-                                            updatePage(index, { correct_answer: newCorrect });
-                                          }
-                                        }}
-                                        className="w-16 p-1 border rounded text-sm"
-                                        placeholder="ترتیب"
-                                      />
-                                      <span className="text-sm">گزینه {optIndex + 1}: {option.option_text}</span>
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
-                              {page.test_type === 'Pluggable' && (
-                                <div className="space-y-2">
-                                  <p className="text-xs text-gray-600">جفت‌های صحیح را مشخص کنید:</p>
-                                  {(optionsByPage[index] || []).map((option, optIndex) => (
-                                    <div key={optIndex} className="flex items-center gap-2">
-                                      <span className="text-sm w-20">گزینه {optIndex + 1}:</span>
-                                      <select
-                                        value={(() => {
-                                          const pairIndex = Math.floor(optIndex / 2);
-                                          const isFirstInPair = optIndex % 2 === 0;
-                                          if (isFirstInPair && page.correct_answer.length > pairIndex * 2 + 1) {
-                                            return page.correct_answer[pairIndex * 2 + 1];
-                                          } else if (!isFirstInPair && page.correct_answer.length > pairIndex * 2) {
-                                            return page.correct_answer[pairIndex * 2];
-                                          }
-                                          return '';
-                                        })()}
-                                        onChange={(e) => {
-                                          const selectedId = parseInt(e.target.value);
-                                          const pairIndex = Math.floor(optIndex / 2);
-                                          const isFirstInPair = optIndex % 2 === 0;
-                                          const newCorrect = [...page.correct_answer];
-                                          
-                                          if (isFirstInPair) {
-                                            if (newCorrect.length <= pairIndex * 2) {
-                                              newCorrect.push(option.option_order, selectedId);
-                                            } else {
-                                              newCorrect[pairIndex * 2] = option.option_order;
-                                              newCorrect[pairIndex * 2 + 1] = selectedId;
-                                            }
-                                          } else {
-                                            if (newCorrect.length <= pairIndex * 2) {
-                                              newCorrect.push(selectedId, option.option_order);
-                                            } else {
-                                              newCorrect[pairIndex * 2] = selectedId;
-                                              newCorrect[pairIndex * 2 + 1] = option.option_order;
-                                            }
-                                          }
-                                          
-                                          updatePage(index, { correct_answer: newCorrect });
-                                        }}
-                                        className="flex-1 p-1 border rounded text-sm"
-                                      >
-                                        <option value="">انتخاب کنید</option>
-                                        {(optionsByPage[index] || []).map((otherOption, otherIndex) => (
-                                          optIndex !== otherIndex && (
-                                            <option key={otherIndex} value={otherOption.option_order}>
-                                              گزینه {otherIndex + 1}: {otherOption.option_text}
-                                            </option>
-                                          )
-                                        ))}
-                                      </select>
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
+                              ))}
                             </div>
-                          </>
-                        )}
-
+                          )}
+                          {page.test_type === 'Pluggable' && (
+                            <div className="space-y-2">
+                              <p className="text-xs text-gray-600">جفت‌های صحیح را مشخص کنید:</p>
+                              {(optionsByPage[index] || []).map((option, optIndex) => (
+                                <div key={optIndex} className="flex items-center gap-2">
+                                  <span className="text-sm w-20">گزینه {optIndex + 1}:</span>
+                                  <select
+                                    value={(() => {
+                                      const pairIndex = Math.floor(optIndex / 2);
+                                      const isFirstInPair = optIndex % 2 === 0;
+                                      if (isFirstInPair && page.correct_answer.length > pairIndex * 2 + 1) {
+                                        return page.correct_answer[pairIndex * 2 + 1];
+                                      } else if (!isFirstInPair && page.correct_answer.length > pairIndex * 2) {
+                                        return page.correct_answer[pairIndex * 2];
+                                      }
+                                      return '';
+                                    })()}
+                                    onChange={(e) => {
+                                      const selectedId = parseInt(e.target.value);
+                                      const pairIndex = Math.floor(optIndex / 2);
+                                      const isFirstInPair = optIndex % 2 === 0;
+                                      const newCorrect = [...page.correct_answer];
+                                      
+                                      if (isFirstInPair) {
+                                        if (newCorrect.length <= pairIndex * 2) {
+                                          newCorrect.push(option.option_order, selectedId);
+                                        } else {
+                                          newCorrect[pairIndex * 2] = option.option_order;
+                                          newCorrect[pairIndex * 2 + 1] = selectedId;
+                                        }
+                                      } else {
+                                        if (newCorrect.length <= pairIndex * 2) {
+                                          newCorrect.push(selectedId, option.option_order);
+                                        } else {
+                                          newCorrect[pairIndex * 2] = selectedId;
+                                          newCorrect[pairIndex * 2 + 1] = option.option_order;
+                                        }
+                                      }
+                                      
+                                      updatePage(index, { correct_answer: newCorrect });
+                                    }}
+                                    className="flex-1 p-1 border rounded text-sm"
+                                  >
+                                    <option value="">انتخاب کنید</option>
+                                    {(optionsByPage[index] || []).map((otherOption, otherIndex) => (
+                                      optIndex !== otherIndex && (
+                                        <option key={otherIndex} value={otherOption.option_order}>
+                                          گزینه {otherIndex + 1}: {otherOption.option_text}
+                                        </option>
+                                      )
+                                    ))}
+                                  </select>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                        </>
+                        }
                         <div className="col-span-2">
                           <div className="flex justify-between items-center mb-2">
                             <h5 className="font-medium">گزینه‌های آزمون</h5>
@@ -1453,6 +1531,95 @@ export default function CourseManagement() {
                 className="px-6 py-2 bg-red-600 text-white rounded hover:bg-red-700"
               >
                 حذف
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Reorder Pages Modal */}
+      {showReorderModal && (
+        <motion.div className="fixed inset-0 bg-black/30 backdrop-blur-xl bg-opacity-50 flex items-center justify-center p-4 z-10000" 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+        >
+          <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <h2 className="text-2xl font-bold mb-4">تغییر ترتیب صفحات</h2>
+            <p className="mb-6">
+              از دکمه‌های بالا و پایین برای تغییر ترتیب صفحات استفاده کنید.
+            </p>
+            <div className="space-y-2">
+              {reorderPages.map((page, index) => (
+                <div
+                  key={`reorder-page-${index}-${page.id || 'new'}-${page.page_number}`}
+                  className="flex items-center justify-between p-3 rounded-lg border bg-gray-50"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm font-medium text-gray-500 w-8">#{page.page_number}</span>
+                    <span className="text-lg font-medium">{getPageDisplayText(page)}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => moveReorderPageUp(index)}
+                      disabled={index === 0}
+                      className="p-2 text-gray-600 hover:text-blue-600 disabled:opacity-30 disabled:cursor-not-allowed"
+                      title="انتقال به بالا"
+                    >
+                      <FiChevronUp size={20} />
+                    </button>
+                    <button
+                      onClick={() => moveReorderPageDown(index)}
+                      disabled={index === reorderPages.length - 1}
+                      className="p-2 text-gray-600 hover:text-blue-600 disabled:opacity-30 disabled:cursor-not-allowed"
+                      title="انتقال به پایین"
+                    >
+                      <FiChevronDown size={20} />
+                    </button>
+                    <button
+                      onClick={() => {
+                        const newPages = reorderPages.filter((_, i) => i !== index);
+
+                        // reindex pages
+                        renumberPagesInPlace(newPages);
+                      
+                        // reindex options map keys after deletion
+                        const newOpts: Record<number, OptionFormData[]> = {};
+                        let ptr = 0;
+                        for (let i = 0; i < reorderPages.length; i++) {
+                          if (i === index) continue;
+                          newOpts[ptr] = reorderOptionsByPage[i] || [];
+                          ptr++;
+                        }
+                        setReorderPages(newPages);
+                        setReorderOptionsByPage(prev => {
+                          const newOpts = { ...prev };
+                          delete newOpts[index];
+                          return newOpts;
+                        });
+                      }}
+                      className="p-2 text-red-500 hover:text-red-700"
+                      title="حذف صفحه"
+                    >
+                      <FiTrash2 size={20} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="flex gap-4 justify-end mt-6">
+              <button
+                onClick={cancelReorder}
+                className="px-6 py-2 border rounded hover:bg-gray-50"
+              >
+                انصراف
+              </button>
+              <button
+                onClick={confirmReorder}
+                className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              >
+                تایید تغییرات
               </button>
             </div>
           </div>
