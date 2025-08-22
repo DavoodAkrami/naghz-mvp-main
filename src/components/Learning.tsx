@@ -485,7 +485,7 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                     {text &&
                         <p
                             style={{ whiteSpace: "pre-line" }}
-                            className="text-center text-[1.2rem] font-black text-[var(--accent-color1)]"
+                            className="text-justify text-[1.2rem] font-black text-[var(--accent-color1)]"
                         >
                             {text}
                         </p>
@@ -508,11 +508,12 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                     )}
                     <p 
                         style={{ whiteSpace: "pre-line" }}
-                        className="text-[1.2rem] text-[var(--text-primary)] text-center my-[3vh]"
+                        className="text-[1.2rem] text-[var(--text-primary)] text-justify my-[3vh]"
                     >
                         {header}
                     </p>
                     <p
+                        style={{ whiteSpace: "pre-line" }}
                         className="text-[2rem] font-bold mb-[5vh] text-center max-md:max-w-[95%] mx-auto"
                     >
                         {question}
