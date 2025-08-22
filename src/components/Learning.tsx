@@ -578,7 +578,7 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                             <Image 
                                 src={image} 
                                 width={500}
-                                height={10000}
+                                height={100000}
                                 alt="تصویر صفحه" 
                                 priority
                                 className="max-h-[70vh] max-w-[80%] max-md:max-w-[95%] max-md:max-h-max mx-auto object-cover rounded-xl mb-6"
@@ -608,8 +608,8 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                         ) : (
                             <Image 
                                 src={image} 
-                                width={500}
-                                height={10000}
+                                width={450}
+                                height={100000}
                                 alt="تصویر صفحه"
                                 priority 
                                 className="max-h-[70vh] max-w-[80%] max-md:max-w-[95%] max-md:max-h-max mx-auto object-cover rounded-xl mb-6"
