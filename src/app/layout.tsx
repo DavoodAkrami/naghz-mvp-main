@@ -5,7 +5,7 @@ import Header from "@/components/Header";
 import Reduxrovider from "../providers/ReduxProvider";
 import AuthStatusProvider from "@/providers/authProvider";
 import { Analytics } from "@vercel/analytics/next"
-import ChallengPopUp from "@/components/ChallengPopUp";
+import Footer from "@/components/Footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -113,6 +113,7 @@ export default function RootLayout({
           <AuthStatusProvider>
             <Header />
             {children}
+            <Footer />
             <Analytics />
           </AuthStatusProvider>
         </Reduxrovider>

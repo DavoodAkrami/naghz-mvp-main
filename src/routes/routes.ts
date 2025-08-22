@@ -4,6 +4,7 @@ export interface routesType {
     header?: boolean;
     profilePage?: boolean;
     adminRequaire?: boolean;
+    footer?: boolean;
 }
 
 
@@ -12,6 +13,7 @@ const routes: routesType[]= [
         name: "خانه",
         path: "/",
         header: true,
+        footer: true
     },
     {
         name: "ثبت نام",

@@ -89,20 +89,26 @@ const Home = () => {
     }, [isAuthenticated]);
 
     useEffect(() => {
-        const hasPopUpOpened = localStorage.getItem("hasPopupOpen");
         const popupDate = localStorage.getItem("popupDate");
         const today = new Date().toDateString();
         const currentHour = new Date().getHours();
         
-        
-        if (popupDate !== today || (popupDate === today && currentHour >= 12)) {
-            localStorage.removeItem("hasPopupOpen");
-            localStorage.removeItem("popupDate");
+
+        if (popupDate && popupDate !== today) {
+            localStorage.setItem("hasPopupOpen", "false");
+            localStorage.setItem("popupDate", today);
         }
         
+
+        if (popupDate != today) {
+            localStorage.setItem("hasPopupOpen", "false");
+        }
+    }, []);
+
+    useEffect(() => {
         const shouldShowPopup = localStorage.getItem("hasPopupOpen");
         
-        if (isAuthenticated && !shouldShowPopup) {
+        if (isAuthenticated && shouldShowPopup !== "true") {
             const timer = setTimeout(() => {
                 setIsPopUpOpen(true);
             }, 8000); 
