@@ -5,6 +5,7 @@ import Header from "@/components/Header";
 import Reduxrovider from "../providers/ReduxProvider";
 import AuthStatusProvider from "@/providers/authProvider";
 import { Analytics } from "@vercel/analytics/next"
+import ChallengPopUp from "@/components/ChallengPopUp";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

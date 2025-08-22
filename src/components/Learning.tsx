@@ -115,6 +115,11 @@ const renderRichText = (text: string) => {
   
   // Convert markdown-like syntax to HTML
   let html = text
+    // Links: [text](url) or [text](url|target)
+    .replace(/\[([^\]]+)\]\(([^)]+)(?:\|([^)]+))?\)/g, (match, linkText, url, target) => {
+      const targetAttr = target ? ` target="${target}"` : ' target="_blank"';
+      return `<a href="${url}"${targetAttr} class="text-blue-600 hover:text-blue-800 underline transition-colors duration-200" rel="noopener noreferrer">${linkText}</a>`;
+    })
     // Bold: **text** or __text__
     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
     .replace(/__(.*?)__/g, '<strong>$1</strong>')
@@ -572,7 +577,7 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                             <Image 
                                 src={image} 
                                 width={500}
-                                height={500}
+                                height={10000}
                                 alt="تصویر صفحه" 
                                 priority
                                 className="max-h-[70vh] max-w-[80%] max-md:max-w-[95%] max-md:max-h-max mx-auto object-cover rounded-xl mb-6"
@@ -582,13 +587,13 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                     {header &&
                         <RichText
                             content={header}
-                            className="text-[3.6rem] max-md:text-[1.8rem] font-extrabold mb-[5vh] text-center"
+                            className="text-[3.6rem] max-md:text-[1.8rem] font-extrabold mb-[3vh] text-center"
                         />
                     }
                     {text &&
                         <RichText
                             content={text}
-                            className="text-justify text-[1.2rem] font-black text-[var(--accent-color1)]"
+                            className="text-justify text-[1.2rem] font-black text-[var(--text-primary)] my-[2vh]"
                         />
                     }
                 </div>
@@ -603,7 +608,7 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                             <Image 
                                 src={image} 
                                 width={500}
-                                height={500}
+                                height={10000}
                                 alt="تصویر صفحه"
                                 priority 
                                 className="max-h-[70vh] max-w-[80%] max-md:max-w-[95%] max-md:max-h-max mx-auto object-cover rounded-xl mb-6"

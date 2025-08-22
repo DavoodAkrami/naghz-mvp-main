@@ -4,12 +4,12 @@ import { ImClock2 } from "react-icons/im";
 import { FaUsers } from "react-icons/fa";
 import { MdPsychologyAlt } from "react-icons/md";
 import React, { useState, useEffect } from "react";
-import clsx from "clsx";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { links } from  "@/routes/routes";
+import ChallengPopUp from "@/components/ChallengPopUp";
 
 
 interface GuidedPathsType {
@@ -49,11 +49,35 @@ const Home = () => {
     const [selectedGuide, setSelectedGuide] = useState<number>(1);
     const { isAuthenticated, loading } = useSelector((state: RootState) => state.auth);
     const [linkCarry, setLinkCarry] = useState<string>(links.signUp);
+    const [isPopUpOpen, setIsPopUpOpen] = useState<boolean>(false);
+    const [isChallengPopUpOpen, setIsChallengPopUpOpen] = useState<boolean>(false);
 
 
+    // const handleNavigation = (guidedPath: number) => {
+    //     setSelectedGuide(guidedPath);
+    // }
 
-    const handleNavigation = (guidedPath: number) => {
-        setSelectedGuide(guidedPath);
+    const handlePopupClose = () => {
+        if (isPopUpOpen) {
+            setIsPopUpOpen(false);
+        } else if (isChallengPopUpOpen) {
+            setIsChallengPopUpOpen(false);
+        }
+    }
+
+    const handlePopupAccept = () => {
+        setIsPopUpOpen(false);
+        const timer = setTimeout(() => {
+            setIsChallengPopUpOpen(true)
+        }, 2000);
+        return () => clearTimeout(timer);
+    }
+
+    const handlePopUpSubmit = () => {
+        setIsChallengPopUpOpen(false);
+        const today = new Date().toDateString();
+        localStorage.setItem("hasPopupOpen", "true");
+        localStorage.setItem("popupDate", today);
     }
 
     useEffect(() => {
@@ -61,6 +85,29 @@ const Home = () => {
             setLinkCarry(links.courses);
         } else {
             setLinkCarry(links.signUp);
+        }
+    }, [isAuthenticated]);
+
+    useEffect(() => {
+        const hasPopUpOpened = localStorage.getItem("hasPopupOpen");
+        const popupDate = localStorage.getItem("popupDate");
+        const today = new Date().toDateString();
+        const currentHour = new Date().getHours();
+        
+        
+        if (popupDate !== today || (popupDate === today && currentHour >= 12)) {
+            localStorage.removeItem("hasPopupOpen");
+            localStorage.removeItem("popupDate");
+        }
+        
+        const shouldShowPopup = localStorage.getItem("hasPopupOpen");
+        
+        if (isAuthenticated && !shouldShowPopup) {
+            const timer = setTimeout(() => {
+                setIsPopUpOpen(true);
+            }, 8000); 
+
+            return () => clearTimeout(timer);
         }
     }, [isAuthenticated]);
 
@@ -358,6 +405,20 @@ const Home = () => {
                         </motion.button>
                     </div>
                 </section>
+                <ChallengPopUp 
+                    type="text"
+                    text="نام خود را بنویسید"
+                    openPopUp={isPopUpOpen}
+                    onAccept={handlePopupAccept}
+                    onClose={handlePopupClose}
+                />
+                <ChallengPopUp 
+                    type="form"
+                    question="نام"
+                    openPopUp={isChallengPopUpOpen}
+                    onClose={handlePopupClose}
+                    onSubmit={handlePopUpSubmit}
+                />
             </div>
         </AnimatePresence>
     );
