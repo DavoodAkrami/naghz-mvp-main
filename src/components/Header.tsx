@@ -45,7 +45,7 @@ const Header = () => {
     
     if (showSkeleton && headerPage) {
         return (
-            <header className="top-0 sticky shadow-lg bg-[var(--primary-color4)] z-1000">
+            <header className="top-0 sticky shadow-lg bg-[var(--primary-color4)]/40 backdrop-blur-xl z-1000">
                 <div className="py-[1.8rem] flex items-center justify-between w-[80%] max-lg:w-[90%] mx-auto max-md:py-[1.2rem]">
                     <div className="h-12 w-32 bg-gray-200 rounded animate-pulse max-md:w-24 max-md:h-8" />
                     <div className="flex gap-[1rem] max-md:gap-[0.2rem]">
@@ -64,7 +64,7 @@ const Header = () => {
         <>
             {headerPage ? (
                 <header
-                    className="top-0 sticky shadow-lg bg-[var(--primary-color4)] z-1000"
+                    className="top-0 sticky shadow-lg bg-[var(--primary-color4)]/40 backdrop-blur-xl z-1000"
                 >
                     <div
                         className="py-[1rem] flex items-center justify-between w-[80%] max-lg:w-[90%] mx-auto"
@@ -150,7 +150,7 @@ const Header = () => {
                 </header>
             ) : (
                 <header
-                    className="top-0 shadow-lg sticky bg-[var(--bg-color)] z-1000 px-[1.8rem] py-[1rem] flex items-center justify-between"
+                    className="top-0 shadow-lg sticky bg-[var(--bg-color)]/40 backdrop-blur-xl z-1000 px-[1.8rem] py-[1rem] flex items-center justify-between"
                 >
                     <IoArrowBackCircleOutline 
                         onClick={() => router.push("/")}

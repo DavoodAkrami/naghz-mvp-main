@@ -16,7 +16,7 @@ interface CoursePage {
   id: string;
   course_id: string;
   page_number: number;
-  page_type: 'text' | 'test' | 'nextTest';
+  page_type: 'text' | 'test' | 'testNext';
   title?: string;
   content?: string;
   question?: string;

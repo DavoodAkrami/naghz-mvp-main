@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6ad0ff"/>
+      <stop offset="100%" stop-color="#8b7bff"/>
+    </linearGradient>
+    <linearGradient id="tealGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#79e3e3"/>
+      <stop offset="100%" stop-color="#3fb0c9"/>
+    </linearGradient>
+    <linearGradient id="purpleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a999ff"/>
+      <stop offset="100%" stop-color="#6f63ff"/>
+    </linearGradient>
+    <linearGradient id="yellowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffd66b"/>
+      <stop offset="100%" stop-color="#ffb84d"/>
+    </linearGradient>
+    <filter id="softShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="8" result="blur"/>
+      <feOffset dx="0" dy="8" result="offset"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.25"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode in="offset"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="glassBlur" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="6"/>
+    </filter>
+    <linearGradient id="glassStroke" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.2"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="100%" height="100%" fill="none"/>
+  <!-- Background glow -->
+  <ellipse cx="520" cy="560" rx="360" ry="260" fill="url(#bgGrad)" filter="url(#glassBlur)" opacity="0.3"/>
+
+  <!-- Glass progress panel -->
+  <g filter="url(#softShadow)">
+    <rect x="560" y="360" width="240" height="280" rx="28" fill="#ffffff" opacity="0.28" stroke="url(#glassStroke)"/>
+    <rect x="600" y="430" width="160" height="16" rx="8" fill="url(#purpleGrad)" opacity="0.8"/>
+    <rect x="600" y="462" width="140" height="14" rx="7" fill="url(#purpleGrad)" opacity="0.6"/>
+    <rect x="600" y="494" width="120" height="14" rx="7" fill="url(#purpleGrad)" opacity="0.4"/>
+    <circle cx="760" cy="404" r="14" fill="url(#yellowGrad)"/>
+    <circle cx="580" cy="404" r="14" fill="url(#yellowGrad)"/>
+  </g>
+
+  <!-- Staircase of small steps -->
+  <g filter="url(#softShadow)">
+    <rect x="260" y="580" width="90" height="100" rx="16" fill="url(#tealGrad)"/>
+    <rect x="360" y="540" width="90" height="140" rx="16" fill="url(#tealGrad)" opacity="0.9"/>
+    <rect x="460" y="500" width="90" height="180" rx="16" fill="url(#tealGrad)" opacity="0.85"/>
+    <rect x="560" y="460" width="90" height="220" rx="16" fill="url(#tealGrad)" opacity="0.8"/>
+    <!-- progress arrow -->
+    <path d="M250,640 C360,580 520,520 700,480" fill="none" stroke="url(#yellowGrad)" stroke-width="10" stroke-linecap="round"/>
+    <polygon points="700,480 680,470 680,490" fill="url(#yellowGrad)"/>
+  </g>
+
+  <!-- Bell (reminder) -->
+  <g transform="translate(330,320)" filter="url(#softShadow)">
+    <path d="M120,60 a40,40 0 1 1 80,0 v60 h-80z" fill="url(#purpleGrad)"/>
+    <rect x="140" y="120" width="40" height="18" rx="9" fill="#fff" opacity="0.7"/>
+    <circle cx="160" cy="150" r="12" fill="url(#yellowGrad)"/>
+  </g>
+</svg>

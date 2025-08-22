@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6ad0ff"/>
+      <stop offset="100%" stop-color="#8b7bff"/>
+    </linearGradient>
+    <linearGradient id="tealGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#79e3e3"/>
+      <stop offset="100%" stop-color="#3fb0c9"/>
+    </linearGradient>
+    <linearGradient id="purpleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a999ff"/>
+      <stop offset="100%" stop-color="#6f63ff"/>
+    </linearGradient>
+    <linearGradient id="yellowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffd66b"/>
+      <stop offset="100%" stop-color="#ffb84d"/>
+    </linearGradient>
+    <filter id="softShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="8" result="blur"/>
+      <feOffset dx="0" dy="8" result="offset"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.25"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode in="offset"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="glassBlur" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="6"/>
+    </filter>
+    <linearGradient id="glassStroke" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.2"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="100%" height="100%" fill="none"/>
+  <!-- Glow background blob -->
+  <g opacity="0.9">
+    <ellipse cx="380" cy="360" rx="300" ry="220" fill="url(#bgGrad)" filter="url(#glassBlur)" opacity="0.35"/>
+    <ellipse cx="700" cy="700" rx="260" ry="200" fill="url(#bgGrad)" filter="url(#glassBlur)" opacity="0.25"/>
+  </g>
+
+  <!-- Floating glass cards -->
+  <g filter="url(#softShadow)">
+    <rect x="280" y="420" rx="28" ry="28" width="180" height="220" fill="#ffffff" opacity="0.28" stroke="url(#glassStroke)"/>
+    <rect x="480" y="380" rx="28" ry="28" width="220" height="260" fill="#ffffff" opacity="0.32" stroke="url(#glassStroke)"/>
+    <rect x="720" y="440" rx="28" ry="28" width="160" height="200" fill="#ffffff" opacity="0.28" stroke="url(#glassStroke)"/>
+  </g>
+
+  <!-- Card contents (gamified icons & micro-cards) -->
+  <g>
+    <!-- Middle big card content -->
+    <circle cx="590" cy="470" r="46" fill="url(#tealGrad)"/>
+    <rect x="530" y="530" width="160" height="16" rx="8" fill="url(#purpleGrad)" opacity="0.9"/>
+    <rect x="530" y="560" width="140" height="14" rx="7" fill="url(#purpleGrad)" opacity="0.6"/>
+    <rect x="530" y="588" width="120" height="14" rx="7" fill="url(#purpleGrad)" opacity="0.4"/>
+  </g>
+
+  <!-- Stars / badges -->
+  <g filter="url(#softShadow)">
+    <path d="M140,260 l38,0 12,-36 12,36 38,0 -30,22 12,36 -32,-20 -32,20 12,-36z"
+          fill="url(#yellowGrad)" transform="translate(120,80) scale(0.9)"/>
+    <circle cx="820" cy="360" r="34" fill="url(#yellowGrad)"/>
+    <circle cx="340" cy="660" r="18" fill="url(#yellowGrad)" opacity="0.9"/>
+  </g>
+
+  <!-- Progress ring -->
+  <g filter="url(#softShadow)">
+    <circle cx="360" cy="380" r="54" fill="none" stroke="url(#purpleGrad)" stroke-width="16" opacity="0.35"/>
+    <path d="M360 326 A54 54 0 1 1 334 430" fill="none" stroke="url(#tealGrad)" stroke-width="16" stroke-linecap="round"/>
+  </g>
+
+</svg>

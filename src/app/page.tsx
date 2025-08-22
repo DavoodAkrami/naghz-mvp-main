@@ -335,24 +335,36 @@ const Home = () => {
                 <section
                     className="bg-[url(/social-proof-background.svg)] bg-[var(--section-color)] text-[var(--text-secondary)]"
                 >
-                    <motion.div 
-                        initial={{ y: 90, opacity: 0 }}
-                        whileInView={{ y: 0, opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        viewport={{ once: true }}
-                        transition={{  delay: 0.5, duration: 0.6}}
+                    <div 
                         className="min-h-[80vh] flex flex-col justify-center items-center"
                     >
-                        <h2 className="font-[750] text-[4rem] max-[1200px]:font-[700] max-md:text-[2.4rem] text-center py-[10vh] text-[var(--primary-color4)] max-w-[90%]">
+                        <motion.h2 
+                            initial={{ y: -90, opacity: 0 }}
+                            whileInView={{ y: 0, opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            viewport={{ once: true }}
+                            transition={{  delay: 0.5, duration: 0.6}}
+                            className="font-[750] text-[4rem] max-[1200px]:font-[700] max-md:text-[2.4rem] text-center py-[10vh] text-[var(--primary-color4)] max-w-[90%]"
+                        >
                             با اولین قطره شروع کن، این‌طوریه که اقیانوس ساخته میشه  
-                        </h2>
-                        <p
+                        </motion.h2>
+                        <motion.p
+                            initial={{ y: -90, opacity: 0 }}
+                            whileInView={{ y: 0, opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            viewport={{ once: true }}
+                            transition={{  delay: 0.5, duration: 0.6}}
                             className="text-[2.2rem] max-w-[80%] mx-auto max-md:text-[1.6rem] text-center font-[600] mb-[1rem]"
                         >
                             تغییر نیاز به هیاهو نداره و از همون لحظه‌ای آغاز می‌شود که تصمیم می‌گیری.
                             آروم، ساده، اما واقعی
-                        </p>
-                        <button
+                        </motion.p>
+                        <motion.button
+                            initial={{ y: -90, opacity: 0 }}
+                            whileInView={{ y: 0, opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            viewport={{ once: true }}
+                            transition={{  delay: 0.5, duration: 0.6}}
                             className="button-primary rounded-full mt-[5vh] shadow-lg md:scale-[1.5] max-md:scale-[1.3] mb-[10vh] min-w-[15vw]"
                         >
                             <Link href="/auth/sign-up"
@@ -360,8 +372,8 @@ const Home = () => {
                             >
                                 قدم اولو بردار
                             </Link>
-                        </button>
-                    </motion.div>
+                        </motion.button>
+                    </div>
                 </section>
             </div>
         </AnimatePresence>

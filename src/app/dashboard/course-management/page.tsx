@@ -133,46 +133,69 @@ export default function CourseManagement() {
   const handleCreateCourse = async () => {
     try {
       if (!supabase) throw new Error('Supabase not configured');
-      
+  
       const { data: course, error: courseError } = await supabase
         .from('courses')
         .insert(courseFormData)
         .select()
         .single();
-      
       if (courseError) throw courseError;
-
-      for (let i = 0; i < pages.length; i++) {
-        const page = pages[i];
+  
+      const annotatedPages = pages.map((p, idx) => ({
+        ...p,
+        __origIndex: idx as number
+      }));
+  
+      const sortedPages = [...annotatedPages].sort((a, b) => {
+        const ao = a.order_index ?? a.page_number ?? a.__origIndex;
+        const bo = b.order_index ?? b.page_number ?? b.__origIndex;
+        return ao - bo;
+      });
+  
+      sortedPages.forEach((p, i) => {
+        p.order_index = i;
+        p.page_number = i + 1;
+      });
+  
+      for (let i = 0; i < sortedPages.length; i++) {
+        const page = sortedPages[i];
+        const orig = page.__origIndex as number;
+  
         const { data: pageData, error: pageError } = await supabase
           .from('course_pages')
           .insert({
-            ...page,
+            title: page.title,
+            content: page.content,
+            image: page.image,
+            page_type: page.page_type,
+            test_type: page.test_type,
             correct_answer: toDbCorrectAnswer(page.test_type, page.correct_answer),
+            order_index: page.order_index,
+            page_number: page.page_number,
             course_id: course.id
           })
           .select()
           .single();
-        
+  
         if (pageError) throw pageError;
-
-        // If an image is selected for this page, upload it and update DB
-        const fileForPage = imagesByPage[i];
+  
+        const fileForPage = imagesByPage[orig];
         if (fileForPage) {
           try {
-            const result = await dispatch(uploadPageImage({ pageId: pageData.id as string, file: fileForPage })).unwrap();
-            // reflect in local state
-            updatePage(i, { image: result.publicUrl });
+            const result = await dispatch(
+              uploadPageImage({ pageId: pageData.id as string, file: fileForPage })
+            ).unwrap();
+            updatePage(orig, { image: result.publicUrl });
           } catch (e) {
             console.error('Failed to upload page image:', e);
           }
         }
-
-        const pageOptions = optionsByPage[i] || [];
-        if (page.page_type === 'test' && pageOptions.length > 0) {
+  
+        const pageOptions = optionsByPage[orig] || [];
+        if ((page.page_type === 'test' || page.page_type === 'testNext') && pageOptions.length > 0) {
           for (let j = 0; j < pageOptions.length; j++) {
             const option = pageOptions[j];
-            await supabase
+            const { error: optErr } = await supabase
               .from('page_options')
               .insert({
                 option_text: option.option_text,
@@ -181,10 +204,11 @@ export default function CourseManagement() {
                 icon_name: option.icon_name,
                 page_id: pageData.id
               });
+            if (optErr) throw optErr;
           }
         }
       }
-
+  
       setShowCreateModal(false);
       setCourseFormData({
         slug: '',
@@ -201,31 +225,44 @@ export default function CourseManagement() {
       console.error('Error creating course:', error);
     }
   };
+  
 
   const handleEditCourse = async () => {
     setEditLoading(true);
     try {
       if (!supabase || !selectedCourse) throw new Error('Supabase not configured or no course selected');
-
+  
       const courseId = (selectedCourse as { id: string }).id;
-
+  
       await supabase
         .from('courses')
         .update(courseFormData)
         .eq('id', courseId);
-
-      const currentPageIds = pages.filter(p => p.id).map(p => p.id!) as string[];
+  
+      const annotatedPages = pages.map((p, idx) => ({ ...p, __origIndex: idx as number }));
+      const sortedPages = [...annotatedPages].sort((a, b) => {
+        const ao = a.order_index ?? a.page_number ?? a.__origIndex;
+        const bo = b.order_index ?? b.page_number ?? b.__origIndex;
+        return ao - bo;
+      });
+      sortedPages.forEach((p, i) => {
+        p.order_index = i;
+        p.page_number = i + 1;
+      });
+  
+      const currentPageIds = sortedPages.filter(p => p.id).map(p => p.id!) as string[];
       const pagesToDelete = originalPageIds.filter(id => !currentPageIds.includes(id));
-
+  
       for (const pageId of pagesToDelete) {
         await supabase.from('page_options').delete().eq('page_id', pageId);
         await supabase.from('course_pages').delete().eq('id', pageId);
       }
-
-      for (let i = 0; i < pages.length; i++) {
-        const page = pages[i];
+  
+      for (let i = 0; i < sortedPages.length; i++) {
+        const page = sortedPages[i];
+        const orig = page.__origIndex as number;
         let pageId: string | undefined = page.id;
-
+  
         if (pageId) {
           await supabase
             .from('course_pages')
@@ -266,36 +303,35 @@ export default function CourseManagement() {
           if (insertPageError) throw insertPageError;
           pageId = insertedPage?.id as string;
         }
-
-        // Upload a newly selected image for this page (if any)
-        const fileForPage = imagesByPage[i];
+  
+        const fileForPage = imagesByPage[orig];
         if (fileForPage && pageId) {
           try {
             const result = await dispatch(uploadPageImage({ pageId, file: fileForPage })).unwrap();
-            updatePage(i, { image: result.publicUrl });
+            updatePage(orig, { image: result.publicUrl });
           } catch (e) {
             console.error('Failed to upload page image:', e);
           }
         }
-
+  
         if (!pageId) continue;
-
-        const pageOptions = optionsByPage[i] || [];
+  
+        const pageOptions = optionsByPage[orig] || [];
         const { data: existingOpts } = await supabase
           .from('page_options')
           .select('id')
           .eq('page_id', pageId);
         const existingIds = (existingOpts || []).map((o: unknown) => {
-            if (typeof o === 'object' && o && 'id' in o) return (o as { id: string }).id;
-            return '';
+          if (typeof o === 'object' && o && 'id' in o) return (o as { id: string }).id;
+          return '';
         });
         const currentIds = pageOptions.filter(o => o.id).map(o => o.id as string);
         const optionsToDelete = existingIds.filter(id => id && !currentIds.includes(id));
-
+  
         if (optionsToDelete.length > 0) {
           await supabase.from('page_options').delete().in('id', optionsToDelete);
         }
-
+  
         for (const opt of pageOptions) {
           if (opt.id) {
             await supabase
@@ -320,7 +356,7 @@ export default function CourseManagement() {
           }
         }
       }
-
+  
       setShowEditModal(false);
       setSelectedCourse(null);
       setPages([]);
@@ -333,6 +369,7 @@ export default function CourseManagement() {
       setEditLoading(false);
     }
   };
+  
 
   const handleDeleteCourse = async () => {
     try {
@@ -372,6 +409,23 @@ export default function CourseManagement() {
     newPages[index] = { ...newPages[index], ...data };
     setPages(newPages);
   };
+
+  const movePageUp = (i: number) => {
+    if (i === 0) return;
+    const copy = [...pages];
+    [copy[i - 1], copy[i]] = [copy[i], copy[i - 1]];
+    copy.forEach((p, idx) => p.order_index = idx);
+    setPages(copy);
+  };
+  
+  const movePageDown = (i: number) => {
+    if (i === pages.length - 1) return;
+    const copy = [...pages];
+    [copy[i], copy[i + 1]] = [copy[i + 1], copy[i]];
+    copy.forEach((p, idx) => p.order_index = idx);
+    setPages(copy);
+  };
+  
 
   const removePage = (index: number) => {
     const newPages = pages.filter((_, i) => i !== index);
@@ -667,6 +721,20 @@ export default function CourseManagement() {
                             <img src={page.image} alt="preview" className="mt-2 max-h-40 rounded" />
                           )}
                     </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">ترتیب نمایش</label>
+                      <input
+                        type="number"
+                        min={0}
+                        value={page.order_index ?? index}
+                        onChange={(e) => updatePage(index, { order_index: Number(e.target.value) })}
+                        className="w-full p-2 border rounded"
+                      />
+                    </div>
+                    <div className="flex gap-2">
+                      <button onClick={() => movePageUp(index)} className="px-2 py-1 border rounded">⬆️</button>
+                      <button onClick={() => movePageDown(index)} className="px-2 py-1 border rounded">⬇️</button>
+                    </div>
                     {page.page_type === 'text' ? (
                       <div className="col-span-2">
                         <label className="block text-sm font-medium mb-2">محتوای متن</label>
@@ -715,141 +783,144 @@ export default function CourseManagement() {
                             <option value="grid-row">شبکه سطری</option>
                           </select>
                         </div>
-                        <div className="col-span-2">
-                          <label className="block text-sm font-medium mb-2">دلیل</label>
-                          <textarea
-                            value={page.why || ''}
-                            onChange={(e) => updatePage(index, { why: e.target.value })}
-                            className="w-full p-2 border rounded"
-                            rows={3}
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium mb-2">پاسخ صحیح</label>
-                          {page.test_type === 'Default' && (
-                            <select
-                              value={page.correct_answer[0] || ''}
-                              onChange={(e) => {
-                                const selectedId = parseInt(e.target.value);
-                                updatePage(index, { correct_answer: selectedId ? [selectedId] : [] });
-                              }}
-                            className="w-full p-2 border rounded"
-                            >
-                              <option value="">انتخاب کنید</option>
-                              {(optionsByPage[index] || []).map((option, optIndex) => (
-                                <option key={optIndex} value={option.option_order}>
-                                  گزینه {optIndex + 1}: {option.option_text}
-                                </option>
-                              ))}
-                            </select>
-                          )}
-                          {page.test_type === 'Multiple' && (
-                            <div className="space-y-2">
-                              {(optionsByPage[index] || []).map((option, optIndex) => (
-                                <label key={optIndex} className="flex items-center gap-2">
-                                  <input
-                                    type="checkbox"
-                                    checked={page.correct_answer.includes(option.option_order)}
-                                    onChange={(e) => {
-                                      const newCorrect = e.target.checked
-                                        ? [...page.correct_answer, option.option_order]
-                                        : page.correct_answer.filter(id => id !== option.option_order);
-                                      updatePage(index, { correct_answer: newCorrect });
-                                    }}
-                                  />
-                                  <span className="text-sm">گزینه {optIndex + 1}: {option.option_text}</span>
-                                </label>
-                              ))}
-                            </div>
-                          )}
-                          {page.test_type === 'Sequential' && (
-                            <div className="space-y-2">
-                              <p className="text-xs text-gray-600">ترتیب صحیح گزینه‌ها را مشخص کنید:</p>
-                              {(optionsByPage[index] || []).map((option, optIndex) => (
-                                <div key={optIndex} className="flex items-center gap-2">
-                                  <input
-                                    type="number"
-                                    min="1"
-                                    max={(optionsByPage[index] || []).length}
-                                    value={page.correct_answer.indexOf(option.option_order) + 1 || ''}
-                                    onChange={(e) => {
-                                      const order = parseInt(e.target.value);
-                                      if (order && order >= 1 && order <= (optionsByPage[index] || []).length) {
-                                        const newCorrect = [...page.correct_answer];
-                                        const currentIndex = newCorrect.indexOf(option.option_order);
-                                        if (currentIndex !== -1) {
-                                          newCorrect.splice(currentIndex, 1);
-                                        }
-                                        newCorrect.splice(order - 1, 0, option.option_order);
+                        {page.page_type != "testNext" && (
+                          <>
+                          <div className="col-span-2">
+                            <label className="block text-sm font-medium mb-2">دلیل</label>
+                            <textarea
+                              value={page.why || ''}
+                              onChange={(e) => updatePage(index, { why: e.target.value })}
+                              className="w-full p-2 border rounded"
+                              rows={3}
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium mb-2">پاسخ صحیح</label>
+                            {page.test_type === 'Default' && (
+                              <select
+                                value={page.correct_answer[0] || ''}
+                                onChange={(e) => {
+                                  const selectedId = parseInt(e.target.value);
+                                  updatePage(index, { correct_answer: selectedId ? [selectedId] : [] });
+                                }}
+                              className="w-full p-2 border rounded"
+                              >
+                                <option value="">انتخاب کنید</option>
+                                {(optionsByPage[index] || []).map((option, optIndex) => (
+                                  <option key={optIndex} value={option.option_order}>
+                                    گزینه {optIndex + 1}: {option.option_text}
+                                  </option>
+                                ))}
+                              </select>
+                            )}
+                            {page.test_type === 'Multiple' && (
+                              <div className="space-y-2">
+                                {(optionsByPage[index] || []).map((option, optIndex) => (
+                                  <label key={optIndex} className="flex items-center gap-2">
+                                    <input
+                                      type="checkbox"
+                                      checked={page.correct_answer.includes(option.option_order)}
+                                      onChange={(e) => {
+                                        const newCorrect = e.target.checked
+                                          ? [...page.correct_answer, option.option_order]
+                                          : page.correct_answer.filter(id => id !== option.option_order);
                                         updatePage(index, { correct_answer: newCorrect });
-                                      }
-                                    }}
-                                    className="w-16 p-1 border rounded text-sm"
-                                    placeholder="ترتیب"
-                                  />
-                                  <span className="text-sm">گزینه {optIndex + 1}: {option.option_text}</span>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                          {page.test_type === 'Pluggable' && (
-                            <div className="space-y-2">
-                              <p className="text-xs text-gray-600">جفت‌های صحیح را مشخص کنید:</p>
-                              {(optionsByPage[index] || []).map((option, optIndex) => (
-                                <div key={optIndex} className="flex items-center gap-2">
-                                  <span className="text-sm w-20">گزینه {optIndex + 1}:</span>
-                                  <select
-                                    value={(() => {
-                                      const pairIndex = Math.floor(optIndex / 2);
-                                      const isFirstInPair = optIndex % 2 === 0;
-                                      if (isFirstInPair && page.correct_answer.length > pairIndex * 2 + 1) {
-                                        return page.correct_answer[pairIndex * 2 + 1];
-                                      } else if (!isFirstInPair && page.correct_answer.length > pairIndex * 2) {
-                                        return page.correct_answer[pairIndex * 2];
-                                      }
-                                      return '';
-                                    })()}
-                                    onChange={(e) => {
-                                      const selectedId = parseInt(e.target.value);
-                                      const pairIndex = Math.floor(optIndex / 2);
-                                      const isFirstInPair = optIndex % 2 === 0;
-                                      const newCorrect = [...page.correct_answer];
-                                      
-                                      if (isFirstInPair) {
-                                        if (newCorrect.length <= pairIndex * 2) {
-                                          newCorrect.push(option.option_order, selectedId);
-                                        } else {
-                                          newCorrect[pairIndex * 2] = option.option_order;
-                                          newCorrect[pairIndex * 2 + 1] = selectedId;
+                                      }}
+                                    />
+                                    <span className="text-sm">گزینه {optIndex + 1}: {option.option_text}</span>
+                                  </label>
+                                ))}
+                              </div>
+                            )}
+                            {page.test_type === 'Sequential' && (
+                              <div className="space-y-2">
+                                <p className="text-xs text-gray-600">ترتیب صحیح گزینه‌ها را مشخص کنید:</p>
+                                {(optionsByPage[index] || []).map((option, optIndex) => (
+                                  <div key={optIndex} className="flex items-center gap-2">
+                                    <input
+                                      type="number"
+                                      min="1"
+                                      max={(optionsByPage[index] || []).length}
+                                      value={page.correct_answer.indexOf(option.option_order) + 1 || ''}
+                                      onChange={(e) => {
+                                        const order = parseInt(e.target.value);
+                                        if (order && order >= 1 && order <= (optionsByPage[index] || []).length) {
+                                          const newCorrect = [...page.correct_answer];
+                                          const currentIndex = newCorrect.indexOf(option.option_order);
+                                          if (currentIndex !== -1) {
+                                            newCorrect.splice(currentIndex, 1);
+                                          }
+                                          newCorrect.splice(order - 1, 0, option.option_order);
+                                          updatePage(index, { correct_answer: newCorrect });
                                         }
-                                      } else {
-                                        if (newCorrect.length <= pairIndex * 2) {
-                                          newCorrect.push(selectedId, option.option_order);
-                                        } else {
-                                          newCorrect[pairIndex * 2] = selectedId;
-                                          newCorrect[pairIndex * 2 + 1] = option.option_order;
+                                      }}
+                                      className="w-16 p-1 border rounded text-sm"
+                                      placeholder="ترتیب"
+                                    />
+                                    <span className="text-sm">گزینه {optIndex + 1}: {option.option_text}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                            {page.test_type === 'Pluggable' && (
+                              <div className="space-y-2">
+                                <p className="text-xs text-gray-600">جفت‌های صحیح را مشخص کنید:</p>
+                                {(optionsByPage[index] || []).map((option, optIndex) => (
+                                  <div key={optIndex} className="flex items-center gap-2">
+                                    <span className="text-sm w-20">گزینه {optIndex + 1}:</span>
+                                    <select
+                                      value={(() => {
+                                        const pairIndex = Math.floor(optIndex / 2);
+                                        const isFirstInPair = optIndex % 2 === 0;
+                                        if (isFirstInPair && page.correct_answer.length > pairIndex * 2 + 1) {
+                                          return page.correct_answer[pairIndex * 2 + 1];
+                                        } else if (!isFirstInPair && page.correct_answer.length > pairIndex * 2) {
+                                          return page.correct_answer[pairIndex * 2];
                                         }
-                                      }
-                                      
-                                      updatePage(index, { correct_answer: newCorrect });
-                                    }}
-                                    className="flex-1 p-1 border rounded text-sm"
-                                  >
-                                    <option value="">انتخاب کنید</option>
-                                    {(optionsByPage[index] || []).map((otherOption, otherIndex) => (
-                                      optIndex !== otherIndex && (
-                                        <option key={otherIndex} value={otherOption.option_order}>
-                                          گزینه {otherIndex + 1}: {otherOption.option_text}
-                                        </option>
-                                      )
-                                    ))}
-                                  </select>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                        
+                                        return '';
+                                      })()}
+                                      onChange={(e) => {
+                                        const selectedId = parseInt(e.target.value);
+                                        const pairIndex = Math.floor(optIndex / 2);
+                                        const isFirstInPair = optIndex % 2 === 0;
+                                        const newCorrect = [...page.correct_answer];
+                                        
+                                        if (isFirstInPair) {
+                                          if (newCorrect.length <= pairIndex * 2) {
+                                            newCorrect.push(option.option_order, selectedId);
+                                          } else {
+                                            newCorrect[pairIndex * 2] = option.option_order;
+                                            newCorrect[pairIndex * 2 + 1] = selectedId;
+                                          }
+                                        } else {
+                                          if (newCorrect.length <= pairIndex * 2) {
+                                            newCorrect.push(selectedId, option.option_order);
+                                          } else {
+                                            newCorrect[pairIndex * 2] = selectedId;
+                                            newCorrect[pairIndex * 2 + 1] = option.option_order;
+                                          }
+                                        }
+                                        
+                                        updatePage(index, { correct_answer: newCorrect });
+                                      }}
+                                      className="flex-1 p-1 border rounded text-sm"
+                                    >
+                                      <option value="">انتخاب کنید</option>
+                                      {(optionsByPage[index] || []).map((otherOption, otherIndex) => (
+                                        optIndex !== otherIndex && (
+                                          <option key={otherIndex} value={otherOption.option_order}>
+                                            گزینه {otherIndex + 1}: {otherOption.option_text}
+                                          </option>
+                                        )
+                                      ))}
+                                    </select>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                          </>
+                        )}
                         <div className="col-span-2">
                           <div className="flex justify-between items-center mb-2">
                             <h5 className="font-medium">گزینه‌های آزمون</h5>
@@ -1070,6 +1141,21 @@ export default function CourseManagement() {
                             </span>
                           )}
                     </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">ترتیب نمایش</label>
+                      <input
+                        type="number"
+                        min={0}
+                        value={page.order_index ?? index}
+                        onChange={(e) => updatePage(index, { order_index: Number(e.target.value) })}
+                        className="w-full p-2 border rounded"
+                      />
+                    </div>
+                    <div className="flex gap-2">
+                      <button onClick={() => movePageUp(index)} className="px-2 py-1 border rounded">⬆️</button>
+                      <button onClick={() => movePageDown(index)} className="px-2 py-1 border rounded">⬇️</button>
+                    </div>
+
                     {page.page_type === 'text' ? (
                       <div className="col-span-2">
                         <label className="block text-sm font-medium mb-2">محتوای متن</label>
@@ -1118,140 +1204,144 @@ export default function CourseManagement() {
                             <option value="grid-row">شبکه سطری</option>
                           </select>
                         </div>
-                        <div className="col-span-2">
-                          <label className="block text-sm font-medium mb-2">دلیل</label>
-                          <textarea
-                            value={page.why || ''}
-                            onChange={(e) => updatePage(index, { why: e.target.value })}
-                            className="w-full p-2 border rounded"
-                            rows={3}
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium mb-2">پاسخ صحیح</label>
-                          {page.test_type === 'Default' && (
-                            <select
-                              value={page.correct_answer[0] || ''}
-                              onChange={(e) => {
-                                const selectedId = parseInt(e.target.value);
-                                updatePage(index, { correct_answer: selectedId ? [selectedId] : [] });
-                              }}
-                            className="w-full p-2 border rounded"
-                            >
-                              <option value="">انتخاب کنید</option>
-                              {(optionsByPage[index] || []).map((option, optIndex) => (
-                                <option key={optIndex} value={option.option_order}>
-                                  گزینه {optIndex + 1}: {option.option_text}
-                                </option>
-                              ))}
-                            </select>
-                          )}
-                          {page.test_type === 'Multiple' && (
-                            <div className="space-y-2">
-                              {(optionsByPage[index] || []).map((option, optIndex) => (
-                                <label key={optIndex} className="flex items-center gap-2">
-                                  <input
-                                    type="checkbox"
-                                    checked={page.correct_answer.includes(option.option_order)}
-                                    onChange={(e) => {
-                                      const newCorrect = e.target.checked
-                                        ? [...page.correct_answer, option.option_order]
-                                        : page.correct_answer.filter(id => id !== option.option_order);
-                                      updatePage(index, { correct_answer: newCorrect });
-                                    }}
-                                  />
-                                  <span className="text-sm">گزینه {optIndex + 1}: {option.option_text}</span>
-                                </label>
-                              ))}
+                        {page.page_type != "testNext" && (
+                          <>
+                            <div className="col-span-2">
+                              <label className="block text-sm font-medium mb-2">دلیل</label>
+                              <textarea
+                                value={page.why || ''}
+                                onChange={(e) => updatePage(index, { why: e.target.value })}
+                                className="w-full p-2 border rounded"
+                                rows={3}
+                              />
                             </div>
-                          )}
-                          {page.test_type === 'Sequential' && (
-                            <div className="space-y-2">
-                              <p className="text-xs text-gray-600">ترتیب صحیح گزینه‌ها را مشخص کنید:</p>
-                              {(optionsByPage[index] || []).map((option, optIndex) => (
-                                <div key={optIndex} className="flex items-center gap-2">
-                                  <input
-                                    type="number"
-                                    min="1"
-                                    max={(optionsByPage[index] || []).length}
-                                    value={page.correct_answer.indexOf(option.option_order) + 1 || ''}
-                                    onChange={(e) => {
-                                      const order = parseInt(e.target.value);
-                                      if (order && order >= 1 && order <= (optionsByPage[index] || []).length) {
-                                        const newCorrect = [...page.correct_answer];
-                                        const currentIndex = newCorrect.indexOf(option.option_order);
-                                        if (currentIndex !== -1) {
-                                          newCorrect.splice(currentIndex, 1);
-                                        }
-                                        newCorrect.splice(order - 1, 0, option.option_order);
-                                        updatePage(index, { correct_answer: newCorrect });
-                                      }
-                                    }}
-                                    className="w-16 p-1 border rounded text-sm"
-                                    placeholder="ترتیب"
-                                  />
-                                  <span className="text-sm">گزینه {optIndex + 1}: {option.option_text}</span>
+                            <div>
+                              <label className="block text-sm font-medium mb-2">پاسخ صحیح</label>
+                              {page.test_type === 'Default' && (
+                                <select
+                                  value={page.correct_answer[0] || ''}
+                                  onChange={(e) => {
+                                    const selectedId = parseInt(e.target.value);
+                                    updatePage(index, { correct_answer: selectedId ? [selectedId] : [] });
+                                  }}
+                                className="w-full p-2 border rounded"
+                                >
+                                  <option value="">انتخاب کنید</option>
+                                  {(optionsByPage[index] || []).map((option, optIndex) => (
+                                    <option key={optIndex} value={option.option_order}>
+                                      گزینه {optIndex + 1}: {option.option_text}
+                                    </option>
+                                  ))}
+                                </select>
+                              )}
+                              {page.test_type === 'Multiple' && (
+                                <div className="space-y-2">
+                                  {(optionsByPage[index] || []).map((option, optIndex) => (
+                                    <label key={optIndex} className="flex items-center gap-2">
+                                      <input
+                                        type="checkbox"
+                                        checked={page.correct_answer.includes(option.option_order)}
+                                        onChange={(e) => {
+                                          const newCorrect = e.target.checked
+                                            ? [...page.correct_answer, option.option_order]
+                                            : page.correct_answer.filter(id => id !== option.option_order);
+                                          updatePage(index, { correct_answer: newCorrect });
+                                        }}
+                                      />
+                                      <span className="text-sm">گزینه {optIndex + 1}: {option.option_text}</span>
+                                    </label>
+                                  ))}
                                 </div>
-                              ))}
-                            </div>
-                          )}
-                          {page.test_type === 'Pluggable' && (
-                            <div className="space-y-2">
-                              <p className="text-xs text-gray-600">جفت‌های صحیح را مشخص کنید:</p>
-                              {(optionsByPage[index] || []).map((option, optIndex) => (
-                                <div key={optIndex} className="flex items-center gap-2">
-                                  <span className="text-sm w-20">گزینه {optIndex + 1}:</span>
-                                  <select
-                                    value={(() => {
-                                      const pairIndex = Math.floor(optIndex / 2);
-                                      const isFirstInPair = optIndex % 2 === 0;
-                                      if (isFirstInPair && page.correct_answer.length > pairIndex * 2 + 1) {
-                                        return page.correct_answer[pairIndex * 2 + 1];
-                                      } else if (!isFirstInPair && page.correct_answer.length > pairIndex * 2) {
-                                        return page.correct_answer[pairIndex * 2];
-                                      }
-                                      return '';
-                                    })()}
-                                    onChange={(e) => {
-                                      const selectedId = parseInt(e.target.value);
-                                      const pairIndex = Math.floor(optIndex / 2);
-                                      const isFirstInPair = optIndex % 2 === 0;
-                                      const newCorrect = [...page.correct_answer];
-                                      
-                                      if (isFirstInPair) {
-                                        if (newCorrect.length <= pairIndex * 2) {
-                                          newCorrect.push(option.option_order, selectedId);
-                                        } else {
-                                          newCorrect[pairIndex * 2] = option.option_order;
-                                          newCorrect[pairIndex * 2 + 1] = selectedId;
-                                        }
-                                      } else {
-                                        if (newCorrect.length <= pairIndex * 2) {
-                                          newCorrect.push(selectedId, option.option_order);
-                                        } else {
-                                          newCorrect[pairIndex * 2] = selectedId;
-                                          newCorrect[pairIndex * 2 + 1] = option.option_order;
-                                        }
-                                      }
-                                      
-                                      updatePage(index, { correct_answer: newCorrect });
-                                    }}
-                                    className="flex-1 p-1 border rounded text-sm"
-                                  >
-                                    <option value="">انتخاب کنید</option>
-                                    {(optionsByPage[index] || []).map((otherOption, otherIndex) => (
-                                      optIndex !== otherIndex && (
-                                        <option key={otherIndex} value={otherOption.option_order}>
-                                          گزینه {otherIndex + 1}: {otherOption.option_text}
-                                        </option>
-                                      )
-                                    ))}
-                                  </select>
+                              )}
+                              {page.test_type === 'Sequential' && (
+                                <div className="space-y-2">
+                                  <p className="text-xs text-gray-600">ترتیب صحیح گزینه‌ها را مشخص کنید:</p>
+                                  {(optionsByPage[index] || []).map((option, optIndex) => (
+                                    <div key={optIndex} className="flex items-center gap-2">
+                                      <input
+                                        type="number"
+                                        min="1"
+                                        max={(optionsByPage[index] || []).length}
+                                        value={page.correct_answer.indexOf(option.option_order) + 1 || ''}
+                                        onChange={(e) => {
+                                          const order = parseInt(e.target.value);
+                                          if (order && order >= 1 && order <= (optionsByPage[index] || []).length) {
+                                            const newCorrect = [...page.correct_answer];
+                                            const currentIndex = newCorrect.indexOf(option.option_order);
+                                            if (currentIndex !== -1) {
+                                              newCorrect.splice(currentIndex, 1);
+                                            }
+                                            newCorrect.splice(order - 1, 0, option.option_order);
+                                            updatePage(index, { correct_answer: newCorrect });
+                                          }
+                                        }}
+                                        className="w-16 p-1 border rounded text-sm"
+                                        placeholder="ترتیب"
+                                      />
+                                      <span className="text-sm">گزینه {optIndex + 1}: {option.option_text}</span>
+                                    </div>
+                                  ))}
                                 </div>
-                              ))}
+                              )}
+                              {page.test_type === 'Pluggable' && (
+                                <div className="space-y-2">
+                                  <p className="text-xs text-gray-600">جفت‌های صحیح را مشخص کنید:</p>
+                                  {(optionsByPage[index] || []).map((option, optIndex) => (
+                                    <div key={optIndex} className="flex items-center gap-2">
+                                      <span className="text-sm w-20">گزینه {optIndex + 1}:</span>
+                                      <select
+                                        value={(() => {
+                                          const pairIndex = Math.floor(optIndex / 2);
+                                          const isFirstInPair = optIndex % 2 === 0;
+                                          if (isFirstInPair && page.correct_answer.length > pairIndex * 2 + 1) {
+                                            return page.correct_answer[pairIndex * 2 + 1];
+                                          } else if (!isFirstInPair && page.correct_answer.length > pairIndex * 2) {
+                                            return page.correct_answer[pairIndex * 2];
+                                          }
+                                          return '';
+                                        })()}
+                                        onChange={(e) => {
+                                          const selectedId = parseInt(e.target.value);
+                                          const pairIndex = Math.floor(optIndex / 2);
+                                          const isFirstInPair = optIndex % 2 === 0;
+                                          const newCorrect = [...page.correct_answer];
+                                          
+                                          if (isFirstInPair) {
+                                            if (newCorrect.length <= pairIndex * 2) {
+                                              newCorrect.push(option.option_order, selectedId);
+                                            } else {
+                                              newCorrect[pairIndex * 2] = option.option_order;
+                                              newCorrect[pairIndex * 2 + 1] = selectedId;
+                                            }
+                                          } else {
+                                            if (newCorrect.length <= pairIndex * 2) {
+                                              newCorrect.push(selectedId, option.option_order);
+                                            } else {
+                                              newCorrect[pairIndex * 2] = selectedId;
+                                              newCorrect[pairIndex * 2 + 1] = option.option_order;
+                                            }
+                                          }
+                                          
+                                          updatePage(index, { correct_answer: newCorrect });
+                                        }}
+                                        className="flex-1 p-1 border rounded text-sm"
+                                      >
+                                        <option value="">انتخاب کنید</option>
+                                        {(optionsByPage[index] || []).map((otherOption, otherIndex) => (
+                                          optIndex !== otherIndex && (
+                                            <option key={otherIndex} value={otherOption.option_order}>
+                                              گزینه {otherIndex + 1}: {otherOption.option_text}
+                                            </option>
+                                          )
+                                        ))}
+                                      </select>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
                             </div>
-                          )}
-                        </div>
+                          </>
+                        )}
 
                         <div className="col-span-2">
                           <div className="flex justify-between items-center mb-2">

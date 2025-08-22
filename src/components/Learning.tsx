@@ -18,7 +18,7 @@ export interface options {
 
 export interface LearningPropsType {
     id: string;
-    page_type: "test" | "text" | "nextTest";
+    page_type: "test" | "text" | "testNext";
     header?: string;
     text?: string;
     test_type?: "Sequential" | "Pluggable" | "Multiple" | "Default";
@@ -486,7 +486,7 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                         </p>
                     }
                 </div>
-            ) : (page_type === "test" || page_type === "nextTest") ? (
+            ) : (page_type === "test" || page_type === "testNext") ? (
                 <div
                     className="flex flex-col justify-center mx-auto"
                 >
@@ -535,8 +535,8 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                                     icon_name={option.icon_name} 
                                     id={option.id} 
                                     test_type={test_type}
-                                    isSelected={page_type === "nextTest" ? false : isOptionSelected(option.id)} 
-                                    onSelect={page_type === "nextTest" ? () => handleNext?.() : handleActiveOption}
+                                    isSelected={page_type === "testNext" ? false : isOptionSelected(option.id)} 
+                                    onSelect={page_type === "testNext" ? () => handleNext?.() : handleActiveOption}
                                     getSequentialOrder={getSequentialOrder}
                                     getPluggablePair={getPluggablePair}
                                     classname={clsx(test_grid === "grid-row" && "flex justify-center items-center")}
@@ -586,7 +586,7 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                 className={clsx(
                     "button-primary rounded-full shadow-xl hover:bg active:shadow-none w-[10rem] mx-auto scale-[1.4] mt-[3vh] mb-[3vh]",
                     page_type === "test" && !activeId && "disabled:opacity-50",
-                    page_type === "nextTest" && options && "hidden" 
+                    page_type === "testNext" && options && "hidden" 
                 )}
             >
                 {page_number >= pageLength ? "پایان" : "ادامه"}
