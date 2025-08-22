@@ -91,7 +91,7 @@ const ChallengPopUp: React.FC<ChallengPopUpProp> = ({ text, onSubmit, type, ques
                                 </div>
                                 <button
                                     type="submit"
-                                    className="button-primary md:scale-[1.3] scale-[1.1] rounded-xl shadow-xl fixed bottom-[7.3vh] left-[10vw] max-md:left-4"
+                                    className="button-primary md:scale-[1.3] scale-[1.1] rounded-xl shadow-xl fixed bottom-[7.3vh] max-md:bottom-[5.2vh] left-[10vw] max-md:left-4"
                                 >
                                     انجام چالش
                                 </button>
