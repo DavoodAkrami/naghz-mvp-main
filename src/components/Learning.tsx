@@ -588,13 +588,13 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                     {header &&
                         <RichText
                             content={header}
-                            className="text-[3.6rem] whitespace-pre-wrap max-md:text-[1.8rem] max-w-[90%] font-extrabold mb-[3vh] text-center"
+                            className="text-[3.6rem] whitespace-pre-wrap max-md:text-[1.8rem] max-w-[90%] font-extrabold mx-auto mb-[3vh] text-center"
                         />
                     }
                     {text &&
                         <RichText
                             content={text}
-                            className="text-justify whitespace-pre-wrap text-[1.2rem] font-black max-w-[90%] text-[var(--text-primary)] my-[2vh]"
+                            className="text-justify whitespace-pre-wrap text-[1.2rem] font-black max-w-[90%] mx-auto order-[3px] border-[var(--primary-color1)] bg-[var(--primary-color1)]/50 backdrop-blur-xl p-4 rounded-2xl text-[var(--text-primary)] my-[2vh]"
                         />
                     }
                 </div>
@@ -619,7 +619,7 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                     {text && (
                         <RichText
                             content={text}
-                            className="text-[1.2rem] whitespace-pre-wrap text-[var(--text-primary)] max-w-[90%] text-justify my-[3vh]"
+                            className="text-[1.2rem] whitespace-pre-wrap text-[var(--text-primary)] border-[3px] border-[var(--primary-color1)] bg-[var(--primary-color1)]/50 backdrop-blur-xl p-4 rounded-2xl max-w-[90%] mx-auto text-justify my-[3vh]"
                         />
                     )}
                     {question && (

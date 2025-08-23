@@ -115,7 +115,7 @@ const Home = () => {
         if (isAuthenticated && shouldShowPopup !== "true") {
             const timer = setTimeout(() => {
                 setIsPopUpOpen(true);
-            }, 8000); 
+            }, 4000); 
 
             return () => clearTimeout(timer);
         }
@@ -225,7 +225,7 @@ const Home = () => {
                     className="bg-[var(--primary-color4)] grid grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr] max-[1100px]:grid-cols-1 max-md:grid-rows-[1fr_1fr] overflow-x-hidden min-h-[80vh] max-md:min-h-[85vh] relative" 
                 >
                     <div className="absolute top-[13vh] left-[5vw] w-4/5 max-md:w-full max-w-[40vw] flex items-center max-md:max-w-[90vw] max-md:mt-[25vh]">
-                        <img src="/section1.landing1.jpg" alt="concepts that click" className="w-full h-auto object-contain max-[1100px]:object-cover rounded-3xl" />
+                        <img src="/section1.landing3.jpg" alt="concepts that click" className="w-full h-auto object-contain max-[1100px]:object-cover rounded-3xl" />
                     </div>
                     <motion.div
                         initial={{ x: 90, opacity: 0 }}
@@ -278,7 +278,7 @@ const Home = () => {
                     className="bg-[var(--primary-color4)] grid grid-cols-[5%_1fr_1fr_1fr_1fr_1fr_1fr] max-[1100px]:grid-cols-1 max-md:grid-rows-[1fr_1fr] overflow-x-hidden min-h-[80vh] max-md:min-h-[85vh] relative" 
                 >
                     <div className="absolute top-[13vh] left-[5vw] w-4/5 max-md:w-full max-w-[40vw] flex items-center max-md:max-w-[90vw] max-md:mt-[25vh]">
-                        <img src="/section1.landing3.jpg" alt="concepts that click" className="w-full h-auto object-contain max-[1100px]:object-cover rounded-3xl" />
+                        <img src="/section1.landing1.jpg" alt="concepts that click" className="w-full h-auto object-contain max-[1100px]:object-cover rounded-3xl" />
                     </div>
                     <motion.div 
                         initial={{ x: 90, opacity: 0 }}
@@ -417,20 +417,20 @@ const Home = () => {
                 </section>
                 <ChallengPopUp 
                     type="text"
-                    text="نام خود را بنویسید"
+                    text="چالش امروز رو انجام دادی؟"
                     openPopUp={isPopUpOpen}
                     onAccept={handlePopupAccept}
                     onClose={handlePopupClose}
                 />
                 <ChallengPopUp 
                     type="form"
-                    question="نام"
+                    question="پس درباره‌ش برامون یه جمله بنویس:"
                     openPopUp={isChallengPopUpOpen}
                     onClose={handlePopupClose}
                     onSubmit={handlePopUpSubmit}
                 />
-                {/* <div
-                    className="fixed bottom-[3vh] right-[4vh] p-4 bg-[var(--primary-color1)]/50 backdrop-blur-xl flex items-center justify-center rounded-full hover:cursor-pointer hover:bg-[var(--primary-color1)]/40 transition-all duration-200"
+                <div
+                    className="fixed bottom-[3vh] right-[4vh] p-4 bg-[var(--primary-color1)]/50 backdrop-blur-xl flex items-center justify-center rounded-full hover:cursor-pointer hover:bg-[var(--primary-color1)]/40 transition-all duration-200 max-md:text-[2rem] max-md:p-2 max-md:right-[2.5vw] max-md:bottom-[2vh]"
                     onClick={() => setIsChatBotOpen(!isChatBotOpen)}
                 >
                     <button
@@ -440,13 +440,13 @@ const Home = () => {
                         )}
                     >
                         <TbMessageChatbot 
-                            className="text-[3rem] text-[white] cursor-pointer"
+                            className="text-[3rem] max-md:text-[2.4rem] text-[white] cursor-pointer"
                         />
                     </button>
                 </div>
                 <ChatBot 
                     isOpen={isChatBotOpen}
-                /> */}
+                />
             </div>
         </AnimatePresence>
     );

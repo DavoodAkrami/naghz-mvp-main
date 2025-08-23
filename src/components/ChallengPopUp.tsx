@@ -51,13 +51,13 @@ const ChallengPopUp: React.FC<ChallengPopUpProp> = ({ text, onSubmit, type, ques
                                     onClick={onAccept}
                                     className="button-primary md:scale-[1.3] scale-[1.1] rounded-xl shadow-xl"
                                 >
-                                    برو که بریم
+                                    اره انجامش دادم
                                 </button>
                                 <button
                                     onClick={onClose}
                                     className="button-secondary md:scale-[1.3] scale-[1.1] rounded-xl shadow-xl text-[white]"
                                 >
-                                    نه حوصله ندارم
+                                    نه حوصلشو نداشتم
                                 </button>
                             </div>
                         </div>
