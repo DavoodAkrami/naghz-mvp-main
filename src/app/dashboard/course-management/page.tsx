@@ -901,7 +901,7 @@ export default function CourseManagement() {
           <div className="bg-white rounded-lg p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <h2 className="text-2xl font-bold mb-4">ایجاد دوره جدید</h2>
             
-            {selectedFullCourse && (
+            {(selectedFullCourse as any) && (
               <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
                 <p className="text-sm text-blue-800">
                   این دوره به مجموعه <strong>{(selectedFullCourse as any).title}</strong> اضافه خواهد شد.
