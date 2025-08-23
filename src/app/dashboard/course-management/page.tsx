@@ -806,7 +806,7 @@ export default function CourseManagement() {
                       ) : (
                         <textarea
                           value={page.content}
-                          onChange={(e) => updatePage(index, { title: e.target.value })}
+                          onChange={(e) => updatePage(index, { content: e.target.value })}
                           className="w-full p-2 border rounded"
                           placeholder="عنوان صفحه"
                           rows={5}
@@ -1225,7 +1225,7 @@ export default function CourseManagement() {
                       ) : (
                         <textarea
                           value={page.content}
-                          onChange={(e) => updatePage(index, { title: e.target.value })}
+                          onChange={(e) => updatePage(index, { content: e.target.value })}
                           className="w-full p-2 border rounded"
                           placeholder="عنوان صفحه"
                           rows={5}

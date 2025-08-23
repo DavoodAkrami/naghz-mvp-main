@@ -11,6 +11,7 @@ import { RootState } from "@/store/store";
 import { links } from  "@/routes/routes";
 import { TbMessageChatbot } from "react-icons/tb";
 import ChallengPopUp from "@/components/ChallengPopUp";
+import ChatBot from "@/components/ChatBot";
 
 
 interface GuidedPathsType {
@@ -427,18 +428,21 @@ const Home = () => {
                     onClose={handlePopupClose}
                     onSubmit={handlePopUpSubmit}
                 />
-                <div
+                {/* <div
                     className="fixed bottom-[3vh] right-[4vh] p-4 bg-[var(--primary-color1)]/50 backdrop-blur-xl flex items-center justify-center rounded-full hover:cursor-pointer hover:bg-[var(--primary-color1)]/40 transition-all duration-200"
+                    onClick={() => setIsChatBotOpen(!isChatBotOpen)}
                 >
                     <button
-                        onClick={() => setIsChatBotOpen(!isChatBotOpen)}
                         className=""
                     >
                         <TbMessageChatbot 
-                            className="text-[3rem] text-[white]"
+                            className="text-[3rem] text-[white] cursor-pointer"
                         />
                     </button>
                 </div>
+                <ChatBot 
+                    isOpen={isChatBotOpen}
+                /> */}
             </div>
         </AnimatePresence>
     );
