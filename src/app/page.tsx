@@ -9,6 +9,7 @@ import Link from "next/link";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { links } from  "@/routes/routes";
+import { TbMessageChatbot } from "react-icons/tb";
 import ChallengPopUp from "@/components/ChallengPopUp";
 
 
@@ -51,6 +52,7 @@ const Home = () => {
     const [linkCarry, setLinkCarry] = useState<string>(links.signUp);
     const [isPopUpOpen, setIsPopUpOpen] = useState<boolean>(false);
     const [isChallengPopUpOpen, setIsChallengPopUpOpen] = useState<boolean>(false);
+    const [isChatBotOpen, setIsChatBotOpen] = useState<boolean>(false);
 
 
     // const handleNavigation = (guidedPath: number) => {
@@ -425,6 +427,18 @@ const Home = () => {
                     onClose={handlePopupClose}
                     onSubmit={handlePopUpSubmit}
                 />
+                <div
+                    className="fixed bottom-[3vh] right-[4vh] p-4 bg-[var(--primary-color1)]/50 backdrop-blur-xl flex items-center justify-center rounded-full hover:cursor-pointer hover:bg-[var(--primary-color1)]/40 transition-all duration-200"
+                >
+                    <button
+                        onClick={() => setIsChatBotOpen(!isChatBotOpen)}
+                        className=""
+                    >
+                        <TbMessageChatbot 
+                            className="text-[3rem] text-[white]"
+                        />
+                    </button>
+                </div>
             </div>
         </AnimatePresence>
     );

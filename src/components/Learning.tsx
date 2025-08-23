@@ -34,7 +34,7 @@ export interface LearningPropsType {
     handlePrev?: () => void;
     image?: string;
     why?: string | null;
-    preloadedImages?: string[]; // New prop for preloaded images
+    preloadedImages?: string[];
 }
 
 
@@ -588,13 +588,13 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                     {header &&
                         <RichText
                             content={header}
-                            className="text-[3.6rem] whitespace-pre-wrap max-md:text-[1.8rem] font-extrabold mb-[3vh] text-center"
+                            className="text-[3.6rem] whitespace-pre-wrap max-md:text-[1.8rem] max-w-[90%] font-extrabold mb-[3vh] text-center"
                         />
                     }
                     {text &&
                         <RichText
                             content={text}
-                            className="text-justify whitespace-pre-wrap text-[1.2rem] font-black text-[var(--text-primary)] my-[2vh]"
+                            className="text-justify whitespace-pre-wrap text-[1.2rem] font-black max-w-[90%] text-[var(--text-primary)] my-[2vh]"
                         />
                     }
                 </div>
@@ -616,16 +616,16 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                             />
                         )
                     )}
-                    {header && (
+                    {text && (
                         <RichText
-                            content={header}
-                            className="text-[1.2rem] whitespace-pre-wrap text-[var(--text-primary)] text-justify my-[3vh]"
+                            content={text}
+                            className="text-[1.2rem] whitespace-pre-wrap text-[var(--text-primary)] max-w-[90%] text-justify my-[3vh]"
                         />
                     )}
                     {question && (
                         <RichText
                             content={question}
-                            className="text-[2rem] whitespace-pre-wrap font-bold mb-[5vh] text-center max-md:max-w-[95%] mx-auto"
+                            className="text-[2rem] whitespace-pre-wrap font-bold mb-[5vh] text-center max-w-[90%] max-md:max-w-[95%] mx-auto"
                         />
                     )}
                     {getTestTypeIndicator()}
@@ -734,7 +734,7 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                     >
                         {isCorrect ? "جواب درست" : "جواب اشتباه"}
                     </h1>
-                    <p className="text-[1.5rem]">
+                    <p className="text-[1.5rem] w-[90%] mx-auto">
                         جواب درست: {correctModalContent}
                     </p>
                 </div>
@@ -746,7 +746,7 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                 <div className="text-center">
                     <h1 className="text-[2rem] font-bold">دلیل</h1>
                 </div>
-                <p className="text-[1.5rem]">
+                <p className="text-[1.5rem] w-[90%] mx-auto">
                     {whyModalContent}
                 </p>
             </Modal>
