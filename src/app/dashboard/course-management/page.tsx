@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "@/store/store";
-import { fetchCourses, uploadPageImage } from "@/store/slices/courseSlice";
+import { fetchCourses, uploadPageImage, fetchFullCourses, createFullCourse, updateFullCourse, deleteFullCourse } from "@/store/slices/courseSlice";
 import { supabase } from "@/config/supabase";
 import { FiPlus, FiEdit, FiTrash2, FiMove, FiChevronUp, FiChevronDown } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
@@ -14,6 +14,18 @@ interface CourseFormData {
   title: string;
   description: string;
   icon_name: string;
+  is_active: boolean;
+  order_index: number;
+  full_course_id?: string;
+  order_within_full_course?: number;
+}
+
+interface FullCourseFormData {
+  slug: string;
+  title: string;
+  description: string;
+  icon_name: string;
+  image?: string;
   is_active: boolean;
   order_index: number;
 }
@@ -45,18 +57,35 @@ interface OptionFormData {
 
 export default function CourseManagement() {
   const dispatch = useDispatch<AppDispatch>();
-  const { courses, loading, error } = useSelector((state: RootState) => state.course);
+  const { courses, fullCourses, loading, error } = useSelector((state: RootState) => state.course);
   
+  // Course management states
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  // TODO: Replace 'unknown' with a specific type for course if possible
-  const [selectedCourse, setSelectedCourse] = useState<unknown>(null); // FIXME: type
+  const [selectedCourse, setSelectedCourse] = useState<unknown>(null);
   const [courseFormData, setCourseFormData] = useState<CourseFormData>({
     slug: '',
     title: '',
     description: '',
     icon_name: '',
+    is_active: true,
+    order_index: 0,
+    full_course_id: '',
+    order_within_full_course: 0
+  });
+
+  // Full course management states
+  const [showCreateFullCourseModal, setShowCreateFullCourseModal] = useState(false);
+  const [showEditFullCourseModal, setShowEditFullCourseModal] = useState(false);
+  const [showDeleteFullCourseModal, setShowDeleteFullCourseModal] = useState(false);
+  const [selectedFullCourse, setSelectedFullCourse] = useState<unknown>(null);
+  const [fullCourseFormData, setFullCourseFormData] = useState<FullCourseFormData>({
+    slug: '',
+    title: '',
+    description: '',
+    icon_name: '',
+    image: '',
     is_active: true,
     order_index: 0
   });
@@ -227,15 +256,116 @@ export default function CourseManagement() {
 
   useEffect(() => {
     dispatch(fetchCourses());
+    dispatch(fetchFullCourses());
   }, [dispatch]);
+
+  // Debug: Log course data to see the structure
+  useEffect(() => {
+    if (courses.length > 0 || fullCourses.length > 0) {
+      console.log('Courses:', courses);
+      console.log('Full Courses:', fullCourses);
+      courses.forEach(course => {
+        console.log(`Course "${course.title}" has full_course_id:`, course.full_course_id);
+      });
+    }
+  }, [courses, fullCourses]);
+
+  // Full Course CRUD Functions
+  const handleCreateFullCourse = async () => {
+    try {
+      await dispatch(createFullCourse(fullCourseFormData)).unwrap();
+      setShowCreateFullCourseModal(false);
+      setFullCourseFormData({
+        slug: '',
+        title: '',
+        description: '',
+        icon_name: '',
+        image: '',
+        is_active: true,
+        order_index: 0
+      });
+    } catch (error) {
+      console.error('Error creating full course:', error);
+    }
+  };
+
+  const handleEditFullCourse = async () => {
+    try {
+      if (selectedFullCourse && typeof selectedFullCourse === 'object' && 'id' in selectedFullCourse) {
+        await dispatch(updateFullCourse({
+          id: selectedFullCourse.id as string,
+          updates: fullCourseFormData
+        })).unwrap();
+        setShowEditFullCourseModal(false);
+        setSelectedFullCourse(null);
+        setFullCourseFormData({
+          slug: '',
+          title: '',
+          description: '',
+          icon_name: '',
+          image: '',
+          is_active: true,
+          order_index: 0
+        });
+      }
+    } catch (error) {
+      console.error('Error updating full course:', error);
+    }
+  };
+
+  const handleDeleteFullCourse = async () => {
+    try {
+      if (selectedFullCourse && typeof selectedFullCourse === 'object' && 'id' in selectedFullCourse) {
+        await dispatch(deleteFullCourse(selectedFullCourse.id as string)).unwrap();
+        setShowDeleteFullCourseModal(false);
+        setSelectedFullCourse(null);
+      }
+    } catch (error) {
+      console.error('Error deleting full course:', error);
+    }
+  };
+
+  const openEditFullCourseModal = (fullCourse: any) => {
+    setSelectedFullCourse(fullCourse);
+    setFullCourseFormData({
+      slug: fullCourse.slug,
+      title: fullCourse.title,
+      description: fullCourse.description,
+      icon_name: fullCourse.icon_name || '',
+      image: fullCourse.image || '',
+      is_active: fullCourse.is_active,
+      order_index: fullCourse.order_index
+    });
+    setShowEditFullCourseModal(true);
+  };
+
+  const openDeleteFullCourseModal = (fullCourse: any) => {
+    setSelectedFullCourse(fullCourse);
+    setShowDeleteFullCourseModal(true);
+  };
+
+  const openCreateCourseModal = (fullCourse?: any) => {
+    if (fullCourse) {
+      setSelectedFullCourse(fullCourse);
+    }
+    setShowCreateModal(true);
+  };
 
   const handleCreateCourse = async () => {
     try {
       if (!supabase) throw new Error('Supabase not configured');
       
+      // If we're creating a course within a full course context, set the full_course_id
+      const courseDataToInsert = {
+        ...courseFormData,
+        full_course_id: selectedFullCourse && typeof selectedFullCourse === 'object' && 'id' in selectedFullCourse 
+          ? (selectedFullCourse as { id: string }).id 
+          : courseFormData.full_course_id || null
+      };
+      
       const { data: course, error: courseError } = await supabase
         .from('courses')
-        .insert(courseFormData)
+        .insert(courseDataToInsert)
         .select()
         .single();
       
@@ -290,13 +420,16 @@ export default function CourseManagement() {
       }
 
       setShowCreateModal(false);
+      setSelectedFullCourse(null);
       setCourseFormData({
         slug: '',
         title: '',
         description: '',
         icon_name: '',
         is_active: true,
-        order_index: 0
+        order_index: 0,
+        full_course_id: '',
+        order_within_full_course: 0
       });
       setPages([]);
       setOptionsByPage({});
@@ -567,7 +700,9 @@ export default function CourseManagement() {
       description: (course as { description: string }).description,
       icon_name: (course as { icon_name: string }).icon_name || '',
       is_active: (course as { is_active: boolean }).is_active,
-      order_index: (course as { order_index: number }).order_index
+      order_index: (course as { order_index: number }).order_index,
+      full_course_id: (course as { full_course_id?: string }).full_course_id || '',
+      order_within_full_course: (course as { order_within_full_course?: number }).order_within_full_course || 0
     });
     const loadPagesAndOptions = async () => {
       try {
@@ -632,44 +767,126 @@ export default function CourseManagement() {
 
   return (
     <div className="p-6" dir="rtl">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">مدیریت دوره‌ها</h1>
-        <button
-          onClick={() => setShowCreateModal(true)}
-          className="bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 flex items-center gap-2"
-        >
-          <FiPlus size={20} />
-          افزودن دوره جدید
-        </button>
-      </div>
+      {/* Full Course Management Section */}
+      <div className="mb-12">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold">مدیریت دوره‌های کامل</h1>
+          <button
+            onClick={() => setShowCreateFullCourseModal(true)}
+            className="bg-green-600 text-white p-3 rounded-lg hover:bg-green-700 flex items-center gap-2"
+          >
+            <FiPlus size={20} />
+            افزودن دوره کامل جدید
+          </button>
+        </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {courses.map((course) => (
-          <div key={course.id} className="bg-white p-6 rounded-lg shadow-md border">
-            <h3 className="text-xl font-semibold mb-2">{course.title}</h3>
-            <p className="text-gray-600 mb-4 line-clamp-3">{course.description}</p>
-            <div className="flex items-center gap-2 mb-4">
-              <span className={`px-2 py-1 rounded text-xs ${course.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                {course.is_active ? 'فعال' : 'غیرفعال'}
-              </span>
-              <span className="text-gray-500 text-sm">ترتیب: {course.order_index}</span>
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={() => openEditModal(course)}
-                className="bg-yellow-500 text-white p-2 rounded hover:bg-yellow-600"
-              >
-                <FiEdit size={16} />
-              </button>
-              <button
-                onClick={() => openDeleteModal(course)}
-                className="bg-red-500 text-white p-2 rounded hover:bg-red-600"
-              >
-                <FiTrash2 size={16} />
-              </button>
-            </div>
-          </div>
-        ))}
+        <div className="space-y-6">
+          {fullCourses.map((fullCourse) => {
+            // Filter courses that belong to this full course
+            const fullCourseCourses = courses.filter(course => {
+              // Handle both string and object comparisons
+              const courseFullCourseId = course.full_course_id;
+              const fullCourseId = fullCourse.id;
+              return courseFullCourseId === fullCourseId || courseFullCourseId === fullCourseId?.toString();
+            });
+            
+            return (
+              <div key={fullCourse.id} className="bg-white rounded-lg shadow-md border overflow-hidden">
+                {/* Full Course Header */}
+                <div className="bg-gradient-to-r from-green-50 to-blue-50 p-6 border-b">
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <h3 className="text-2xl font-bold mb-2">{fullCourse.title}</h3>
+                      <p className="text-gray-600 mb-3">{fullCourse.description}</p>
+                      <div className="flex items-center gap-4">
+                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${fullCourse.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                          {fullCourse.is_active ? 'فعال' : 'غیرفعال'}
+                        </span>
+                        <span className="text-gray-500 text-sm">ترتیب: {fullCourse.order_index}</span>
+                        <span className="text-gray-500 text-sm">تعداد دوره‌ها: {fullCourseCourses.length}</span>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => openEditFullCourseModal(fullCourse)}
+                        className="bg-yellow-500 text-white p-2 rounded hover:bg-yellow-600"
+                        title="ویرایش دوره کامل"
+                      >
+                        <FiEdit size={16} />
+                      </button>
+                      <button
+                        onClick={() => openDeleteFullCourseModal(fullCourse)}
+                        className="bg-red-500 text-white p-2 rounded hover:bg-red-600"
+                        title="حذف دوره کامل"
+                      >
+                        <FiTrash2 size={16} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Individual Courses Section */}
+                <div className="p-6">
+                  <div className="flex justify-between items-center mb-4">
+                    <h4 className="text-lg font-semibold text-gray-700">دوره‌های این مجموعه</h4>
+                    <button
+                      onClick={() => openCreateCourseModal(fullCourse)}
+                      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2 text-sm"
+                    >
+                      <FiPlus size={16} />
+                      افزودن دوره جدید
+                    </button>
+                  </div>
+
+                  {fullCourseCourses.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {fullCourseCourses.map((course) => (
+                        <div key={course.id} className="bg-gray-50 p-4 rounded-lg border">
+                          <h5 className="font-semibold mb-2">{course.title}</h5>
+                          <p className="text-gray-600 text-sm mb-3 line-clamp-2">{course.description}</p>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <span className={`px-2 py-1 rounded text-xs ${course.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                                {course.is_active ? 'فعال' : 'غیرفعال'}
+                              </span>
+                              <span className="text-gray-500 text-xs">ترتیب: {course.order_index}</span>
+                            </div>
+                            <div className="flex gap-1">
+                              <button
+                                onClick={() => openEditModal(course)}
+                                className="bg-yellow-500 text-white p-1.5 rounded hover:bg-yellow-600"
+                                title="ویرایش دوره"
+                              >
+                                <FiEdit size={14} />
+                              </button>
+                              <button
+                                onClick={() => openDeleteModal(course)}
+                                className="bg-red-500 text-white p-1.5 rounded hover:bg-red-600"
+                                title="حذف دوره"
+                              >
+                                <FiTrash2 size={14} />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      <p>هنوز دوره‌ای به این مجموعه اضافه نشده است.</p>
+                      <button
+                        onClick={() => openCreateCourseModal(fullCourse)}
+                        className="mt-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                      >
+                        افزودن اولین دوره
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* Create Course Modal */}
@@ -683,6 +900,14 @@ export default function CourseManagement() {
         >
           <div className="bg-white rounded-lg p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <h2 className="text-2xl font-bold mb-4">ایجاد دوره جدید</h2>
+            
+            {selectedFullCourse && (
+              <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                <p className="text-sm text-blue-800">
+                  این دوره به مجموعه <strong>{(selectedFullCourse as any).title}</strong> اضافه خواهد شد.
+                </p>
+              </div>
+            )}
             
             <div className="grid grid-cols-2 gap-4 mb-6">
               <div>
@@ -1640,6 +1865,240 @@ export default function CourseManagement() {
                 className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
               >
                 تایید تغییرات
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Create Full Course Modal */}
+      {showCreateFullCourseModal && (
+        <motion.div className="fixed inset-0 bg-black/30 backdrop-blur-xl bg-opacity-50 flex items-center justify-center p-4 z-10000" 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+        >
+          <div className="bg-white rounded-lg p-6 max-w-2xl w-full">
+            <h2 className="text-2xl font-bold mb-4">ایجاد دوره کامل جدید</h2>
+            
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              <div>
+                <label className="block text-sm font-medium mb-2">Slug</label>
+                <input
+                  type="text"
+                  value={fullCourseFormData.slug}
+                  onChange={(e) => setFullCourseFormData({...fullCourseFormData, slug: e.target.value})}
+                  className="w-full p-2 border rounded"
+                  placeholder="soft-skills"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">عنوان</label>
+                <input
+                  type="text"
+                  value={fullCourseFormData.title}
+                  onChange={(e) => setFullCourseFormData({...fullCourseFormData, title: e.target.value})}
+                  className="w-full p-2 border rounded"
+                  placeholder="عنوان دوره کامل"
+                />
+              </div>
+              <div className="col-span-2">
+                <label className="block text-sm font-medium mb-2">توضیحات</label>
+                <textarea
+                  value={fullCourseFormData.description}
+                  onChange={(e) => setFullCourseFormData({...fullCourseFormData, description: e.target.value})}
+                  className="w-full p-2 border rounded"
+                  rows={3}
+                  placeholder="توضیحات دوره کامل"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">نام آیکون</label>
+                <input
+                  type="text"
+                  value={fullCourseFormData.icon_name}
+                  onChange={(e) => setFullCourseFormData({...fullCourseFormData, icon_name: e.target.value})}
+                  className="w-full p-2 border rounded"
+                  placeholder="LuBrain"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">تصویر</label>
+                <input
+                  type="text"
+                  value={fullCourseFormData.image || ''}
+                  onChange={(e) => setFullCourseFormData({...fullCourseFormData, image: e.target.value})}
+                  className="w-full p-2 border rounded"
+                  placeholder="URL تصویر"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">ترتیب</label>
+                <input
+                  type="number"
+                  value={fullCourseFormData.order_index}
+                  onChange={(e) => setFullCourseFormData({...fullCourseFormData, order_index: parseInt(e.target.value)})}
+                  className="w-full p-2 border rounded"
+                />
+              </div>
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  checked={fullCourseFormData.is_active}
+                  onChange={(e) => setFullCourseFormData({...fullCourseFormData, is_active: e.target.checked})}
+                  className="mr-2"
+                />
+                <label className="text-sm font-medium">فعال</label>
+              </div>
+            </div>
+            
+            <div className="flex gap-4 justify-end">
+              <button
+                onClick={() => setShowCreateFullCourseModal(false)}
+                className="px-6 py-2 border rounded hover:bg-gray-50"
+              >
+                انصراف
+              </button>
+              <button
+                onClick={handleCreateFullCourse}
+                className="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+              >
+                ایجاد
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Edit Full Course Modal */}
+      {showEditFullCourseModal && (
+        <motion.div className="fixed inset-0 bg-black/30 backdrop-blur-xl bg-opacity-50 flex items-center justify-center p-4 z-10000" 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+        >
+          <div className="bg-white rounded-lg p-6 max-w-2xl w-full">
+            <h2 className="text-2xl font-bold mb-4">ویرایش دوره کامل</h2>
+            
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              <div>
+                <label className="block text-sm font-medium mb-2">Slug</label>
+                <input
+                  type="text"
+                  value={fullCourseFormData.slug}
+                  onChange={(e) => setFullCourseFormData({...fullCourseFormData, slug: e.target.value})}
+                  className="w-full p-2 border rounded"
+                  placeholder="soft-skills"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">عنوان</label>
+                <input
+                  type="text"
+                  value={fullCourseFormData.title}
+                  onChange={(e) => setFullCourseFormData({...fullCourseFormData, title: e.target.value})}
+                  className="w-full p-2 border rounded"
+                  placeholder="عنوان دوره کامل"
+                />
+              </div>
+              <div className="col-span-2">
+                <label className="block text-sm font-medium mb-2">توضیحات</label>
+                <textarea
+                  value={fullCourseFormData.description}
+                  onChange={(e) => setFullCourseFormData({...fullCourseFormData, description: e.target.value})}
+                  className="w-full p-2 border rounded"
+                  rows={3}
+                  placeholder="توضیحات دوره کامل"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">نام آیکون</label>
+                <input
+                  type="text"
+                  value={fullCourseFormData.icon_name}
+                  onChange={(e) => setFullCourseFormData({...fullCourseFormData, icon_name: e.target.value})}
+                  className="w-full p-2 border rounded"
+                  placeholder="LuBrain"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">تصویر</label>
+                <input
+                  type="text"
+                  value={fullCourseFormData.image || ''}
+                  onChange={(e) => setFullCourseFormData({...fullCourseFormData, image: e.target.value})}
+                  className="w-full p-2 border rounded"
+                  placeholder="URL تصویر"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">ترتیب</label>
+                <input
+                  type="number"
+                  value={fullCourseFormData.order_index}
+                  onChange={(e) => setFullCourseFormData({...fullCourseFormData, order_index: parseInt(e.target.value)})}
+                  className="w-full p-2 border rounded"
+                />
+              </div>
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  checked={fullCourseFormData.is_active}
+                  onChange={(e) => setFullCourseFormData({...fullCourseFormData, is_active: e.target.checked})}
+                  className="mr-2"
+                />
+                <label className="text-sm font-medium">فعال</label>
+              </div>
+            </div>
+            
+            <div className="flex gap-4 justify-end">
+              <button
+                onClick={() => setShowEditFullCourseModal(false)}
+                className="px-6 py-2 border rounded hover:bg-gray-50"
+              >
+                انصراف
+              </button>
+              <button
+                onClick={handleEditFullCourse}
+                className="px-6 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700"
+              >
+                ذخیره تغییرات
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Delete Full Course Modal */}
+      {showDeleteFullCourseModal && (
+        <motion.div className="fixed inset-0 bg-black/30 backdrop-blur-xl bg-opacity-50 flex items-center justify-center p-4 z-10000" 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+        >
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <h2 className="text-2xl font-bold mb-4">حذف دوره کامل</h2>
+            <p className="mb-6">
+                {typeof selectedFullCourse === 'object' && selectedFullCourse && 'title' in selectedFullCourse
+                    ? `آیا مطمئن هستید که می‌خواهید دوره کامل "${(selectedFullCourse as { title: string }).title}" را حذف کنید؟`
+                    : 'آیا مطمئن هستید که می‌خواهید این دوره کامل را حذف کنید؟'}
+            </p>
+            
+            <div className="flex gap-4 justify-end">
+              <button
+                onClick={() => setShowDeleteFullCourseModal(false)}
+                className="px-6 py-2 border rounded hover:bg-gray-50"
+              >
+                انصراف
+              </button>
+              <button
+                onClick={handleDeleteFullCourse}
+                className="px-6 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+              >
+                حذف
               </button>
             </div>
           </div>

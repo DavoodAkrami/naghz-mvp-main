@@ -1,13 +1,14 @@
 "use client"
 import clsx from "clsx";
 import React, { useEffect, useState, useMemo} from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import PopUp from "./PopUp";
 import Modal from "./Modal";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import { saveProgress } from "@/store/slices/courseSlice";
 import Image from "next/image";
+import { FullCourse } from "@/store/slices/courseSlice";
 
 
 export interface options {
@@ -238,11 +239,21 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
     const hasMultipleSelection = multipleSelections.length > 0;
     const hasSequentialSelection = sequentialSelections.length > 0;
 
+    const [fullCourseRoute, setFullCourseRoute] = useState<string | null>(null);
+    const pathname = usePathname();
+
+
     const dispatch = useDispatch<AppDispatch>();
     const { user } = useSelector((state: RootState) => state.auth);
-    const { userProgress, loading: courseLoading } = useSelector((state: RootState) => state.course);
+    const { fullCourses, userProgress, loading: courseLoading } = useSelector((state: RootState) => state.course);
 
     const isCompleted = userProgress.some(progress => progress.course_id === course_id);
+
+
+    useEffect(() => {
+        const foundCourse: FullCourse | undefined = fullCourses.find(course => pathname.includes(course.slug));
+        setFullCourseRoute(foundCourse?.slug || "");
+    }, [])
 
     useEffect(() => {
         if (activeId) {
@@ -326,7 +337,7 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
     const handleNextPage = () => {
         if (page_number >= pageLength) {
             endSound.play();
-            router.push("/courses")
+            router.push(`/courses/${fullCourseRoute}`)
             if (!isCompleted){ 
                 setSaveProgressLoading(true)
                 dispatch(saveProgress({ courseId: course_id, userId: user?.id || '' }))
@@ -600,7 +611,7 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                 </div>
             ) : (page_type === "test" || page_type === "testNext") ? (
                 <div
-                    className="flex flex-col justify-center mx-auto"
+                    className="flex flex-col justify-center mx-auto py-[5vh]"
                 >
                     {image && (
                         courseLoading ? (

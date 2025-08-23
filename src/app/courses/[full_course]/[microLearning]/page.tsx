@@ -6,16 +6,16 @@ import { useEffect } from "react";
 import { use } from "react";
 import LearningSlider from "@/components/LearningSlider";
 
-export default function CoursePage({ params }: { params: Promise<{ course: string; }> }) {
+export default function CoursePage({ params }: { params: Promise<{ microLearning: string; }> }) {
     const resolvedParams = use(params);
-    const { course } = resolvedParams;
+    const { microLearning } = resolvedParams;
     const dispatch = useDispatch<AppDispatch>();
     const { currentCourse, currentPage, pageOptions, loading, error } = useSelector((state: RootState) => state.course);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const courseData = await dispatch(fetchCourseBySlug(course)).unwrap();
+                const courseData = await dispatch(fetchCourseBySlug(microLearning)).unwrap();
                 if (courseData?.id) {
                     const pageData = await dispatch(fetchPage({ courseId: courseData.id, pageNumber: 1 })).unwrap();
                     if (pageData?.id) {
@@ -28,7 +28,7 @@ export default function CoursePage({ params }: { params: Promise<{ course: strin
         };
         
         fetchData();
-    }, [dispatch, course]);
+    }, [dispatch, microLearning]);
 
     if (loading) return (
         <div className="min-h-screen flex items-center justify-center bg-[var(--bg-color)]" dir="rtl">

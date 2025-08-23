@@ -6,13 +6,14 @@ import { MdPsychologyAlt } from "react-icons/md";
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { useSelector } from "react-redux";
-import { RootState } from "@/store/store";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState, AppDispatch } from "@/store/store";
 import { links } from  "@/routes/routes";
 import { TbMessageChatbot } from "react-icons/tb";
 import ChallengPopUp from "@/components/ChallengPopUp";
 import ChatBot from "@/components/ChatBot";
 import clsx from "clsx";
+import { fetchUserProgress } from "@/store/slices/courseSlice";
 
 
 interface GuidedPathsType {
@@ -49,12 +50,15 @@ const GuidedPaths: GuidedPathsType[] = [
 
 
 const Home = () => {
-    const [selectedGuide, setSelectedGuide] = useState<number>(1);
-    const { isAuthenticated, loading } = useSelector((state: RootState) => state.auth);
+    // const [selectedGuide, setSelectedGuide] = useState<number>(1);
+    const { isAuthenticated, user, loading } = useSelector((state: RootState) => state.auth);
     const [linkCarry, setLinkCarry] = useState<string>(links.signUp);
     const [isPopUpOpen, setIsPopUpOpen] = useState<boolean>(false);
     const [isChallengPopUpOpen, setIsChallengPopUpOpen] = useState<boolean>(false);
     const [isChatBotOpen, setIsChatBotOpen] = useState<boolean>(false);
+    const [shouldPopUpOpen, setShouldPopUpOpen] = useState<boolean>(false);
+    const { userProgress } = useSelector((state: RootState) => state.course);
+    const dispatch = useDispatch<AppDispatch>();
 
 
     // const handleNavigation = (guidedPath: number) => {
@@ -93,6 +97,12 @@ const Home = () => {
     }, [isAuthenticated]);
 
     useEffect(() => {
+        if (user?.id) {
+            dispatch(fetchUserProgress(user.id));
+        }
+    }, [dispatch, user?.id]);
+
+    useEffect(() => {
         const popupDate = localStorage.getItem("popupDate");
         const today = new Date().toDateString();
         const currentHour = new Date().getHours();
@@ -120,6 +130,11 @@ const Home = () => {
             return () => clearTimeout(timer);
         }
     }, [isAuthenticated]);
+
+
+    useEffect((courseId="4930ad6d-aa59-4061-87aa-1b255d6355bf") => {
+        setShouldPopUpOpen(!!userProgress.find(course => course.course_id === courseId))
+    }, [userProgress])
 
     return (
         <AnimatePresence>

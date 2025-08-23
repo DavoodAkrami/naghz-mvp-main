@@ -1,6 +1,19 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { supabase } from '@/config/supabase';
 
+export interface FullCourse {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  icon_name?: string;
+  image?: string;
+  is_active: boolean;
+  order_index: number;
+  created_at: string;
+  updated_at: string;
+}
+
 interface Course {
   id: string;
   slug: string;
@@ -9,6 +22,8 @@ interface Course {
   icon_name?: string;
   is_active: boolean;
   order_index: number;
+  full_course_id?: string;
+  order_within_full_course?: number;
 }
 
 
@@ -66,6 +81,8 @@ interface TestResult {
 }
 
 interface LearningState {
+  fullCourses: FullCourse[];
+  currentFullCourse: FullCourse | null;
   courses: Course[];
   currentCourse: Course | null;
   currentPage: CoursePage | null;
@@ -84,6 +101,8 @@ interface LearningState {
 }
 
 const initialState: LearningState = {
+  fullCourses: [],
+  currentFullCourse: null,
   courses: [],
   currentCourse: null,
   currentPage: null,
@@ -289,6 +308,94 @@ export const uploadPageImage = createAsyncThunk(
   }
 );
 
+export const fetchFullCourses = createAsyncThunk(
+  'course/fetchFullCourses',
+  async () => {
+    if (!supabase) throw new Error('Supabase not configured');
+    
+    const { data, error } = await supabase
+      .from('full_courses')
+      .select('*')
+      .eq('is_active', true)
+      .order('order_index');
+    
+    if (error) throw error;
+    return data || [];
+  }
+);
+
+export const createFullCourse = createAsyncThunk(
+  'course/createFullCourse',
+  async (fullCourseData: Omit<FullCourse, 'id' | 'created_at' | 'updated_at'>) => {
+    if (!supabase) throw new Error('Supabase not configured');
+    
+    const { data, error } = await supabase
+      .from('full_courses')
+      .insert({
+        ...fullCourseData,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  }
+);
+
+export const updateFullCourse = createAsyncThunk(
+  'course/updateFullCourse',
+  async ({ id, updates }: { id: string; updates: Partial<Omit<FullCourse, 'id' | 'created_at' | 'updated_at'>> }) => {
+    if (!supabase) throw new Error('Supabase not configured');
+    
+    const { data, error } = await supabase
+      .from('full_courses')
+      .update({
+        ...updates,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', id)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  }
+);
+
+export const deleteFullCourse = createAsyncThunk(
+  'course/deleteFullCourse',
+  async (id: string) => {
+    if (!supabase) throw new Error('Supabase not configured');
+    
+    const { error } = await supabase
+      .from('full_courses')
+      .delete()
+      .eq('id', id);
+    
+    if (error) throw error;
+    return id;
+  }
+);
+
+export const fetchCoursesByFullCourse = createAsyncThunk(
+  'course/fetchCoursesByFullCourse',
+  async (fullCourseId: string) => {
+    if (!supabase) throw new Error('Supabase not configured');
+    
+    const { data, error } = await supabase
+      .from('courses')
+      .select('*')
+      .eq('full_course_id', fullCourseId)
+      .eq('is_active', true)
+      .order('order_within_full_course');
+    
+    if (error) throw error;
+    return data || [];
+  }
+);
+
 const courseSlice = createSlice({
   name: 'course',
   initialState,
@@ -446,6 +553,70 @@ const courseSlice = createSlice({
       .addCase(fetchUserProgress.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || 'Failed to fetch user progress';
+      })
+      .addCase(fetchFullCourses.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchFullCourses.fulfilled, (state, action) => {
+        state.loading = false;
+        state.fullCourses = action.payload;
+      })
+      .addCase(fetchFullCourses.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || 'Failed to fetch full courses';
+      })
+      .addCase(createFullCourse.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(createFullCourse.fulfilled, (state, action) => {
+        state.loading = false;
+        state.fullCourses.push(action.payload);
+      })
+      .addCase(createFullCourse.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || 'Failed to create full course';
+      })
+      .addCase(updateFullCourse.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateFullCourse.fulfilled, (state, action) => {
+        state.loading = false;
+        const updatedFullCourse = action.payload;
+        const index = state.fullCourses.findIndex(fc => fc.id === updatedFullCourse.id);
+        if (index !== -1) {
+          state.fullCourses[index] = updatedFullCourse;
+        }
+      })
+      .addCase(updateFullCourse.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || 'Failed to update full course';
+      })
+      .addCase(deleteFullCourse.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(deleteFullCourse.fulfilled, (state, action) => {
+        state.loading = false;
+        state.fullCourses = state.fullCourses.filter(fc => fc.id !== action.payload);
+      })
+      .addCase(deleteFullCourse.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || 'Failed to delete full course';
+      })
+      .addCase(fetchCoursesByFullCourse.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchCoursesByFullCourse.fulfilled, (state, action) => {
+        state.loading = false;
+        state.courses = action.payload;
+      })
+      .addCase(fetchCoursesByFullCourse.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || 'Failed to fetch courses by full course';
       });
   },
 });

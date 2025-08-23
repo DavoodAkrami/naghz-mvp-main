@@ -79,7 +79,7 @@ body {
 }
 
 .button-primary:hover {
-    background-color: var(--accent-color2);
+    background-color: var(--primary-color2);
 }
 
 .button-secondary {
