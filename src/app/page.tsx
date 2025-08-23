@@ -12,6 +12,7 @@ import { links } from  "@/routes/routes";
 import { TbMessageChatbot } from "react-icons/tb";
 import ChallengPopUp from "@/components/ChallengPopUp";
 import ChatBot from "@/components/ChatBot";
+import clsx from "clsx";
 
 
 interface GuidedPathsType {
@@ -223,7 +224,7 @@ const Home = () => {
                 <section
                     className="bg-[var(--primary-color4)] grid grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr] max-[1100px]:grid-cols-1 max-md:grid-rows-[1fr_1fr] overflow-x-hidden min-h-[80vh] max-md:min-h-[85vh] relative" 
                 >
-                    <div className="absolute top-[13vh] left-[5vw] w-4/5 max-md:w-full max-w-[40vw] flex items-center max-md:max-w-[90vw] max-md:mt-[20vh]">
+                    <div className="absolute top-[13vh] left-[5vw] w-4/5 max-md:w-full max-w-[40vw] flex items-center max-md:max-w-[90vw] max-md:mt-[25vh]">
                         <img src="/section1.landing1.jpg" alt="concepts that click" className="w-full h-auto object-contain max-[1100px]:object-cover rounded-3xl" />
                     </div>
                     <motion.div
@@ -232,7 +233,7 @@ const Home = () => {
                         exit={{ opacity: 0 }}
                         viewport={{ once: true }}
                         transition={{  delay: 0.5, duration: 0.6}}
-                        className="px-8 flex flex-col justify-center col-start-2 col-end-5 max-md:w-[90%] mb-[3vh]"
+                        className="px-8 flex flex-col justify-center col-start-2 col-end-5 max-md:w-[130%] mb-[7vh]"
                     >
                         <h1
                             className="h1 max-w-[45vw] max-[1300px]:max-w-[45vw] max-[550px]:max-w-[80vw] max-[400px]:max-w-[80vw]"
@@ -250,7 +251,7 @@ const Home = () => {
                 <section
                     className="grid grid-cols-[5%_1fr_1fr_1fr_1fr_1fr_1fr] max-[1100px]:grid-cols-1 max-md:grid-rows-[1fr_1fr] overflow-x-hidden min-h-[80vh] max-md:min-h-[85vh] relative" 
                 >
-                    <div className="absolute top-[13vh] right-[5vw] w-4/5 max-md:w-full max-w-[40vw] flex items-center max-md:max-w-[90vw] max-md:mt-[20vh]">
+                    <div className="absolute top-[13vh] right-[5vw] w-4/5 max-md:w-full max-w-[40vw] flex items-center max-md:max-w-[90vw] max-md:mt-[25vh]">
                         <img src="/section1.landing2.jpg" alt="concepts that click" className="w-full h-auto object-contain max-[1100px]:object-cover rounded-3xl" />
                     </div>
                     <motion.div 
@@ -276,7 +277,7 @@ const Home = () => {
                 <section
                     className="bg-[var(--primary-color4)] grid grid-cols-[5%_1fr_1fr_1fr_1fr_1fr_1fr] max-[1100px]:grid-cols-1 max-md:grid-rows-[1fr_1fr] overflow-x-hidden min-h-[80vh] max-md:min-h-[85vh] relative" 
                 >
-                    <div className="absolute top-[13vh] left-[5vw] w-4/5 max-md:w-full max-w-[40vw] flex items-center max-md:max-w-[90vw] max-md:mt-[20vh]">
+                    <div className="absolute top-[13vh] left-[5vw] w-4/5 max-md:w-full max-w-[40vw] flex items-center max-md:max-w-[90vw] max-md:mt-[25vh]">
                         <img src="/section1.landing3.jpg" alt="concepts that click" className="w-full h-auto object-contain max-[1100px]:object-cover rounded-3xl" />
                     </div>
                     <motion.div 
@@ -302,7 +303,7 @@ const Home = () => {
                 <section
                     className="grid grid-cols-[5%_1fr_1fr_1fr_1fr_1fr_1fr] max-[1100px]:grid-cols-1 max-md:grid-rows-[1fr_1fr] overflow-x-hidden min-h-[80vh] max-md:min-h-[80vh] relative" 
                 >
-                    <div className="absolute top-[13vh] right-[5vw] w-4/5 max-md:w-full max-w-[40vw] flex items-center max-md:max-w-[90vw] max-md:mt-[20vh]">
+                    <div className="absolute top-[13vh] right-[5vw] w-4/5 max-md:w-full max-w-[40vw] flex items-center max-md:max-w-[90vw] max-md:mt-[25vh]">
                         <img src="/section4.landing.jpg" alt="concepts that click" className="w-full h-auto object-contain max-[1100px]:object-cover rounded-3xl" />
                     </div>
                     <motion.div
@@ -433,7 +434,10 @@ const Home = () => {
                     onClick={() => setIsChatBotOpen(!isChatBotOpen)}
                 >
                     <button
-                        className=""
+                        className={clsx(
+                            'transition-all duration-400',
+                            isChatBotOpen && 'rotate-360'
+                        )}
                     >
                         <TbMessageChatbot 
                             className="text-[3rem] text-[white] cursor-pointer"

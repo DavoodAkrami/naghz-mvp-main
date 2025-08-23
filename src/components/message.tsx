@@ -13,7 +13,8 @@ const Message: React.FC<MessageProps> = ({ sender="user", loading=false, childre
         <div 
             className={clsx(
                 "flex items-center justify-center w-[80%] mx-auto shadow-lg p-4 rounded-t-lg",
-                sender === "ai" ? "rounded-br-lg" : "rounded-bl-lg"
+                sender === "ai" ? "rounded-br-lg" : "rounded-bl-lg",
+                !children && "hidden"
             )}
         >
             {loading ? 

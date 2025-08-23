@@ -15,7 +15,7 @@ const ChatBot: React.FC<chatBotProp> = ({ sender="user", aiMessage, userMessage,
         <>
             {isOpen &&
                 <div
-                    className="min-h-[60vh] max-md:min-h-[90vh] min-w-[40vw]  bg-[var(--bg-color)] fixed right-[4vw] bottom-[4vh] z-1000000"
+                    className="min-h-[60vh] max-md:min-h-[90vh] min-w-[40vw] bg-[var(--bg-color)] fixed right-[2vw] bottom-[12vh] z-1000000"
                 >
                     <Message sender={sender} loading={loading}>
                         {sender === "ai" ? aiMessage : userMessage}
