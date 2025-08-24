@@ -11,7 +11,7 @@ import { useRouter } from "next/navigation";
 
 const FullCourseDetailPage = () => {
     const dispatch = useDispatch<AppDispatch>();
-    const { fullCourses, loading, error } = useSelector((state: RootState) => state.fullCourse);
+    const { fullCourses, fullCourseLoading, error } = useSelector((state: RootState) => state.fullCourse);
     const params = useParams();
     const fullCourseSlug = params.full_course as string;
     const route = useRouter();
@@ -41,7 +41,7 @@ const FullCourseDetailPage = () => {
                 دوره‌ها
             </h2>
             <div className="flex flex-col gap-[2rem]">
-                {loading ? (
+                {fullCourseLoading ? (
                     Array.from({ length: 3 }).map((_, index) => (
                         <div key={index} className="w-full animate-pulse">
                             <div className="bg-[var(--primary-color1)]/20 backdrop-blur-xl px-[2rem] py-[1.5rem] rounded-lg">

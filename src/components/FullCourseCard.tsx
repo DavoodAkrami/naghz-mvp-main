@@ -1,4 +1,4 @@
-import { FullCourse } from "@/store/slices/courseSlice"
+import { FullCourse } from "@/store/slices/fullCourseSlice"
 import React from "react"
 import * as LuIcons from "react-icons/lu";
 import clsx from "clsx";
