@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useRouter, useParams } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "@/store/store";
-import { fetchCourses, fetchUserProgress, fetchFullCourses } from "@/store/slices/courseSlice";
+import { fetchCourses, fetchUserProgress, fetchFullCourses, fetchAllCourses } from "@/store/slices/courseSlice";
 import * as LuIcons from "react-icons/lu";
 import { usePathname } from "next/navigation";
 import { FullCourse } from "@/store/slices/courseSlice";
@@ -43,11 +43,16 @@ const Curses: React.FC = () => {
     }, [fullCourses, pathname])
 
     useEffect(() => {
-        dispatch(fetchCourses());
+        // Fetch all courses for admins, only active courses for regular users
+        if (user?.user_metadata?.role === 'admin') {
+            dispatch(fetchAllCourses());
+        } else {
+            dispatch(fetchCourses());
+        }
         if (user?.id) {
             dispatch(fetchUserProgress(user.id));
         }
-    }, [dispatch, user?.id]);
+    }, [dispatch, user?.id, user?.user_metadata?.role]);
 
     const handleModalOpen = (id: string | null) => {
         setIsModalOpen(id);
@@ -118,6 +123,7 @@ const Curses: React.FC = () => {
                                 isActive={course.is_active}
                                 isCompleted={isCourseCompleted(course.id)}
                                 onClick={() => handleModalOpen(course.id!)}
+                                isAdmin={user?.user_metadata?.role === 'admin'}
                             />
                         ))}
                     </AnimatePresence>
@@ -173,6 +179,7 @@ const Curses: React.FC = () => {
                                         isActive={course.is_active}
                                         onClick={() => handleModalOpen(null)}
                                         startOnClick={course.slug ? () => handleStartOnClick(course.slug!) : undefined}
+                                        isAdmin={user?.user_metadata?.role === 'admin'}
                                     />
                                 );
                             })()}

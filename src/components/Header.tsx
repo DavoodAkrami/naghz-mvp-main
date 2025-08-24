@@ -45,7 +45,7 @@ const Header = () => {
     
     if (showSkeleton && headerPage) {
         return (
-            <header className="top-0 sticky shadow-lg bg-[var(--primary-color4)]/40 backdrop-blur-xl z-1000">
+            <header className="top-[2.5vh] py-[0.4vh] pt-[1.4vh] rounded-full w-[90%] mx-auto sticky shadow-lg bg-[var(--primary-color1)]/40 backdrop-blur-xl z-1000 max-md:py-0 max-md:pt-[0.3rem]">
                 <div className="py-[1.8rem] flex items-center justify-between w-[80%] max-lg:w-[90%] mx-auto max-md:py-[1.2rem]">
                     <div className="h-12 w-32 bg-gray-200 rounded animate-pulse max-md:w-24 max-md:h-8" />
                     <div className="flex gap-[1rem] max-md:gap-[0.2rem]">
@@ -53,7 +53,6 @@ const Header = () => {
                         <div className="h-10 w-32 bg-gray-200 rounded-full animate-pulse max-md:hidden" />
                     </div>
                 </div>
-                <hr className="text-[var(--text-desable)] opacity-[0.8]" />
             </header>
         );
     }
@@ -64,7 +63,7 @@ const Header = () => {
         <>
             {headerPage ? (
                 <header
-                    className="top-0 sticky shadow-lg bg-[var(--primary-color4)]/40 backdrop-blur-xl z-1000"
+                    className="top-[2.5vh] py-[0.4vh] pt-[1.4vh] rounded-full w-[90%] mx-auto sticky shadow-lg bg-[var(--primary-color1)]/40 backdrop-blur-xl z-1000 max-md:py-0 max-md:pt-[0.3rem] max-md:mb-[2rem] text-[var]"
                 >
                     <div
                         className="py-[1rem] flex items-center justify-between w-[80%] max-lg:w-[90%] mx-auto"
@@ -100,7 +99,10 @@ const Header = () => {
                                 onMouseLeave={() => setDropdownOpen(false)}
                             >
                                     <Link 
-                                        className="flex items-center gap-[0.6rem] p-2 hover:bg-[var(--hover-color)] rounded-lg"
+                                        className={clsx(
+                                            "flex items-center gap-[0.6rem] p-2 hover:bg-[var(--primary-color4)]/50 rounded-lg",
+                                            dropdownOpen && "bg-[var(--primary-color4]"
+                                        )}
                                         href="/dashboard/profile"
                                     >
                                         <MdOutlineKeyboardArrowUp 
@@ -121,18 +123,18 @@ const Header = () => {
                                             animate={{ height: 'auto'}}
                                             transition={{ duration: 0.3 }}
                                             exit={{ height: 0 }}
-                                            className="overflow-hidden absolute right-0 rounded-md min-w-[20vw] shadow-lg z-50 bg-[var(--bg-color)] max-lg:hidden"
+                                            className="overflow-hidden absolute right-0 rounded-2xl min-w-[20vw] shadow-lg z-50   max-lg:hidden"
                                         >
                                             <ul 
                                                 className=""
                                             >
                                                 {routes.filter(route => route.profilePage === true).map((route, index) => (
                                                     <li
-                                                        className="text-[1.4rem] max-md:text-[1.2rem] font-bold px-6 py-4 hover:bg-[var(--hover-color)] hover:cursor-pointer"
+                                                        className="text-[1.4rem] max-md:text-[1.2rem] font-bold hover:cursor-pointer bg-[var(--primary-color4)]/50 hover:bg-[var(--primary-color4)]/65"
                                                         key={index}
                                                     >
                                                         <Link
-                                                            className="block w-[100%] h-[100%]"
+                                                            className="block w-[100%] h-[100%] backdrop-blur-2xl px-4 py-3"
                                                             href={route.path}
                                                         >
                                                             {route.name}
@@ -146,7 +148,7 @@ const Header = () => {
                             </div>
                         )}
                     </div>
-                    <hr className="text-[var(--text-desable)] opacity-[0.8]" />
+                    {/* <hr className="text-[var(--text-desable)] opacity-[0.8]" /> */}
                 </header>
             ) : (
                 <header

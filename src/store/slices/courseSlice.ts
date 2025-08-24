@@ -135,6 +135,21 @@ export const fetchCourses = createAsyncThunk(
   }
 );
 
+export const fetchAllCourses = createAsyncThunk(
+  'course/fetchAllCourses',
+  async () => {
+    if (!supabase) throw new Error('Supabase not configured');
+    
+    const { data, error } = await supabase
+      .from('courses')
+      .select('*')
+      .order('order_index');
+    
+    if (error) throw error;
+    return data || [];
+  }
+);
+
 export const fetchCourseBySlug = createAsyncThunk(
   'course/fetchCourseBySlug',
   async (slug: string) => {
@@ -461,6 +476,18 @@ const courseSlice = createSlice({
       .addCase(fetchCourses.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || 'Failed to fetch courses';
+      })
+      .addCase(fetchAllCourses.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchAllCourses.fulfilled, (state, action) => {
+        state.loading = false;
+        state.courses = action.payload;
+      })
+      .addCase(fetchAllCourses.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || 'Failed to fetch all courses';
       })
       .addCase(fetchCourseBySlug.pending, (state) => {
         state.loading = true;

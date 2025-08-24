@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "@/store/store";
-import { fetchCourses, uploadPageImage, fetchFullCourses, createFullCourse, updateFullCourse, deleteFullCourse } from "@/store/slices/courseSlice";
+import { fetchCourses, uploadPageImage, fetchFullCourses, createFullCourse, updateFullCourse, deleteFullCourse, fetchAllCourses } from "@/store/slices/courseSlice";
 import { supabase } from "@/config/supabase";
 import { FiPlus, FiEdit, FiTrash2, FiMove, FiChevronUp, FiChevronDown } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
@@ -58,6 +58,7 @@ interface OptionFormData {
 export default function CourseManagement() {
   const dispatch = useDispatch<AppDispatch>();
   const { courses, fullCourses, loading, error } = useSelector((state: RootState) => state.course);
+  const { user } = useSelector((state: RootState) => state.auth);
   
   // Course management states
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -74,6 +75,9 @@ export default function CourseManagement() {
     full_course_id: '',
     order_within_full_course: 0
   });
+
+  // Admin filter state
+  const [showInactiveCourses, setShowInactiveCourses] = useState(false);
 
   // Full course management states
   const [showCreateFullCourseModal, setShowCreateFullCourseModal] = useState(false);
@@ -255,9 +259,14 @@ export default function CourseManagement() {
   };
 
   useEffect(() => {
-    dispatch(fetchCourses());
+    // Fetch all courses for admins, only active courses for regular users
+    if (user?.user_metadata?.role === 'admin') {
+      dispatch(fetchAllCourses());
+    } else {
+      dispatch(fetchCourses());
+    }
     dispatch(fetchFullCourses());
-  }, [dispatch]);
+  }, [dispatch, user?.user_metadata?.role]);
 
   // Debug: Log course data to see the structure
   useEffect(() => {
@@ -351,76 +360,50 @@ export default function CourseManagement() {
     setShowCreateModal(true);
   };
 
+  const refreshCourses = () => {
+    if (user?.user_metadata?.role === 'admin') {
+      dispatch(fetchAllCourses());
+    } else {
+      dispatch(fetchCourses());
+    }
+  };
+
   const handleCreateCourse = async () => {
     try {
       if (!supabase) throw new Error('Supabase not configured');
       
-      // If we're creating a course within a full course context, set the full_course_id
-      const courseDataToInsert = {
-        ...courseFormData,
-        full_course_id: selectedFullCourse && typeof selectedFullCourse === 'object' && 'id' in selectedFullCourse 
-          ? (selectedFullCourse as { id: string }).id 
-          : courseFormData.full_course_id || null
-      };
-      
-      const { data: course, error: courseError } = await supabase
+      const { data: course, error } = await supabase
         .from('courses')
-        .insert(courseDataToInsert)
+        .insert(courseFormData)
         .select()
         .single();
       
-      if (courseError) throw courseError;
-
-      // Normalize page ordering just before persisting
-      const orderedPages = pages
-        .slice()
-        .map((p, idx) => ({ ...p, page_number: idx + 1, order_index: idx, page_length: pages.length }));
-
-      for (let i = 0; i < orderedPages.length; i++) {
-        const page = orderedPages[i];
-        const { data: pageData, error: pageError } = await supabase
+      if (error) throw error;
+      
+      // Create pages for the course
+      for (let i = 0; i < pages.length; i++) {
+        const page = pages[i];
+        const { error: pageError } = await supabase
           .from('course_pages')
           .insert({
-            ...page,
+            page_number: page.page_number,
+            page_type: page.page_type,
+            title: page.title,
+            content: page.content,
+            question: page.question,
+            test_type: page.test_type,
+            test_grid: page.test_grid,
             correct_answer: toDbCorrectAnswer(page.test_type, page.correct_answer),
-            course_id: course.id
-          })
-          .select()
-          .single();
+            image: page.image,
+            page_length: page.page_length,
+            order_index: page.order_index,
+            course_id: course.id,
+          });
         
         if (pageError) throw pageError;
-
-        // If an image is selected for this page, upload it and update DB
-        const fileForPage = imagesByPage[i];
-        if (fileForPage) {
-          try {
-            const result = await dispatch(uploadPageImage({ pageId: pageData.id as string, file: fileForPage })).unwrap();
-            // reflect in local state
-            updatePage(i, { image: result.publicUrl });
-          } catch (e) {
-            console.error('Failed to upload page image:', e);
-          }
-        }
-
-        const pageOptions = optionsByPage[i] || [];
-        if (page.page_type === 'test' && pageOptions.length > 0) {
-          for (let j = 0; j < pageOptions.length; j++) {
-            const option = pageOptions[j];
-            await supabase
-              .from('page_options')
-              .insert({
-                option_text: option.option_text,
-                option_order: option.option_order,
-                is_correct: option.is_correct,
-                icon_name: option.icon_name,
-                page_id: pageData.id
-              });
-          }
-        }
       }
-
+      
       setShowCreateModal(false);
-      setSelectedFullCourse(null);
       setCourseFormData({
         slug: '',
         title: '',
@@ -433,164 +416,163 @@ export default function CourseManagement() {
       });
       setPages([]);
       setOptionsByPage({});
-      dispatch(fetchCourses());
+      refreshCourses();
     } catch (error) {
       console.error('Error creating course:', error);
     }
   };
 
   const handleEditCourse = async () => {
-  setEditLoading(true);
-  try {
-    if (!supabase || !selectedCourse) throw new Error('Supabase not configured or no course selected');
+    setEditLoading(true);
+    try {
+      if (!supabase || !selectedCourse) throw new Error('Supabase not configured or no course selected');
 
-    const courseId = (selectedCourse as { id: string }).id;
+      const courseId = (selectedCourse as { id: string }).id;
 
-    {
-      const { error } = await supabase
-        .from('courses')
-        .update(courseFormData)
-        .eq('id', courseId);
-      if (error) throw error;
-    }
+      {
+        const { error } = await supabase
+          .from('courses')
+          .update(courseFormData)
+          .eq('id', courseId);
+        if (error) throw error;
+      }
 
-    const orderedPages = pages
-      .slice()
-      .map((p, idx) => ({ ...p, page_number: idx + 1, order_index: idx, page_length: pages.length }));
+      const orderedPages = pages
+        .slice()
+        .map((p, idx) => ({ ...p, page_number: idx + 1, order_index: idx, page_length: pages.length }));
 
-    const currentPageIds = orderedPages.filter(p => p.id).map(p => p.id!) as string[];
-    const pagesToDelete = originalPageIds.filter(id => !currentPageIds.includes(id));
+      const currentPageIds = orderedPages.filter(p => p.id).map(p => p.id!) as string[];
+      const pagesToDelete = originalPageIds.filter(id => !currentPageIds.includes(id));
 
-    for (const pageId of pagesToDelete) {
-      const { error: delOptErr } = await supabase.from('page_options').delete().eq('page_id', pageId);
-      if (delOptErr) throw delOptErr;
-      const { error: delPageErr } = await supabase.from('course_pages').delete().eq('id', pageId);
-      if (delPageErr) throw delPageErr;
-    }
+      for (const pageId of pagesToDelete) {
+        const { error: delOptErr } = await supabase.from('page_options').delete().eq('page_id', pageId);
+        if (delOptErr) throw delOptErr;
+        const { error: delPageErr } = await supabase.from('course_pages').delete().eq('id', pageId);
+        if (delPageErr) throw delPageErr;
+      }
 
-    for (const p of orderedPages) {
-      if (!p.id) continue;
-      const { error: tmpErr } = await supabase
-        .from('course_pages')
-        .update({ page_number: 1000 + p.order_index })
-        .eq('id', p.id);
-      if (tmpErr) throw tmpErr;
-    }
-
-    for (let i = 0; i < orderedPages.length; i++) {
-      const page = orderedPages[i];
-      let pageId: string | undefined = page.id;
-
-      if (pageId) {
-        const { error: updErr } = await supabase
+      for (const p of orderedPages) {
+        if (!p.id) continue;
+        const { error: tmpErr } = await supabase
           .from('course_pages')
-          .update({
-            page_number: page.page_number,
-            page_type: page.page_type,
-            title: page.title,
-            content: page.content,
-            question: page.question,
-            test_type: page.test_type,
-            test_grid: page.test_grid,
-            correct_answer: toDbCorrectAnswer(page.test_type, page.correct_answer),
-            image: page.image,
-            page_length: page.page_length,
-            order_index: page.order_index,
-            why: page.why
-          })
-          .eq('id', pageId);
-        if (updErr) throw updErr;
-      } else {
-        const { data: insertedPage, error: insertPageError } = await supabase
-          .from('course_pages')
-          .insert({
-            page_number: page.page_number,
-            page_type: page.page_type,
-            title: page.title,
-            content: page.content,
-            question: page.question,
-            test_type: page.test_type,
-            test_grid: page.test_grid,
-            correct_answer: toDbCorrectAnswer(page.test_type, page.correct_answer),
-            image: page.image,
-            page_length: page.page_length,
-            order_index: page.order_index,
-            course_id: courseId,
-          })
-          .select()
-          .single();
-        if (insertPageError) throw insertPageError;
-        pageId = insertedPage!.id as string;
+          .update({ page_number: 1000 + p.order_index })
+          .eq('id', p.id);
+        if (tmpErr) throw tmpErr;
       }
 
-      const fileForPage = imagesByPage[i];
-      if (fileForPage && pageId) {
-        try {
-          const result = await dispatch(uploadPageImage({ pageId, file: fileForPage })).unwrap();
-          updatePage(i, { image: result.publicUrl });
-        } catch (e) {
-          console.error('Failed to upload page image:', e);
-        }
-      }
+      for (let i = 0; i < orderedPages.length; i++) {
+        const page = orderedPages[i];
+        let pageId: string | undefined = page.id;
 
-      if (!pageId) continue;
-
-      const pageOptions = optionsByPage[i] || [];
-      const { data: existingOpts, error: fetchOptErr } = await supabase
-        .from('page_options')
-        .select('id')
-        .eq('page_id', pageId);
-      if (fetchOptErr) throw fetchOptErr;
-
-      const existingIds = (existingOpts || []).map((o: any) => o?.id).filter(Boolean) as string[];
-      const currentIds = pageOptions.filter(o => o.id).map(o => o.id as string);
-      const optionsToDelete = existingIds.filter(id => !currentIds.includes(id));
-
-      if (optionsToDelete.length > 0) {
-        const { error: delOptsErr } = await supabase.from('page_options').delete().in('id', optionsToDelete);
-        if (delOptsErr) throw delOptsErr;
-      }
-
-      for (const opt of pageOptions) {
-        if (opt.id) {
-          const { error: updOptErr } = await supabase
-            .from('page_options')
+        if (pageId) {
+          const { error: updErr } = await supabase
+            .from('course_pages')
             .update({
-              option_text: opt.option_text,
-              option_order: opt.option_order,
-              is_correct: opt.is_correct,
-              icon_name: opt.icon_name,
+              page_number: page.page_number,
+              page_type: page.page_type,
+              title: page.title,
+              content: page.content,
+              question: page.question,
+              test_type: page.test_type,
+              test_grid: page.test_grid,
+              correct_answer: toDbCorrectAnswer(page.test_type, page.correct_answer),
+              image: page.image,
+              page_length: page.page_length,
+              order_index: page.order_index,
+              why: page.why
             })
-            .eq('id', opt.id);
-          if (updOptErr) throw updOptErr;
+            .eq('id', pageId);
+          if (updErr) throw updErr;
         } else {
-          const { error: insOptErr } = await supabase
-            .from('page_options')
+          const { data: insertedPage, error: insertPageError } = await supabase
+            .from('course_pages')
             .insert({
-              page_id: pageId,
-              option_text: opt.option_text,
-              option_order: opt.option_order,
-              is_correct: opt.is_correct,
-              icon_name: opt.icon_name,
-            });
-          if (insOptErr) throw insOptErr;
+              page_number: page.page_number,
+              page_type: page.page_type,
+              title: page.title,
+              content: page.content,
+              question: page.question,
+              test_type: page.test_type,
+              test_grid: page.test_grid,
+              correct_answer: toDbCorrectAnswer(page.test_type, page.correct_answer),
+              image: page.image,
+              page_length: page.page_length,
+              order_index: page.order_index,
+              course_id: courseId,
+            })
+            .select()
+            .single();
+          if (insertPageError) throw insertPageError;
+          pageId = insertedPage!.id as string;
+        }
+
+        const fileForPage = imagesByPage[i];
+        if (fileForPage && pageId) {
+          try {
+            const result = await dispatch(uploadPageImage({ pageId, file: fileForPage })).unwrap();
+            updatePage(i, { image: result.publicUrl });
+          } catch (e) {
+            console.error('Failed to upload page image:', e);
+          }
+        }
+
+        if (!pageId) continue;
+
+        const pageOptions = optionsByPage[i] || [];
+        const { data: existingOpts, error: fetchOptErr } = await supabase
+          .from('page_options')
+          .select('id')
+          .eq('page_id', pageId);
+        if (fetchOptErr) throw fetchOptErr;
+
+        const existingIds = (existingOpts || []).map((o: any) => o?.id).filter(Boolean) as string[];
+        const currentIds = pageOptions.filter(o => o.id).map(o => o.id as string);
+        const optionsToDelete = existingIds.filter(id => !currentIds.includes(id));
+
+        if (optionsToDelete.length > 0) {
+          const { error: delOptsErr } = await supabase.from('page_options').delete().in('id', optionsToDelete);
+          if (delOptsErr) throw delOptsErr;
+        }
+
+        for (const opt of pageOptions) {
+          if (opt.id) {
+            const { error: updOptErr } = await supabase
+              .from('page_options')
+              .update({
+                option_text: opt.option_text,
+                option_order: opt.option_order,
+                is_correct: opt.is_correct,
+                icon_name: opt.icon_name,
+              })
+              .eq('id', opt.id);
+            if (updOptErr) throw updOptErr;
+          } else {
+            const { error: insOptErr } = await supabase
+              .from('page_options')
+              .insert({
+                page_id: pageId,
+                option_text: opt.option_text,
+                option_order: opt.option_order,
+                is_correct: opt.is_correct,
+                icon_name: opt.icon_name,
+              });
+            if (insOptErr) throw insOptErr;
+          }
         }
       }
+
+      setShowEditModal(false);
+      setSelectedCourse(null);
+      setPages([]);
+      setOptionsByPage({});
+      setOriginalPageIds([]);
+      refreshCourses();
+    } catch (error) {
+      console.error('Error updating course:', error);
+    } finally {
+      setEditLoading(false);
     }
-
-    setShowEditModal(false);
-    setSelectedCourse(null);
-    setPages([]);
-    setOptionsByPage({});
-    setOriginalPageIds([]);
-    dispatch(fetchCourses());
-  } catch (error) {
-    console.error('Error updating course:', error);
-  } finally {
-    setEditLoading(false);
-  }
-};
-
+  };
 
   const handleDeleteCourse = async () => {
     try {
@@ -603,7 +585,7 @@ export default function CourseManagement() {
       
       setShowDeleteModal(false);
       setSelectedCourse(null);
-      dispatch(fetchCourses());
+      refreshCourses();
     } catch (error) {
       console.error('Error deleting course:', error);
     }
@@ -770,25 +752,50 @@ export default function CourseManagement() {
       {/* Full Course Management Section */}
       <div className="mb-12">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">مدیریت دوره‌های کامل</h1>
-          <button
-            onClick={() => setShowCreateFullCourseModal(true)}
-            className="bg-green-600 text-white p-3 rounded-lg hover:bg-green-700 flex items-center gap-2"
-          >
-            <FiPlus size={20} />
-            افزودن دوره کامل جدید
-          </button>
+          <h1 className="text-3xl font-bold">مدیریت دوره‌ها</h1>
+          <div className="flex gap-4">
+            {/* Admin filter toggle */}
+            {user?.user_metadata?.role === 'admin' && (
+              <div className="flex gap-4 items-center">
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">
+                    فعال: {courses.filter(c => c.is_active).length}
+                  </span>
+                  <span className="px-2 py-1 bg-red-100 text-red-800 rounded text-xs">
+                    غیرفعال: {courses.filter(c => !c.is_active).length}
+                  </span>
+                </div>
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={showInactiveCourses}
+                    onChange={(e) => setShowInactiveCourses(e.target.checked)}
+                    className="rounded"
+                  />
+                  نمایش دوره‌های غیرفعال
+                </label>
+              </div>
+            )}
+            <button
+              onClick={() => setShowCreateFullCourseModal(true)}
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2"
+            >
+              <FiPlus />
+              ایجاد مجموعه دوره جدید
+            </button>
+          </div>
         </div>
 
         <div className="space-y-6">
           {fullCourses.map((fullCourse) => {
             // Filter courses that belong to this full course
-            const fullCourseCourses = courses.filter(course => {
-              // Handle both string and object comparisons
-              const courseFullCourseId = course.full_course_id;
-              const fullCourseId = fullCourse.id;
-              return courseFullCourseId === fullCourseId || courseFullCourseId === fullCourseId?.toString();
-            });
+            const fullCourseCourses = courses.filter(course => 
+              course.full_course_id === fullCourse.id && 
+              (user?.user_metadata?.role === 'admin' ? 
+                (showInactiveCourses ? true : course.is_active) : 
+                course.is_active
+              )
+            );
             
             return (
               <div key={fullCourse.id} className="bg-white rounded-lg shadow-md border overflow-hidden">
