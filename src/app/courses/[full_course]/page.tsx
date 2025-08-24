@@ -9,6 +9,7 @@ import { fetchCourses, fetchUserProgress, fetchFullCourses } from "@/store/slice
 import * as LuIcons from "react-icons/lu";
 import { usePathname } from "next/navigation";
 import { FullCourse } from "@/store/slices/courseSlice";
+import { IoArrowBackCircleOutline } from "react-icons/io5";
 
 
 const getIconComponent = (iconName?: string): typeof LuIcons.LuBrain => {
@@ -74,16 +75,16 @@ const Curses: React.FC = () => {
     return (
         <div
             dir="rtl"
-            className="mt-[2rem] p-12 max-md:p-8" 
+            className="mt-[3rem] mb-[2rem] p-12 max-md:p-8" 
         >
-            <h1 className="text-center text-[4rem] font-bold maxx-md:text-[2rem] mb-[2rem]">دوره {pageHeader}</h1>
+            <h1 className="text-center text-[3rem] font-bold maxx-md:text-[2rem] mb-[2rem]">{pageHeader}</h1>
             <div
-                className="flex items-start max-md:flex-col max-md:items-center gap-[3rem]"
+                className="flex items-start max-md:flex-col max-md:items-center gap-[3rem] max-md:gap-[0.4rem]"
             >
                 <div
                     className="w-[40%] md:sticky top-[10vh] max-md:w-[100%]"
                 >
-                    <div className="min-h-[40vh] bg-[var(--primary-color1)]/50 backdrop-blur-2xl shadow-lg p-6 rounded-3xl border-[2.5px] border-[var(--primary-color1)]">
+                    <div className="min-h-[40vh] max-md:min-h-[20vh] bg-[var(--primary-color1)]/50 backdrop-blur-2xl shadow-lg p-6 rounded-3xl border-[2.5px] border-[var(--primary-color1)]">
                         <h1 className="h1 text-center mb-[1rem]">
                             {course?.title}
                         </h1>
@@ -96,9 +97,10 @@ const Curses: React.FC = () => {
                     >
                         <button
                             onClick={() => router.push("/courses")}
-                            className="button-secondary rounded-3xl w-[100%]"
+                            className="w-[100%] max-md:absolute max-md:top-[1rem] max-md:left-[1rem] max-md:w-auto max-md:p-0 md:button-secondary md:rounded-3xl md:font-bold md:border-[1.8px] md:border-transparent md:outline md:outline-[1px] md:outline-[var(--text-desable)] md:py-3 md:px-6 md:cursor-pointer md:transition-all md:duration-300 md:hover:bg-[var(--accent-color1)] md:hover:text-[var(--primary-color4)]"
                         >
-                            بازگشت
+                            <span className="max-md:hidden">بازگشت</span>
+                            <IoArrowBackCircleOutline className="text-[4rem] text-[var(--accent-color1)] rounded-full hover:bg-[var(--accent-color1)] hover:text-[var(--primary-color4)] cursor-pointer transition-all duration-300 md:hidden" />
                         </button>
                     </div>
                 </div>

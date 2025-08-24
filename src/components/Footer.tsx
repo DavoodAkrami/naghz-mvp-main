@@ -20,7 +20,7 @@ const Footer = () => {
             className="bg-[var(--foreground)] text-[white]/70 min-h-[20vh] flex flex-col justify-between py-[3vh]"
         >
             <div
-                className="flex justify-center gap-[2rem] text-[3rem]"
+                className="flex justify-center gap-[2rem] text-[3rem] max-md:text-[2rem]"
             >
                 <a href="https://www.instagram.com/naghz.io?igsh=aW1nMDdwOTNhZmFo" target="_blank" rel="noopener noreferrer">
                     <FaInstagram className="cursor-pointer hover:text-[var(--accent-color1)] transition-colors duration-200" />

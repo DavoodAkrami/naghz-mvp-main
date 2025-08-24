@@ -161,9 +161,9 @@ const Header = () => {
                             className="flex md:hidden flex-col gap-[6px] cursor-pointer p-[5px] transition-transform duration-300 ease-out"
                             onClick={() => setIsMenuOpen(!isMenuOpen)}
                         >
-                         <span
+                        <span
                             className="block w-[25px] h-[3px] bg-[var(--primary-color1)] transition-all duration-300 ease-out origin-center"
-                         />
+                        />
                         <span
                             className="block w-[25px] h-[3px] bg-[var(--primary-color1)] transition-all duration-300 ease-out origin-center"
                         />
