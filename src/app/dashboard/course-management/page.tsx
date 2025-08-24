@@ -2,11 +2,15 @@
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "@/store/store";
-import { fetchCourses, uploadPageImage, fetchFullCourses, createFullCourse, updateFullCourse, deleteFullCourse, fetchAllCourses } from "@/store/slices/courseSlice";
+import { fetchCourses, fetchAllCourses } from "@/store/slices/courseSlice";
+import { fetchFullCourses, createFullCourse, updateFullCourse, deleteFullCourse } from "@/store/slices/fullCourseSlice";
+import { uploadPageImage } from "@/store/slices/coursePageSlice";
 import { supabase } from "@/config/supabase";
 import { FiPlus, FiEdit, FiTrash2, FiMove, FiChevronUp, FiChevronDown } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaTrash } from "react-icons/fa";
+import Modal from "@/components/Modal";
+import ButtonLoading from "@/components/ButtonLoading";
 
 
 interface CourseFormData {
@@ -57,7 +61,9 @@ interface OptionFormData {
 
 export default function CourseManagement() {
   const dispatch = useDispatch<AppDispatch>();
-  const { courses, fullCourses, loading, error } = useSelector((state: RootState) => state.course);
+  const { courses, loading, error } = useSelector((state: RootState) => state.course);
+  const { coursePageLoading } = useSelector((state: RootState) => state.coursePage)
+  const { fullCourses, fullCourseLoading} = useSelector((state: RootState) => state.fullCourse);
   const { user } = useSelector((state: RootState) => state.auth);
   
   // Course management states
@@ -1881,7 +1887,11 @@ export default function CourseManagement() {
                 className="px-6 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700"
                 disabled={editLoading}
               >
-                {editLoading ? 'در حال ذخیره تغییرات...' : 'ذخیره تغییرات'}
+                {editLoading || coursePageLoading ? (
+                  <ButtonLoading size="md" />
+                ) : (
+                  'ذخیره تغییرات'
+                )}
               </button>
             </div>
           </div>
@@ -2019,7 +2029,7 @@ export default function CourseManagement() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
         >
-          <div className="bg-white rounded-lg p-6 max-w-2xl w-full">
+          <Modal onOpen={showCreateFullCourseModal}>
             <h2 className="text-2xl font-bold mb-4">ایجاد دوره کامل جدید</h2>
             
             <div className="grid grid-cols-2 gap-4 mb-6">
@@ -2102,12 +2112,17 @@ export default function CourseManagement() {
               </button>
               <button
                 onClick={handleCreateFullCourse}
-                className="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                disabled={fullCourseLoading}
+                className="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-[0.6]"
               >
-                ایجاد
+                {fullCourseLoading ? (
+                  <ButtonLoading size="md" />
+                ) : (
+                  "ایجاد"
+                )}
               </button>
             </div>
-          </div>
+          </Modal>
         </motion.div>
       )}
 
@@ -2119,7 +2134,7 @@ export default function CourseManagement() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
         >
-          <div className="bg-white rounded-lg p-6 max-w-2xl w-full">
+          <Modal onOpen={showEditFullCourseModal}>
             <h2 className="text-2xl font-bold mb-4">ویرایش دوره کامل</h2>
             
             <div className="grid grid-cols-2 gap-4 mb-6">
@@ -2202,12 +2217,17 @@ export default function CourseManagement() {
               </button>
               <button
                 onClick={handleEditFullCourse}
-                className="px-6 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700"
+                disabled={fullCourseLoading}
+                className="px-6 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 disabled:opacity-[0.6]"
               >
-                ذخیره تغییرات
+                {fullCourseLoading ? (
+                  <ButtonLoading size="md" />
+                ) : (
+                  "ذخیره تغییرات"
+                )}
               </button>
             </div>
-          </div>
+          </Modal>
         </motion.div>
       )}
 

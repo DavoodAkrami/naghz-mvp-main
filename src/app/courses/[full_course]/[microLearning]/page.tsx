@@ -1,7 +1,8 @@
 "use client"
 import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "@/store/store";
-import { fetchCourseBySlug, fetchPage, fetchPageOptions } from "@/store/slices/courseSlice";
+import { fetchCourseBySlug } from "@/store/slices/courseSlice";
+import { fetchPage, fetchPageOptions } from "@/store/slices/coursePageSlice";
 import { useEffect } from "react";
 import { use } from "react";
 import LearningSlider from "@/components/LearningSlider";
@@ -10,7 +11,8 @@ export default function CoursePage({ params }: { params: Promise<{ microLearning
     const resolvedParams = use(params);
     const { microLearning } = resolvedParams;
     const dispatch = useDispatch<AppDispatch>();
-    const { currentCourse, currentPage, pageOptions, loading, error } = useSelector((state: RootState) => state.course);
+    const { currentCourse, loading, error } = useSelector((state: RootState) => state.course);
+    const { currentPage, pageOptions } = useSelector((state: RootState) => state.coursePage);
 
     useEffect(() => {
         const fetchData = async () => {

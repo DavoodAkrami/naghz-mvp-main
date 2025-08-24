@@ -1,19 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { supabase } from '@/config/supabase';
 
-export interface FullCourse {
-  id: string;
-  slug: string;
-  title: string;
-  description: string;
-  icon_name?: string;
-  image?: string;
-  is_active: boolean;
-  order_index: number;
-  created_at: string;
-  updated_at: string;
-}
-
 interface Course {
   id: string;
   slug: string;
@@ -26,97 +13,18 @@ interface Course {
   order_within_full_course?: number;
 }
 
-
-interface CoursePage {
-  id: string;
-  course_id: string;
-  page_number: number;
-  page_type: 'text' | 'test' | 'testNext';
-  title?: string;
-  content?: string;
-  question?: string;
-  test_type?: 'Default' | 'Multiple' | 'Sequential' | 'Pluggable';
-  test_grid?: 'col' | 'grid-2' | 'grid-row';
-  correct_answer?: number[] | number;
-  page_length: number;
-  order_index: number;
-  why?: string;
-  image?: string; 
-}
-
-interface PageOption {
-  id: string;
-  page_id: string;
-  option_text: string;
-  option_order: number;
-  is_correct: boolean;
-  icon_name?: string;
-}
-
-interface UserProgress {
-  id: string;
-  user_id: string;
-  course_id: string;
-  completed_at: string;
-}
-
-interface TestAttempt {
-  id: string;
-  user_id: string;
-  page_id: string;
-  // TODO: Replace 'unknown' with a specific type for user_answers if possible
-  user_answers: unknown;
-  score: number;
-  is_correct: boolean;
-  time_taken: number;
-  attempted_at: string;
-}
-
-interface TestResult {
-  isCorrect: boolean;
-  correctAnswers: number[];
-  explanation: string;
-  // TODO: Replace 'unknown' with a specific type for userAnswers if possible
-  userAnswers: unknown;
-}
-
 interface LearningState {
-  fullCourses: FullCourse[];
-  currentFullCourse: FullCourse | null;
   courses: Course[];
   currentCourse: Course | null;
-  currentPage: CoursePage | null;
-  pageOptions: PageOption[];
-  userProgress: UserProgress[];
-  currentProgress: UserProgress | null;
-  testAttempts: TestAttempt[];
-  // TODO: Replace 'unknown' with a specific type for currentTestAnswers if possible
-  currentTestAnswers: unknown;
-  testResult: TestResult | null;
   loading: boolean;
   error: string | null;
-  currentPageNumber: number;
-  totalPages: number;
-  showTestResult: boolean;
 }
 
 const initialState: LearningState = {
-  fullCourses: [],
-  currentFullCourse: null,
   courses: [],
   currentCourse: null,
-  currentPage: null,
-  pageOptions: [],
-  userProgress: [],
-  currentProgress: null,
-  testAttempts: [],
-  currentTestAnswers: {},
-  testResult: null,
   loading: false,
   error: null,
-  currentPageNumber: 1,
-  totalPages: 1,
-  showTestResult: false,
 };
 
 export const fetchCourses = createAsyncThunk(
@@ -166,234 +74,6 @@ export const fetchCourseBySlug = createAsyncThunk(
   }
 );
 
-export const fetchCoursePages = createAsyncThunk(
-  'course/fetchCoursePages',
-  async (courseId: string) => {
-    if (!supabase) throw new Error('Supabase not configured');
-    
-    const { data, error } = await supabase
-      .from('course_pages')
-      .select('*')
-      .eq('course_id', courseId)
-      .order('page_number');
-    
-    if (error) throw error;
-    return data || [];
-  }
-);
-
-export const fetchPage = createAsyncThunk(
-  'course/fetchPage',
-  async ({ courseId, pageNumber }: { courseId: string; pageNumber: number }) => {
-    if (!supabase) throw new Error('Supabase not configured');
-    
-    const { data, error } = await supabase
-      .from('course_pages')
-      .select('*')
-      .eq('course_id', courseId)
-      .eq('page_number', pageNumber)
-      .single();
-    
-    if (error) throw error;
-    return data;
-  }
-);
-
-export const fetchPageOptions = createAsyncThunk(
-  'course/fetchPageOptions',
-  async (pageId: string) => {
-    if (!supabase) throw new Error('Supabase not configured');
-    
-    const { data, error } = await supabase
-      .from('page_options')
-      .select('*')
-      .eq('page_id', pageId)
-      .order('option_order');
-    
-    if (error) throw error;
-    return data || [];
-  }
-);
-
-export const saveProgress = createAsyncThunk(
-  'course/saveProgress',
-  async ({ courseId, userId }: { courseId: string; userId: string }) => {
-    if (!supabase) throw new Error('Supabase not configured');
-    
-    const { data, error } = await supabase
-      .from('user_progress')
-      .upsert({
-        user_id: userId,
-        course_id: courseId,
-        completed_at: new Date().toISOString(),
-      })
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data;
-  }
-);
-
-export const fetchUserProgress = createAsyncThunk(
-  'course/fetchUserProgress',
-  async (userId: string) => {
-    if (!supabase) throw new Error('Supabase not configured');
-    
-    const { data, error } = await supabase
-      .from('user_progress')
-      .select('*')
-      .eq('user_id', userId);
-    
-    if (error) throw error;
-    return data || [];
-  }
-);
-
-export const checkCourseCompletion = createAsyncThunk(
-  'course/checkCourseCompletion',
-  async ({ courseId, userId }: { courseId: string; userId: string }) => {
-    if (!supabase) throw new Error('Supabase not configured');
-    
-    const { data, error } = await supabase
-      .from('user_progress')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('course_id', courseId)
-      .single();
-    
-    if (error && error.code !== 'PGRST116') throw error;
-    return data || null;
-  }
-);
-
-export const submitTest = createAsyncThunk(
-  'course/submitTest',
-  async ({ pageId, answers, timeTaken }: { pageId: string; answers: unknown; timeTaken: number }) => {
-    if (!supabase) throw new Error('Supabase not configured');
-    
-    const { data, error } = await supabase
-      .from('test_attempts')
-      .insert({
-        page_id: pageId,
-        user_answers: answers,
-        time_taken: timeTaken,
-        attempted_at: new Date().toISOString(),
-      })
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data;
-  }
-);
-
-export const uploadPageImage = createAsyncThunk(
-  'course/uploadPageImage',
-  async ({ pageId, file }: { pageId: string; file: File }) => {
-    if (!supabase) throw new Error('Supabase not configured');
-
-    const bucket = 'course-page-images';
-    const extension = file.name.split('.').pop() || 'jpg';
-    const filePath = `pages/${pageId}/${Date.now()}.${extension}`;
-
-    const { error: uploadError } = await supabase
-      .storage
-      .from(bucket)
-      .upload(filePath, file, { cacheControl: '3600', upsert: true });
-
-    if (uploadError) throw uploadError;
-
-    const { data: publicData } = supabase
-      .storage
-      .from(bucket)
-      .getPublicUrl(filePath);
-
-    const publicUrl = publicData?.publicUrl || '';
-
-    const { data, error } = await supabase
-      .from('course_pages')
-      .update({ image: publicUrl })
-      .eq('id', pageId)
-      .select()
-      .single();
-
-    if (error) throw error;
-    return { page: data, publicUrl };
-  }
-);
-
-export const fetchFullCourses = createAsyncThunk(
-  'course/fetchFullCourses',
-  async () => {
-    if (!supabase) throw new Error('Supabase not configured');
-    
-    const { data, error } = await supabase
-      .from('full_courses')
-      .select('*')
-      .eq('is_active', true)
-      .order('order_index');
-    
-    if (error) throw error;
-    return data || [];
-  }
-);
-
-export const createFullCourse = createAsyncThunk(
-  'course/createFullCourse',
-  async (fullCourseData: Omit<FullCourse, 'id' | 'created_at' | 'updated_at'>) => {
-    if (!supabase) throw new Error('Supabase not configured');
-    
-    const { data, error } = await supabase
-      .from('full_courses')
-      .insert({
-        ...fullCourseData,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      })
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data;
-  }
-);
-
-export const updateFullCourse = createAsyncThunk(
-  'course/updateFullCourse',
-  async ({ id, updates }: { id: string; updates: Partial<Omit<FullCourse, 'id' | 'created_at' | 'updated_at'>> }) => {
-    if (!supabase) throw new Error('Supabase not configured');
-    
-    const { data, error } = await supabase
-      .from('full_courses')
-      .update({
-        ...updates,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', id)
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data;
-  }
-);
-
-export const deleteFullCourse = createAsyncThunk(
-  'course/deleteFullCourse',
-  async (id: string) => {
-    if (!supabase) throw new Error('Supabase not configured');
-    
-    const { error } = await supabase
-      .from('full_courses')
-      .delete()
-      .eq('id', id);
-    
-    if (error) throw error;
-    return id;
-  }
-);
-
 export const fetchCoursesByFullCourse = createAsyncThunk(
   'course/fetchCoursesByFullCourse',
   async (fullCourseId: string) => {
@@ -418,49 +98,11 @@ const courseSlice = createSlice({
     setCurrentCourse: (state, action: PayloadAction<Course>) => {
       state.currentCourse = action.payload;
     },
-    setCurrentPage: (state, action: PayloadAction<number>) => {
-      state.currentPageNumber = action.payload;
-    },
-    setTestAnswer: (state, action: PayloadAction<{ questionId: string; answer: unknown }>) => {
-      // Type assertion for currentTestAnswers as Record<string, unknown>
-      (state.currentTestAnswers as Record<string, unknown>)[action.payload.questionId] = action.payload.answer;
-    },
-    clearTestAnswers: (state) => {
-      state.currentTestAnswers = {};
-    },
-    setTestResult: (state, action: PayloadAction<TestResult>) => {
-      state.testResult = action.payload;
-      state.showTestResult = true;
-    },
-    hideTestResult: (state) => {
-      state.showTestResult = false;
-    },
-    goToNextPage: (state) => {
-      if (state.currentPageNumber < state.totalPages) {
-        state.currentPageNumber += 1;
-      }
-    },
-    goToPreviousPage: (state) => {
-      if (state.currentPageNumber > 1) {
-        state.currentPageNumber -= 1;
-      }
-    },
-    goToPage: (state, action: PayloadAction<number>) => {
-      state.currentPageNumber = action.payload;
-    },
     clearError: (state) => {
       state.error = null;
     },
     resetCourseState: (state) => {
       state.currentCourse = null;
-      state.currentPage = null;
-      state.pageOptions = [];
-      state.currentProgress = null;
-      state.currentTestAnswers = {};
-      state.testResult = null;
-      state.showTestResult = false;
-      state.currentPageNumber = 1;
-      state.totalPages = 1;
     },
   },
   extraReducers: (builder) => {
@@ -501,138 +143,7 @@ const courseSlice = createSlice({
         state.loading = false;
         state.error = action.error.message || 'Failed to fetch course';
       })
-      .addCase(fetchCoursePages.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(fetchCoursePages.fulfilled, (state, action) => {
-        state.loading = false;
-        state.totalPages = action.payload.length;
-      })
-      .addCase(fetchCoursePages.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.error.message || 'Failed to fetch course pages';
-      })
-      .addCase(fetchPage.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(fetchPage.fulfilled, (state, action) => {
-        state.loading = false;
-        state.currentPage = action.payload;
-      })
-      .addCase(fetchPage.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.error.message || 'Failed to fetch page';
-      })
-      .addCase(fetchPageOptions.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(fetchPageOptions.fulfilled, (state, action) => {
-        state.loading = false;
-        state.pageOptions = action.payload;
-      })
-      .addCase(fetchPageOptions.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.error.message || 'Failed to fetch page options';
-      })
-      .addCase(saveProgress.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(saveProgress.fulfilled, (state, action) => {
-        state.loading = false;
-        state.currentProgress = action.payload;
-      })
-      .addCase(saveProgress.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.error.message || 'Failed to save progress';
-      })
-      .addCase(submitTest.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(submitTest.fulfilled, (state, action) => {
-        state.loading = false;
-        const result = action.payload;
-        state.testResult = {
-          isCorrect: result.is_correct,
-          correctAnswers: result.correct_answers || [],
-          explanation: result.explanation || '',
-          userAnswers: state.currentTestAnswers,
-        };
-        state.showTestResult = true;
-        state.testAttempts.push(result);
-      })
-      .addCase(submitTest.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.error.message || 'Failed to submit test';
-      })
-      .addCase(fetchUserProgress.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(fetchUserProgress.fulfilled, (state, action) => {
-        state.loading = false;
-        state.userProgress = action.payload;
-      })
-      .addCase(fetchUserProgress.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.error.message || 'Failed to fetch user progress';
-      })
-      .addCase(fetchFullCourses.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(fetchFullCourses.fulfilled, (state, action) => {
-        state.loading = false;
-        state.fullCourses = action.payload;
-      })
-      .addCase(fetchFullCourses.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.error.message || 'Failed to fetch full courses';
-      })
-      .addCase(createFullCourse.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(createFullCourse.fulfilled, (state, action) => {
-        state.loading = false;
-        state.fullCourses.push(action.payload);
-      })
-      .addCase(createFullCourse.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.error.message || 'Failed to create full course';
-      })
-      .addCase(updateFullCourse.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(updateFullCourse.fulfilled, (state, action) => {
-        state.loading = false;
-        const updatedFullCourse = action.payload;
-        const index = state.fullCourses.findIndex(fc => fc.id === updatedFullCourse.id);
-        if (index !== -1) {
-          state.fullCourses[index] = updatedFullCourse;
-        }
-      })
-      .addCase(updateFullCourse.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.error.message || 'Failed to update full course';
-      })
-      .addCase(deleteFullCourse.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(deleteFullCourse.fulfilled, (state, action) => {
-        state.loading = false;
-        state.fullCourses = state.fullCourses.filter(fc => fc.id !== action.payload);
-      })
-      .addCase(deleteFullCourse.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.error.message || 'Failed to delete full course';
-      })
+
       .addCase(fetchCoursesByFullCourse.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -650,14 +161,6 @@ const courseSlice = createSlice({
 
 export const {
   setCurrentCourse,
-  setCurrentPage,
-  setTestAnswer,
-  clearTestAnswers,
-  setTestResult,
-  hideTestResult,
-  goToNextPage,
-  goToPreviousPage,
-  goToPage,
   clearError,
   resetCourseState,
 } = courseSlice.actions;

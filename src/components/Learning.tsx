@@ -6,9 +6,10 @@ import PopUp from "./PopUp";
 import Modal from "./Modal";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
-import { saveProgress } from "@/store/slices/courseSlice";
+import { saveProgress } from "@/store/slices/userProgressSlice";
 import Image from "next/image";
-import { FullCourse } from "@/store/slices/courseSlice";
+import { FullCourse } from "@/store/slices/fullCourseSlice";
+
 
 
 export interface options {
@@ -245,7 +246,10 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
 
     const dispatch = useDispatch<AppDispatch>();
     const { user } = useSelector((state: RootState) => state.auth);
-    const { fullCourses, userProgress, loading: courseLoading } = useSelector((state: RootState) => state.course);
+    const { fullCourses } = useSelector((state: RootState) => state.fullCourse);
+    const { userProgress } = useSelector((state: RootState) => state.userProgress);
+    const { loading: courseLoading } = useSelector((state: RootState) => state.course);
+    const { currentPageNumber, totalPages } = useSelector((state: RootState) => state.coursePage);
 
     const isCompleted = userProgress.some(progress => progress.course_id === course_id);
 

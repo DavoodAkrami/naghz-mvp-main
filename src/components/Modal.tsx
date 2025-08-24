@@ -1,15 +1,17 @@
 import React, { ReactNode } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import clsx from "clsx";
 
 
 
 export interface modalPropsType {
-    onOpen: boolean;
+    onOpen?: boolean;
     children: ReactNode;
-    onClose: () => void;
+    onClose?: () => void;
+    classname?: string;
 }
 
-const Modal: React.FC<modalPropsType> = ({ children, onClose, onOpen}) => {
+const Modal: React.FC<modalPropsType> = ({ children, onClose, onOpen, classname}) => {
 
     return (
         <AnimatePresence>
@@ -22,7 +24,10 @@ const Modal: React.FC<modalPropsType> = ({ children, onClose, onOpen}) => {
             transition={{ duration: 0.3 }}
             onClick={onClose}
         >
-            <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <div className={clsx(
+                "bg-[var(--primary-color4)]/70 backdrop-blur-2xl rounded-lg p-6 max-w-md w-full",
+                classname
+            )}>
                         {children}
                     </div>
                 </motion.div>

@@ -13,7 +13,7 @@ import { TbMessageChatbot } from "react-icons/tb";
 import ChallengPopUp from "@/components/ChallengPopUp";
 import ChatBot from "@/components/ChatBot";
 import clsx from "clsx";
-import { fetchUserProgress } from "@/store/slices/courseSlice";
+import { fetchUserProgress } from "@/store/slices/userProgressSlice";
 
 
 interface GuidedPathsType {
@@ -57,7 +57,7 @@ const Home = () => {
     const [isChallengPopUpOpen, setIsChallengPopUpOpen] = useState<boolean>(false);
     const [isChatBotOpen, setIsChatBotOpen] = useState<boolean>(false);
     const [shouldPopUpOpen, setShouldPopUpOpen] = useState<boolean>(false);
-    const { userProgress } = useSelector((state: RootState) => state.course);
+    const { userProgress } = useSelector((state: RootState) => state.userProgress);
     const dispatch = useDispatch<AppDispatch>();
 
 
