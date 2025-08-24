@@ -9,7 +9,7 @@ import { AppDispatch } from "@/store/store";
 import { useRouter } from "next/navigation";
 import { logoutUser } from "@/store/slices/authSlice";
 import Modal from "@/components/Modal";
-import { fetchUserProgress } from "@/store/slices/courseSlice";
+import { fetchUserProgress } from "@/store/slices/userProgressSlice";
 
 
 
@@ -18,7 +18,7 @@ const Profile = () => {
     const dispatch = useDispatch<AppDispatch>();
     const router = useRouter();
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-    const { userProgress } = useSelector((state: RootState) => state.course);
+    const { userProgress } = useSelector((state: RootState) => state.userProgress);
 
     useEffect(() => {
         if (user?.id) {

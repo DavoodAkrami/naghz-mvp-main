@@ -5,10 +5,11 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useRouter, useParams } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "@/store/store";
-import { fetchCourses, fetchUserProgress, fetchFullCourses, fetchAllCourses } from "@/store/slices/courseSlice";
+import { fetchCourses, fetchAllCourses } from "@/store/slices/courseSlice";
+import { fetchUserProgress } from "@/store/slices/userProgressSlice";
+import { fetchFullCourses, FullCourse } from "@/store/slices/fullCourseSlice";
 import * as LuIcons from "react-icons/lu";
 import { usePathname } from "next/navigation";
-import { FullCourse } from "@/store/slices/courseSlice";
 import { IoArrowBackCircleOutline } from "react-icons/io5";
 
 
@@ -24,7 +25,9 @@ const Curses: React.FC = () => {
     const params = useParams();
     const pathname = usePathname();
     const fullCourseSlug = params.full_course as string;
-    const { fullCourses, courses, loading, error, userProgress } = useSelector((state: RootState) => state.course);
+    const { courses, loading, error } = useSelector((state: RootState) => state.course);
+    const { userProgress } = useSelector((state: RootState) => state.userProgress);
+    const { fullCourses } = useSelector((state: RootState) => state.fullCourse);
     const { user } = useSelector((state: RootState) => state.auth);
     const [ pageHeader, setPageHeader] = useState<string>("");
     const [course, setCourse] = useState<FullCourse | null>(null);

@@ -1,7 +1,7 @@
 "use client"
 import { useEffect } from "react";
 import { useParams } from "next/navigation";
-import { fetchFullCourses } from "@/store/slices/courseSlice";
+import { fetchFullCourses } from "@/store/slices/fullCourseSlice";
 import { useSelector, useDispatch } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import { IconType } from "react-icons";
@@ -11,7 +11,7 @@ import { useRouter } from "next/navigation";
 
 const FullCourseDetailPage = () => {
     const dispatch = useDispatch<AppDispatch>();
-    const { fullCourses, loading, error } = useSelector((state: RootState) => state.course);
+    const { fullCourses, loading, error } = useSelector((state: RootState) => state.fullCourse);
     const params = useParams();
     const fullCourseSlug = params.full_course as string;
     const route = useRouter();

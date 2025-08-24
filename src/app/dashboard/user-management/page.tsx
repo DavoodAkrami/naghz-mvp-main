@@ -5,7 +5,7 @@ import { RootState, AppDispatch } from "@/store/store";
 import { motion } from "framer-motion";
 import { FiUsers, FiMail, FiShield, FiSearch, FiXCircle } from "react-icons/fi";
 import { deleteUserById, fetchAllUsers, updateUserRole } from "@/store/slices/authSlice";
-import { fetchUserProgress } from "@/store/slices/courseSlice";
+import { fetchUserProgress } from "@/store/slices/userProgressSlice";
 import { supabase } from "@/config/supabase";
 
 interface DisplayUser {
@@ -19,7 +19,7 @@ interface DisplayUser {
 const UserManagementPage: React.FC = () => {
 	const dispatch = useDispatch<AppDispatch>();
 	const { user, isAuthenticated, loading, users, usersLoading } = useSelector((state: RootState) => state.auth);
-	const { userProgress } = useSelector((state: RootState) => state.course);
+	const { userProgress } = useSelector((state: RootState) => state.userProgress);
 	const [search, setSearch] = useState<string>("");	
 	const [roleFilter, setRoleFilter] = useState<string>("all");
 	const [passedCounts, setPassedCounts] = useState<Record<string, number>>({});
