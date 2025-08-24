@@ -51,7 +51,6 @@ const CourseCard: React.FC<CurseCardProps> = ({
                     </div>
                 )}
                 
-                {/* Admin indicator for inactive courses */}
                 {isAdmin && !isActive && (
                     <div className="absolute -top-3 -left-4 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold">
                         غیرفعال

@@ -372,38 +372,169 @@ export default function CourseManagement() {
     try {
       if (!supabase) throw new Error('Supabase not configured');
       
-      const { data: course, error } = await supabase
+      // Form validation
+      if (!courseFormData.slug || !courseFormData.title || !courseFormData.description) {
+        alert('لطفاً تمام فیلدهای ضروری را پر کنید (Slug، عنوان، توضیحات)');
+        return;
+      }
+      
+      if (pages.length === 0) {
+        alert('لطفاً حداقل یک صفحه به دوره اضافه کنید');
+        return;
+      }
+      
+      // Validate pages
+      for (let i = 0; i < pages.length; i++) {
+        const page = pages[i];
+        if (!page.title || !page.content) {
+          alert(`صفحه ${i + 1}: لطفاً عنوان و محتوا را پر کنید`);
+          return;
+        }
+        
+        if (page.page_type === 'test' && (!page.question || (optionsByPage[i] || []).length === 0)) {
+          alert(`صفحه ${i + 1}: لطفاً سوال و گزینه‌ها را برای آزمون پر کنید`);
+          return;
+        }
+      }
+      
+      console.log('Creating course with data:', courseFormData);
+      console.log('Selected full course:', selectedFullCourse);
+      console.log('Pages to create:', pages);
+      
+      // Set the full_course_id if we're creating within a full course context
+      const courseDataToInsert = {
+        ...courseFormData,
+        full_course_id: selectedFullCourse && typeof selectedFullCourse === 'object' && 'id' in selectedFullCourse 
+          ? (selectedFullCourse as { id: string }).id 
+          : courseFormData.full_course_id || null
+      };
+      
+      console.log('Course data to insert:', courseDataToInsert);
+      console.log('Full course ID being set:', courseDataToInsert.full_course_id);
+      
+      // Additional validation for full course linking
+      if (!courseDataToInsert.full_course_id) {
+        console.warn('No full course ID set - course will be created without a parent full course');
+      }
+      
+      const { data: course, error: courseError } = await supabase
         .from('courses')
-        .insert(courseFormData)
+        .insert(courseDataToInsert)
         .select()
         .single();
       
-      if (error) throw error;
-      
-      // Create pages for the course
-      for (let i = 0; i < pages.length; i++) {
-        const page = pages[i];
-        const { error: pageError } = await supabase
-          .from('course_pages')
-          .insert({
-            page_number: page.page_number,
-            page_type: page.page_type,
-            title: page.title,
-            content: page.content,
-            question: page.question,
-            test_type: page.test_type,
-            test_grid: page.test_grid,
-            correct_answer: toDbCorrectAnswer(page.test_type, page.correct_answer),
-            image: page.image,
-            page_length: page.page_length,
-            order_index: page.order_index,
-            course_id: course.id,
-          });
+      if (courseError) {
+        console.error('Course creation error:', courseError);
+        console.error('Error details:', {
+          message: courseError.message,
+          details: courseError.details,
+          hint: courseError.hint,
+          code: courseError.code
+        });
         
-        if (pageError) throw pageError;
+        // Provide more specific error messages
+        if (courseError.code === '23505') {
+          throw new Error(`دوره با slug "${courseDataToInsert.slug}" قبلاً وجود دارد`);
+        } else if (courseError.code === '23503') {
+          throw new Error(`خطا در ارتباط با مجموعه دوره - لطفاً مطمئن شوید که مجموعه دوره معتبر است`);
+        } else {
+          throw courseError;
+        }
       }
       
+      console.log('Course created successfully:', course);
+
+      // Normalize page ordering just before persisting
+      const orderedPages = pages
+        .slice()
+        .map((p, idx) => ({ ...p, page_number: idx + 1, order_index: idx, page_length: pages.length }));
+
+      console.log('Ordered pages to create:', orderedPages);
+
+      for (let i = 0; i < orderedPages.length; i++) {
+        const page = orderedPages[i];
+        console.log(`Creating page ${i + 1}:`, page);
+        
+        const { data: pageData, error: pageError } = await supabase
+          .from('course_pages')
+          .insert({
+            ...page,
+            correct_answer: toDbCorrectAnswer(page.test_type, page.correct_answer),
+            course_id: course.id
+          })
+          .select()
+          .single();
+        
+        if (pageError) {
+          console.error(`Page ${i + 1} creation error:`, pageError);
+          console.error(`Page ${i + 1} error details:`, {
+            message: pageError.message,
+            details: pageError.details,
+            hint: pageError.hint,
+            code: pageError.code
+          });
+          
+          // Provide more specific error messages for page creation
+          if (pageError.code === '23503') {
+            throw new Error(`خطا در ایجاد صفحه ${i + 1}: دوره یافت نشد`);
+          } else if (pageError.code === '23502') {
+            throw new Error(`خطا در ایجاد صفحه ${i + 1}: فیلدهای ضروری خالی هستند`);
+          } else {
+            throw new Error(`خطا در ایجاد صفحه ${i + 1}: ${pageError.message}`);
+          }
+        }
+        
+        console.log(`Page ${i + 1} created successfully:`, pageData);
+
+        // If an image is selected for this page, upload it and update DB
+        const fileForPage = imagesByPage[i];
+        if (fileForPage) {
+          try {
+            console.log(`Uploading image for page ${i + 1}:`, fileForPage);
+            const result = await dispatch(uploadPageImage({ pageId: pageData.id as string, file: fileForPage })).unwrap();
+            console.log(`Image upload result:`, result);
+            // reflect in local state
+            updatePage(i, { image: result.publicUrl });
+          } catch (e) {
+            console.error(`Failed to upload page image for page ${i + 1}:`, e);
+          }
+        }
+
+        const pageOptions = optionsByPage[i] || [];
+        if (page.page_type === 'test' && pageOptions.length > 0) {
+          console.log(`Creating ${pageOptions.length} options for page ${i + 1}:`, pageOptions);
+          for (let j = 0; j < pageOptions.length; j++) {
+            const option = pageOptions[j];
+            const { error: optionError } = await supabase
+              .from('page_options')
+              .insert({
+                option_text: option.option_text,
+                option_order: option.option_order,
+                is_correct: option.is_correct,
+                icon_name: option.icon_name,
+                page_id: pageData.id
+              });
+            
+            if (optionError) {
+              console.error(`Option ${j + 1} creation error:`, optionError);
+              console.error(`Option ${j + 1} error details:`, {
+                message: optionError.message,
+                details: optionError.details,
+                hint: optionError.hint,
+                code: optionError.code
+              });
+              
+              throw new Error(`خطا در ایجاد گزینه ${j + 1} برای صفحه ${i + 1}: ${optionError.message}`);
+            }
+          }
+          console.log(`All options created successfully for page ${i + 1}`);
+        }
+      }
+      
+      console.log('Course creation completed successfully');
+      
       setShowCreateModal(false);
+      setSelectedFullCourse(null);
       setCourseFormData({
         slug: '',
         title: '',
@@ -419,6 +550,8 @@ export default function CourseManagement() {
       refreshCourses();
     } catch (error) {
       console.error('Error creating course:', error);
+      // You might want to show this error to the user via a toast or alert
+      alert(`خطا در ایجاد دوره: ${error instanceof Error ? error.message : 'خطای نامشخص'}`);
     }
   };
 

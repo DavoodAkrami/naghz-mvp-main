@@ -27,7 +27,7 @@ const Curses: React.FC = () => {
     const { fullCourses, courses, loading, error, userProgress } = useSelector((state: RootState) => state.course);
     const { user } = useSelector((state: RootState) => state.auth);
     const [ pageHeader, setPageHeader] = useState<string>("");
-    const [course, setCourse] = useState<FullCourse | null>(null);
+    const [fullCourse, setFullCourse] = useState<FullCourse | null>(null);
 
 
     useEffect(() => {
@@ -38,7 +38,7 @@ const Curses: React.FC = () => {
         if (fullCourses.length > 0) {
             const foundCourse: FullCourse | undefined = fullCourses.find(course => pathname.includes(course.slug));
             setPageHeader(foundCourse?.title || "");
-            setCourse(foundCourse || null);
+            setFullCourse(foundCourse || null);
         }
     }, [fullCourses, pathname])
 
@@ -91,10 +91,10 @@ const Curses: React.FC = () => {
                 >
                     <div className="min-h-[40vh] max-md:min-h-[20vh] bg-[var(--primary-color1)]/50 backdrop-blur-2xl shadow-lg p-6 rounded-3xl border-[2.5px] border-[var(--primary-color1)]">
                         <h1 className="h1 text-center mb-[1rem]">
-                            {course?.title}
+                            {fullCourse?.title}
                         </h1>
                         <p className="text-[1.2rem] leading-relaxed">
-                            {course?.description}
+                            {fullCourse?.description}
                         </p>
                     </div>
                     <div
@@ -113,7 +113,7 @@ const Curses: React.FC = () => {
                     className="w-[50%] flex flex-col gap-[2rem] max-md:w-[100%]"
                 >
                     <AnimatePresence>
-                        {courses.map((course) => (
+                        {courses.filter(course => course.full_course_id === fullCourse?.id).map((course) => (
                             <CourseCard
                                 key={course.id}
                                 title={course.title}
@@ -128,31 +128,6 @@ const Curses: React.FC = () => {
                         ))}
                     </AnimatePresence>
                 </div>
-                {/* <div
-                    className="flex gap-[2rem] w-[100%] items-center justify-center max-md:flex-col"
-                >
-                    <CourseCard 
-                        key={1}
-                        title="کنترل واکنش"
-                        description="یاد گرفتن اینکه قبل از جواب دادن یا واکنش نشون دادن، یک مکث کوتاه کنی تا تصمیم بهتری بگیری. این مهارت جلوی خیلی از پشیمونی‌ها رو می‌گیره."
-                        isActive={false}
-                        isCompleted={false}
-                    />
-                    <CourseCard 
-                        key={2}
-                        title="مدیریت تمرکز"
-                        description="حفظ توجه روی کاری که الان مهمه، بدون گم‌شدن در حواس‌پرتی‌ها و فکرهای موازی. این مهارت بهره‌وری رو چند برابر می‌کنه."
-                        isActive={false}
-                        isCompleted={false}
-                    />
-                    <CourseCard 
-                        key={3}
-                        title="برگشت سریع بعد از افت"
-                        description="توانایی دوباره بلند شدن بعد از شکست یا عقب‌افتادگی. این مهارت مانع موندن در حس باخت میشه و حرکت رو ادامه میده."
-                        isActive={false}
-                        isCompleted={false}
-                    />
-                </div> */}
                 {isModalOpen !== null &&
                     <div className="fixed inset-0 z-50000 flex items-center justify-center">
                         <motion.div
