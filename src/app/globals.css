@@ -8,6 +8,8 @@
     --bg-color-secondary: #ffc3c3;
     --foreground: #171717;
     --primary-color1: #5a5fcf;
+    --primary-color1-glassy: #5a60cf83;
+    --primary-color1-glassy-hover: #5a60cf52;
     --primary-color2: #eab901;
     --primary-color3: #f5f7fa;
     --primary-color4: #fff;
@@ -76,15 +78,16 @@ body {
 
 .button-primary {
     cursor: pointer;
-    background-color: var(--primary-color2);
+    background-color: var(--primary-color1-glassy);
     padding: 0.8rem 1.6rem;
     color: var(--primary-color4);
     font-weight: 700;
     transition: all 0.1s ease-in-out;
+    border: 2px solid var(--primary-color1);
 }
 
 .button-primary:hover {
-    background-color: var(--primary-color2);
+    background-color: var(--primary-color1-glassy-hover);
 }
 
 .button-secondary {

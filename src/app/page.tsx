@@ -178,7 +178,7 @@ const Home = () => {
                         <Link href={linkCarry}
                             className="block w-[100%] h-[100%]"
                         >
-                            تجربه‌اش کن
+                            نغز شو!
                         </Link>
                     </button>
                     <hr className="self-stretch border-t border-[var(--text-desable)] opacity-80" />
@@ -240,7 +240,7 @@ const Home = () => {
                     className="bg-[var(--primary-color4)] grid grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr] max-[1100px]:grid-cols-1 max-md:grid-rows-[1fr_1fr] overflow-x-hidden min-h-[80vh] max-md:min-h-[85vh] relative" 
                 >
                     <div className="absolute top-[13vh] left-[5vw] w-4/5 max-md:w-full max-w-[40vw] flex items-center max-md:max-w-[90vw] max-md:mt-[25vh]">
-                        <img src="/section1.landing3.jpg" alt="concepts that click" className="w-full h-auto object-contain max-[1100px]:object-cover rounded-3xl" />
+                        <img src="/landing/landing1.jpg" alt="concepts that click" className="w-full h-auto object-contain max-[1100px]:object-cover rounded-3xl" />
                     </div>
                     <motion.div
                         initial={{ x: 90, opacity: 0 }}
@@ -267,7 +267,7 @@ const Home = () => {
                     className="grid grid-cols-[5%_1fr_1fr_1fr_1fr_1fr_1fr] max-[1100px]:grid-cols-1 max-md:grid-rows-[1fr_1fr] overflow-x-hidden min-h-[80vh] max-md:min-h-[85vh] relative" 
                 >
                     <div className="absolute top-[13vh] right-[5vw] w-4/5 max-md:w-full max-w-[40vw] flex items-center max-md:max-w-[90vw] max-md:mt-[25vh]">
-                        <img src="/section1.landing2.jpg" alt="concepts that click" className="w-full h-auto object-contain max-[1100px]:object-cover rounded-3xl" />
+                        <img src="/landing/landing2.jpg" alt="concepts that click" className="w-full h-auto object-contain max-[1100px]:object-cover rounded-3xl" />
                     </div>
                     <motion.div 
                         initial={{ x: -90, opacity: 0 }}
@@ -293,7 +293,7 @@ const Home = () => {
                     className="bg-[var(--primary-color4)] grid grid-cols-[5%_1fr_1fr_1fr_1fr_1fr_1fr] max-[1100px]:grid-cols-1 max-md:grid-rows-[1fr_1fr] overflow-x-hidden min-h-[80vh] max-md:min-h-[85vh] relative" 
                 >
                     <div className="absolute top-[13vh] left-[5vw] w-4/5 max-md:w-full max-w-[40vw] flex items-center max-md:max-w-[90vw] max-md:mt-[25vh]">
-                        <img src="/section1.landing1.jpg" alt="concepts that click" className="w-full h-auto object-contain max-[1100px]:object-cover rounded-3xl" />
+                        <img src="/landing/landing3.jpg" alt="concepts that click" className="w-full h-auto object-contain max-[1100px]:object-cover rounded-3xl" />
                     </div>
                     <motion.div 
                         initial={{ x: 90, opacity: 0 }}
@@ -319,7 +319,7 @@ const Home = () => {
                     className="grid grid-cols-[5%_1fr_1fr_1fr_1fr_1fr_1fr] max-[1100px]:grid-cols-1 max-md:grid-rows-[1fr_1fr] overflow-x-hidden min-h-[80vh] max-md:min-h-[80vh] relative" 
                 >
                     <div className="absolute top-[13vh] right-[5vw] w-4/5 max-md:w-full max-w-[40vw] flex items-center max-md:max-w-[90vw] max-md:mt-[25vh]">
-                        <img src="/section4.landing.jpg" alt="concepts that click" className="w-full h-auto object-contain max-[1100px]:object-cover rounded-3xl" />
+                        <img src="/landing/landing4.png" alt="concepts that click" className="w-full h-auto object-contain max-[1100px]:object-cover rounded-3xl" />
                     </div>
                     <motion.div
                         initial={{ x: -90, opacity: 0 }}
@@ -425,7 +425,7 @@ const Home = () => {
                             <Link href="/auth/sign-up"
                                 className="block w-[100%] h-[100%]"
                             >
-                                قدم اولو بردار
+                                ادامه ماجرا
                             </Link>
                         </motion.button>
                     </div>
