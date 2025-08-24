@@ -25,7 +25,7 @@ const ChatBot: React.FC<chatBotProp> = ({ sender="user", aiMessage, loading, isO
                         animate={{ opacity: 1, scale: 1, y: 0, x: 0 }}
                         exit={{ opacity: 0, scale: 0.5, y: 150, x: 150 }}
                         transition={{ duration: 0.5 }}
-                        className="min-h-[70vh] py-4 text-center text-[2rem] font-bold max-md:min-h-[75vh] min-w-[35vw] max-md:min-w-[90vw] auto bg-[var(--primary-color1)]/50 backdrop-blur-2xl fixed right-[2vw] bottom-[12vh] max-md:right-[50%] max-md:left-[50%] max-md:transform max-md:-translate-x-1/2 z-1000000 rounded-3xl"
+                        className="min-h-[70vh] py-4 text-center text-[2rem] font-bold max-md:min-h-[75vh] min-w-[35vw] max-md:min-w-[90vw] bg-[var(--primary-color1)]/50 backdrop-blur-2xl fixed right-[2vw] bottom-[12vh] max-md:right-[50%] max-md:left-[50%] max-md:transform max-md:-translate-x-1/2 z-1000000 rounded-3xl"
                     >
                         <header
                             className="flex justify-center items-center text-[white]"
@@ -35,7 +35,7 @@ const ChatBot: React.FC<chatBotProp> = ({ sender="user", aiMessage, loading, isO
                         <hr 
                                 className="border-none h-[0.5px] bg-[white] opacity-60 my-4"
                         />
-                        <div
+                        {/* <div
                             className="min-h-[50vh] w-[97%] overflow-auto max-md:min-h-[54vh]"
                         >
                             <Message sender={sender} loading={loading}>
@@ -63,7 +63,7 @@ const ChatBot: React.FC<chatBotProp> = ({ sender="user", aiMessage, loading, isO
                                 value={userMessage}
                                 onChange={(e) => setUserMessage(e.target.value)}
                             />    
-                        </div>                
+                        </div>                 */}
                     </motion.div>  
             }
             </AnimatePresence>
