@@ -11,7 +11,7 @@ export default function CoursePage({ params }: { params: Promise<{ microLearning
     const resolvedParams = use(params);
     const { microLearning } = resolvedParams;
     const dispatch = useDispatch<AppDispatch>();
-    const { currentCourse, loading, error } = useSelector((state: RootState) => state.course);
+    const { currentCourse, courseloading, error } = useSelector((state: RootState) => state.course);
     const { currentPage, pageOptions } = useSelector((state: RootState) => state.coursePage);
 
     useEffect(() => {
@@ -32,7 +32,7 @@ export default function CoursePage({ params }: { params: Promise<{ microLearning
         fetchData();
     }, [dispatch, microLearning]);
 
-    if (loading) return (
+    if (courseloading) return (
         <div className="min-h-screen flex items-center justify-center bg-[var(--bg-color)]" dir="rtl">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-[var(--primary-color2)] mx-auto mb-4"></div>
