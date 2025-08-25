@@ -16,14 +16,14 @@ interface Course {
 interface LearningState {
   courses: Course[];
   currentCourse: Course | null;
-  loading: boolean;
+  courseloading: boolean;
   error: string | null;
 }
 
 const initialState: LearningState = {
   courses: [],
   currentCourse: null,
-  loading: false,
+  courseloading: false,
   error: null,
 };
 
@@ -108,52 +108,51 @@ const courseSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(fetchCourses.pending, (state) => {
-        state.loading = true;
+        state.courseloading = true;
         state.error = null;
       })
       .addCase(fetchCourses.fulfilled, (state, action) => {
-        state.loading = false;
+        state.courseloading = false;
         state.courses = action.payload;
       })
       .addCase(fetchCourses.rejected, (state, action) => {
-        state.loading = false;
+        state.courseloading = false;
         state.error = action.error.message || 'Failed to fetch courses';
       })
       .addCase(fetchAllCourses.pending, (state) => {
-        state.loading = true;
+        state.courseloading = true;
         state.error = null;
       })
       .addCase(fetchAllCourses.fulfilled, (state, action) => {
-        state.loading = false;
+        state.courseloading = false;
         state.courses = action.payload;
       })
       .addCase(fetchAllCourses.rejected, (state, action) => {
-        state.loading = false;
+        state.courseloading = false;
         state.error = action.error.message || 'Failed to fetch all courses';
       })
       .addCase(fetchCourseBySlug.pending, (state) => {
-        state.loading = true;
+        state.courseloading = true;
         state.error = null;
       })
       .addCase(fetchCourseBySlug.fulfilled, (state, action) => {
-        state.loading = false;
+        state.courseloading = false;
         state.currentCourse = action.payload;
       })
       .addCase(fetchCourseBySlug.rejected, (state, action) => {
-        state.loading = false;
+        state.courseloading = false;
         state.error = action.error.message || 'Failed to fetch course';
       })
-
       .addCase(fetchCoursesByFullCourse.pending, (state) => {
-        state.loading = true;
+        state.courseloading = true;
         state.error = null;
       })
       .addCase(fetchCoursesByFullCourse.fulfilled, (state, action) => {
-        state.loading = false;
+        state.courseloading = false;
         state.courses = action.payload;
       })
       .addCase(fetchCoursesByFullCourse.rejected, (state, action) => {
-        state.loading = false;
+        state.courseloading = false;
         state.error = action.error.message || 'Failed to fetch courses by full course';
       });
   },

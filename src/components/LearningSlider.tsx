@@ -26,6 +26,7 @@ type DbOption = {
   option_order: number;
   is_correct: boolean;
   icon_name?: string;
+  next_page_id?: string | null;
 };
 
 const LearningSlider: React.FC<LearningPropsType> = (props: LearningPropsType) => {
@@ -61,7 +62,7 @@ const LearningSlider: React.FC<LearningPropsType> = (props: LearningPropsType) =
     if (!supabase) return;
     const { data } = await supabase
       .from("page_options")
-      .select("*")
+      .select("id,page_id,option_text,option_order,is_correct,icon_name,next_page_id")
       .eq("page_id", pageId)
       .order("option_order");
     setOptionsByPageId(prev => ({ ...prev, [pageId]: (data || []) as DbOption[] }));
@@ -77,6 +78,28 @@ const LearningSlider: React.FC<LearningPropsType> = (props: LearningPropsType) =
     setCurrentIndex(nextIndex);
     const page = pages[nextIndex];
     if (page) await loadOptionsForPage(page.id);
+  };
+
+  const pageIndexById = useMemo(() => {
+    const map: Record<string, number> = {};
+    pages.forEach((p, idx) => { map[p.id] = idx; });
+    return map;
+  }, [pages]);
+
+  const handleTestNextSelect = async (optionOrder: number) => {
+    const page = pages[currentIndex];
+    if (!page) return;
+    const opts = optionsByPageId[page.id] || [];
+    const opt = opts.find(o => o.option_order === optionOrder);
+    const targetId = opt?.next_page_id || null;
+    if (targetId && pageIndexById[targetId] !== undefined) {
+      const nextIdx = pageIndexById[targetId];
+      setDirection(1);
+      setCurrentIndex(nextIdx);
+      await loadOptionsForPage(pages[nextIdx].id);
+    } else {
+      await handleNext();
+    }
   };
 
   const handlePrevious = async () => {
@@ -168,6 +191,7 @@ const LearningSlider: React.FC<LearningPropsType> = (props: LearningPropsType) =
             handleNext={handleNext}
             handlePrev={handlePrevious}
             preloadedImages={allImages}
+            onTestNextSelect={handleTestNextSelect}
           />
         </motion.div>
       </AnimatePresence>

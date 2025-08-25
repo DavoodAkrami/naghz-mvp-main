@@ -58,11 +58,12 @@ interface OptionFormData {
   option_order: number;
   is_correct: boolean;
   icon_name: string;
+  next_page_id?: string | null;
 }
 
 export default function CourseManagement() {
   const dispatch = useDispatch<AppDispatch>();
-  const { courses, loading, error } = useSelector((state: RootState) => state.course);
+  const { courses, courseloading, error } = useSelector((state: RootState) => state.course);
   const { coursePageLoading } = useSelector((state: RootState) => state.coursePage)
   const { fullCourses, fullCourseLoading} = useSelector((state: RootState) => state.fullCourse);
   const { user } = useSelector((state: RootState) => state.auth);
@@ -510,7 +511,7 @@ export default function CourseManagement() {
         }
 
         const pageOptions = optionsByPage[i] || [];
-        if (page.page_type === 'test' && pageOptions.length > 0) {
+        if ((page.page_type === 'test' || page.page_type === 'testNext') && pageOptions.length > 0) {
           console.log(`Creating ${pageOptions.length} options for page ${i + 1}:`, pageOptions);
           for (let j = 0; j < pageOptions.length; j++) {
             const option = pageOptions[j];
@@ -521,7 +522,8 @@ export default function CourseManagement() {
                 option_order: option.option_order,
                 is_correct: option.is_correct,
                 icon_name: option.icon_name,
-                page_id: pageData.id
+                page_id: pageData.id,
+                next_page_id: option.next_page_id || null
               });
             
             if (optionError) {
@@ -685,6 +687,7 @@ export default function CourseManagement() {
                 option_order: opt.option_order,
                 is_correct: opt.is_correct,
                 icon_name: opt.icon_name,
+                next_page_id: opt.next_page_id || null,
               })
               .eq('id', opt.id);
             if (updOptErr) throw updOptErr;
@@ -697,6 +700,7 @@ export default function CourseManagement() {
                 option_order: opt.option_order,
                 is_correct: opt.is_correct,
                 icon_name: opt.icon_name,
+                next_page_id: opt.next_page_id || null,
               });
             if (insOptErr) throw insOptErr;
           }
@@ -859,7 +863,7 @@ export default function CourseManagement() {
           const page = (dbPages as Record<string, unknown>[])[i];
           const { data: dbOptions } = await supabase
             .from('page_options')
-            .select('*')
+            .select('id,page_id,option_text,option_order,is_correct,icon_name,next_page_id')
             .eq('page_id', page.id)
             .order('option_order');
           optsByPage[i] = (dbOptions || []).map((o: Record<string, unknown>) => ({
@@ -868,7 +872,8 @@ export default function CourseManagement() {
             option_text: o.option_text as string,
             option_order: o.option_order as number,
             is_correct: o.is_correct as boolean,
-            icon_name: (o.icon_name as string) || ''
+            icon_name: (o.icon_name as string) || '',
+            next_page_id: (o.next_page_id as string) || null,
           }));
         }
         setOptionsByPage(optsByPage);
@@ -886,7 +891,7 @@ export default function CourseManagement() {
     setShowDeleteModal(true);
   };
 
-  if (loading) return <div className="text-center p-8">در حال بارگذاری...</div>;
+  if (courseloading) return <div className="text-center p-8">در حال بارگذاری...</div>;
   if (error) return <div className="text-center p-8 text-red-500">خطا: {error}</div>;
 
   return (
@@ -1440,6 +1445,23 @@ export default function CourseManagement() {
                                   />
                                   صحیح
                                 </label>
+                                {page.page_type === 'testNext' && (
+                                  <div className="col-span-3 grid grid-cols-2 gap-2 mt-2">
+                                    <label className="text-sm">صفحه بعدی برای این گزینه</label>
+                                    <select
+                                      value={option.next_page_id || ''}
+                                      onChange={(e) => updateOptionForPage(index, optIndex, { next_page_id: e.target.value || null })}
+                                      className="p-2 border rounded text-sm"
+                                    >
+                                      <option value="">پیش‌فرض (صفحه بعدی خطی)</option>
+                                      {pages.map((p, pi) => (
+                                        <option key={p.id || pi} value={p.id || ''}>
+                                          {p.title || p.question || `صفحه ${pi + 1}`}
+                                        </option>
+                                      ))}
+                                    </select>
+                                  </div>
+                                )}
                               </div>
                             </div>
                           ))}
@@ -1462,7 +1484,7 @@ export default function CourseManagement() {
                 onClick={handleCreateCourse}
                 className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
               >
-                ایجاد دوره
+               {courseloading ? <ButtonLoading size="md" /> : "ایجاد دوره"}
               </button>
             </div>
           </div>
@@ -1867,6 +1889,23 @@ export default function CourseManagement() {
                                   />
                                   صحیح
                                 </label>
+                                {page.page_type === 'testNext' && (
+                                  <div className="flex items-center col-start-1 col-end-3 max-md:flex-col gap-2 mt-2">
+                                    <label className="text-sm">صفحه بعدی برای این گزینه</label>
+                                    <select
+                                      value={option.next_page_id || ''}
+                                      onChange={(e) => updateOptionForPage(index, optIndex, { next_page_id: e.target.value || null })}
+                                      className="p-2 border rounded text-sm"
+                                    >
+                                      <option value="">پیش‌فرض (صفحه بعدی خطی)</option>
+                                      {pages.map((p, pi) => (
+                                        <option key={p.id || pi} value={p.id || ''}>
+                                          {p.title || p.question || `صفحه ${pi + 1}`}
+                                        </option>
+                                      ))}
+                                    </select>
+                                  </div>
+                                )}
                               </div>
                             </div>
                           ))}

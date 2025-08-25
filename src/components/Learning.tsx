@@ -37,6 +37,7 @@ export interface LearningPropsType {
     image?: string;
     why?: string | null;
     preloadedImages?: string[];
+    onTestNextSelect?: (optionOrder: number) => void;
 }
 
 
@@ -217,7 +218,7 @@ const ImagePreloader: React.FC<{ images: string[] }> = ({ images }) => {
 };
 
 
-const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, header, test_type="Default", test_grid= "col", options, question, correct_answer, course_id, page_number, pageLength, handleNext, handlePrev, image, why, preloadedImages}) => {
+const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, header, test_type="Default", test_grid= "col", options, question, correct_answer, course_id, page_number, pageLength, handleNext, handlePrev, image, why, preloadedImages, onTestNextSelect}) => {
     const router = useRouter();
 
     const [activeId, setActiveId] = useState<number | null>(null);
@@ -667,7 +668,7 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                                     id={option.id} 
                                     test_type={test_type}
                                     isSelected={page_type === "testNext" ? false : isOptionSelected(option.id)} 
-                                    onSelect={page_type === "testNext" ? () => handleNextPage() : handleActiveOption}
+                                    onSelect={page_type === "testNext" ? (id) => onTestNextSelect?.(id) : handleActiveOption}
                                     getSequentialOrder={getSequentialOrder}
                                     getPluggablePair={getPluggablePair}
                                     classname={clsx(test_grid === "grid-row" && "flex justify-center items-center")}
