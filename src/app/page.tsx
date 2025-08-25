@@ -404,7 +404,7 @@ const Home = () => {
                         <h1
                             className="h1 max-w-[40vw] max-[1300px]:max-w-[60vw] max-[550px]:max-w-[80vw] max-[400px]:max-w-[80vw] max-md:mt-[5vh]"
                         >
-                            نغز فقط یه محصول نیست
+                            🌿 نغز فقط یه محصول نیست
                         </h1>
                         <p
                             className="text-[1.6rem] max-md:text-[1.2rem] max-w-[85%]"

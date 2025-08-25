@@ -355,6 +355,7 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                 setSaveProgressLoading(false)
             }
         } else {
+            if (page_type != 'text' && page_type != "testNext")
             successSound.play();
             handleNext?.();
         }
