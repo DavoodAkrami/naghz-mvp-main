@@ -17,7 +17,8 @@ export interface CurseCardProps {
     onClick?: () => void;
     startOnClick?: () => void;
     classname?: string;
-    isAdmin?: boolean; // New prop to show admin-specific information
+    isAdmin?: boolean; 
+    image: string;
 }
 
 const CourseCard: React.FC<CurseCardProps> = ({
@@ -30,6 +31,7 @@ const CourseCard: React.FC<CurseCardProps> = ({
     isCompleted,
     onClick,
     classname,
+    image,
     isAdmin = false
 }) => {
     const truncatedDescription = description.length > 80 ? `${description.slice(0, 80)}...` : description;

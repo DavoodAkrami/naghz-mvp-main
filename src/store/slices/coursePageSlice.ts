@@ -206,7 +206,6 @@ const coursePageSlice = createSlice({
       })
       .addCase(uploadPageImage.fulfilled, (state, action) => {
         state.coursePageLoading = false;
-        // Update the current page with the new image URL
         if (state.currentPage && state.currentPage.id === action.payload.page.id) {
           state.currentPage = action.payload.page;
         }

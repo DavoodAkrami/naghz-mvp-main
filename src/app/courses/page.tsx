@@ -1,11 +1,11 @@
 "use client"
 import { useEffect } from "react";
 import { useParams } from "next/navigation";
-import { fetchFullCourses } from "@/store/slices/fullCourseSlice";
+import { fetchFullCourses, FullCourse } from "@/store/slices/fullCourseSlice";
 import { useSelector, useDispatch } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import { IconType } from "react-icons";
-import FullCourseCard from "@/components/CourseCard";
+import FullCourseCard from "@/components/FullCourseCard";
 import { useRouter } from "next/navigation";
 
 
@@ -33,21 +33,20 @@ const FullCourseDetailPage = () => {
     return (
         <div
             dir="rtl"
-            className="py-[5vh] px-[10vw]"
+            className="py-[5vh] px-[10vw] max-md:px-[5vw]"
         >
             <h2
                 className="mb-[8vh] mt-[3vh] h1 text-center"
             >
                 دوره‌ها
             </h2>
-            <div className="flex flex-col gap-[2rem]">
-                {fullCourseLoading ? (
-                    Array.from({ length: 3 }).map((_, index) => (
+            <div className="grid grid-cols-2 max-md:grid-cols-1 gap-[3rem] max-md:gap-[1.6rem]">
+                {fullCourseLoading || fullCourses.length === 0 ? (
+                    Array.from({ length: 4 }).map((_, index) => (
                         <div key={index} className="w-full animate-pulse">
                             <div className="bg-[var(--primary-color1)]/20 backdrop-blur-xl px-[2rem] py-[1.5rem] rounded-lg">
-                                <div className="flex items-center gap-2 mb-3">
-                                    <div className="w-5 h-5 bg-white/30 rounded"></div>
-                                    <div className="h-6 bg-white/30 rounded w-1/3"></div>
+                                <div className="flex items-center justify-center gap-2 mb-3">
+                                    <div className="h-80 w-full bg-white/30 rounded"></div>
                                 </div>
                                 <div className="space-y-2">
                                     <div className="h-4 bg-white/30 rounded w-full"></div>
@@ -58,14 +57,16 @@ const FullCourseDetailPage = () => {
                         </div>
                     ))
                 ) : (
-                    fullCourses.map((course: any) => (
+                    fullCourses.map((course: FullCourse) => (
                         <FullCourseCard 
                             key={course.id}
                             title={course.title}
                             description={course.description}
-                            icon={course.icon_name as unknown as IconType}
-                            isActive={true}
+                            icon_name={course.icon_name}
+                            is_active={true}
                             onClick={() => handleOpenCourseDetails(course.slug)}
+                            image={course.image}
+                            fullCourseLaoding={fullCourseLoading}
                         />
                     ))
                 )}

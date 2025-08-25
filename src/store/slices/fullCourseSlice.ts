@@ -99,6 +99,41 @@ export const deleteFullCourse = createAsyncThunk(
   }
 );
 
+export const uploadFullCourseImage = createAsyncThunk(
+  'fullCourse/uploadFullCourseImage',
+  async ({ fullCourseId, file }: {fullCourseId: string; file: File;}) => {
+    if (!supabase) throw new Error('Supabase not configured');
+
+    const bucket = 'full-course-images';
+    const extension = file.name.split('.').pop() || 'jpg';
+    const filePath = `courses/${fullCourseId}/${Date.now()}.${extension}`;
+
+    const { error: uploadError } = await  supabase
+      .storage
+      .from(bucket)
+      .upload(filePath, file, { cacheControl: '3600', upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: publicData} = supabase
+      .storage
+      .from(bucket)
+      .getPublicUrl(filePath);
+
+    const publicUrl = publicData?.publicUrl || '';
+
+    const { data, error } = await supabase
+      .from('full_courses')
+      .update({ image: publicUrl, updated_at: new Date().toISOString() })
+      .eq('id', fullCourseId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return { fullCourse: data, publicUrl };
+  }
+)
+
 const fullCourseSlice = createSlice({
   name: 'fullCourse',
   initialState,
@@ -167,6 +202,25 @@ const fullCourseSlice = createSlice({
       .addCase(deleteFullCourse.rejected, (state, action) => {
         state.fullCourseLoading = false;
         state.error = action.error.message || 'Failed to delete full course';
+      })
+      .addCase(uploadFullCourseImage.pending, (state) => {
+        state.fullCourseLoading = true;
+        state.error = null;
+      })
+      .addCase(uploadFullCourseImage.fulfilled, (state, action) => {
+        state.fullCourseLoading = false;
+        const updated = action.payload.fullCourse;
+        const index = state.fullCourses.findIndex(fc => fc.id === updated.id);
+        if (index !== -1) {
+          state.fullCourses[index] = updated;
+        }
+        if (state.currentFullCourse && state.currentFullCourse.id === updated.id) {
+          state.currentFullCourse = updated;
+        }
+      })
+      .addCase(uploadFullCourseImage.rejected, (state, action) => {
+        state.fullCourseLoading = false;
+        state.error = action.error.message || 'Failed to upload full course image';
       });
   },
 });

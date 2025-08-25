@@ -11,6 +11,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FaTrash } from "react-icons/fa";
 import Modal from "@/components/Modal";
 import ButtonLoading from "@/components/ButtonLoading";
+import { uploadFullCourseImage } from "@/store/slices/fullCourseSlice";
 
 
 interface CourseFormData {
@@ -99,6 +100,8 @@ export default function CourseManagement() {
     is_active: true,
     order_index: 0
   });
+  const [fullCourseImageFile, setFullCourseImageFile] = useState<File | null>(null);
+  const [uploadingFullCourseImage, setUploadingFullCourseImage] = useState<boolean>(false);
   const [pages, setPages] = useState<PageFormData[]>([]);
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [showPageModal, setShowPageModal] = useState(false);
@@ -2164,7 +2167,7 @@ export default function CourseManagement() {
                   value={fullCourseFormData.description}
                   onChange={(e) => setFullCourseFormData({...fullCourseFormData, description: e.target.value})}
                   className="w-full p-2 border rounded"
-                  rows={3}
+                  rows={5}
                   placeholder="توضیحات دوره کامل"
                 />
               </div>
@@ -2179,14 +2182,32 @@ export default function CourseManagement() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">تصویر</label>
+                <label className="block text-sm font-medium mb-2">بارگذاری تصویر جدید</label>
                 <input
-                  type="text"
-                  value={fullCourseFormData.image || ''}
-                  onChange={(e) => setFullCourseFormData({...fullCourseFormData, image: e.target.value})}
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setFullCourseImageFile(e.target.files?.[0] || null)}
                   className="w-full p-2 border rounded"
-                  placeholder="URL تصویر"
                 />
+                <button
+                  disabled={!fullCourseImageFile || uploadingFullCourseImage || !(selectedFullCourse && typeof selectedFullCourse === 'object' && 'id' in selectedFullCourse)}
+                  onClick={async () => {
+                    if (!fullCourseImageFile || !selectedFullCourse || !(selectedFullCourse as any).id) return;
+                    try {
+                      setUploadingFullCourseImage(true);
+                      const res = await dispatch(uploadFullCourseImage({ fullCourseId: (selectedFullCourse as { id: string }).id, file: fullCourseImageFile })).unwrap();
+                      setFullCourseFormData(prev => ({ ...prev, image: res.publicUrl }));
+                      setFullCourseImageFile(null);
+                    } catch (e) {
+                      console.error('Failed to upload full course image', e);
+                    } finally {
+                      setUploadingFullCourseImage(false);
+                    }
+                  }}
+                  className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-60 w-full"
+                >
+                  {uploadingFullCourseImage ? <ButtonLoading size="md"/> : 'آپلود تصویر'}
+                </button>
               </div>
               <div>
                 <label className="block text-sm font-medium mb-2">ترتیب</label>
