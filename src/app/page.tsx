@@ -146,7 +146,7 @@ const Home = () => {
                         className="my-0 px-[4vw] mx-auto flex justify-center items-center"
                     >
                         <video 
-                            src="/naghz-main-page-laptop.webm"
+                            src="/Landing-first/landing-first-laptop.webm"
                             className="max-md:hidden scale-[0.9] w-[90%] mx-auto"
                             autoPlay
                             muted
@@ -154,8 +154,8 @@ const Home = () => {
                             preload="auto"
                         />
                         <video 
-                            src="/naghz-landing-do-it-mobile.webm" 
-                            className="md:hidden mr-[1rem]"
+                            src="/Landing-first/landing-first-mobile.webm" 
+                            className="md:hidden"
                             autoPlay
                             muted
                             playsInline
@@ -387,6 +387,47 @@ const Home = () => {
                         {GuidedPaths.find(guidedPath => guidedPath.id === selectedGuide)?.component}
                     </motion.div>
                 </section> */}
+                                <section
+                    className="bg-[var(--primary-color4)] grid grid-cols-[5%_1fr_1fr_1fr_1fr_1fr_1fr] max-[1100px]:grid-cols-1 max-md:grid-rows-[1fr_1fr] overflow-x-hidden min-h-[80vh] max-md:min-h-[85vh] relative" 
+                >
+                    <div className="absolute top-[13vh] left-[5vw] w-4/5 max-md:w-full max-w-[40vw] flex items-center max-md:max-w-[90vw] max-md:mt-[50vh]">
+                        <img src="/landing/landing5.png" alt="concepts that click" className="w-full h-auto object-contain max-[1100px]:object-cover rounded-3xl" />
+                    </div>
+                    <motion.div 
+                        initial={{ x: 90, opacity: 0 }}
+                        whileInView={{ x: 0, opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        viewport={{ once: true }}
+                        transition={{  delay: 0.5, duration: 0.6}}
+                        className="px-8 flex flex-col justify-center col-start-2 col-end-5 max-md:w-[90%] "
+                    >
+                        <h1
+                            className="h1 max-w-[40vw] max-[1300px]:max-w-[60vw] max-[550px]:max-w-[80vw] max-[400px]:max-w-[80vw] max-md:mt-[5vh]"
+                        >
+                            نغز فقط یه محصول نیست
+                        </h1>
+                        <p
+                            className="text-[1.6rem] max-md:text-[1.2rem] max-w-[85%]"
+                        >
+                            یه جور دیدنه، یه جور ساختنه… با حوصله، با عشق، با دقت
+                            <br />
+                            اینجا جاییه که آدمای شبیه تو جمع میشن — کسایی که میخوان کار، زندگی و یادگیری‌شون نغز باشه
+                            <br />
+                            اینجا حرف از عجله و کامل‌بودن نیست
+                            حرف از قدمای کوچیکیه که باهم برمی‌داریم
+                            از لحظه‌هایی که یاد می‌گیریم، تجربه می‌کنیم و رشد می‌کنیم
+                            <br />
+                            اگه بخش نغزت هنوز زندست
+                            اینجا می‌تونی باهاش وقت بگذرونی، پرورش بدی و با جمعی شبیه خودت، نغزتر بشی
+                        </p>
+                        <button
+                            onClick={() => window.open('https://t.me/naghzed')}
+                            className="button-primary rounded-full mt-[3rem] w-[50%] scale-[1.2] mr-[1rem]"
+                        >
+                            جامعه نغز
+                        </button>
+                    </motion.div>
+                </section>
                 <section
                     className="bg-[url(/social-proof-background.svg)] bg-[var(--section-color)] text-[var(--text-secondary)]"
                 >

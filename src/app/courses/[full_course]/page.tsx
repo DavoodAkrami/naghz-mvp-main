@@ -1,5 +1,5 @@
 "use client"
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import CourseCard, { CourseCardOpen } from "@/components/CourseCard";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouter, useParams } from "next/navigation";
@@ -32,6 +32,8 @@ const Curses: React.FC = () => {
     const [ pageHeader, setPageHeader] = useState<string>("");
     const [fullCourse, setFullCourse] = useState<FullCourse | null>(null);
 
+    const startSound = useMemo(() => new Audio('/sounds/start-lesson.mp3'), [])
+
 
     useEffect(() => {
         dispatch(fetchFullCourses());
@@ -46,7 +48,6 @@ const Curses: React.FC = () => {
     }, [fullCourses, pathname])
 
     useEffect(() => {
-        // Fetch all courses for admins, only active courses for regular users
         if (user?.user_metadata?.role === 'admin') {
             dispatch(fetchAllCourses());
         } else {
@@ -63,6 +64,7 @@ const Curses: React.FC = () => {
 
     const handleStartOnClick = (slug: string) => {
         router.push(`/courses/${fullCourseSlug}/${slug}`)
+        startSound.play();
     }
 
     const isCourseCompleted = (courseId: string): boolean => {

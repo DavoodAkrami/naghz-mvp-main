@@ -233,9 +233,10 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
     const [whyModalContent, setWhyModalContent] = useState<string>("");
     const [saveProgressLoading, setSaveProgressLoading] = useState<boolean>(false);
 
-    const successSound = useMemo(() => new Audio('/game-se-1.wav'), []);
-    const wrongSound = useMemo(() => new Audio('/game-se-2.wav'), []);
-    const endSound = useMemo(() => new Audio('/game-se-3.wav'), []);
+    const successSound = useMemo(() => new Audio('/sounds/correct.mp3'), []);
+    const wrongSound = useMemo(() => new Audio('/sounds/incorrect.mp3'), []);
+    const endSound = useMemo(() => new Audio('/sounds/endstate.mp3'), []);
+    const lightweight = useMemo(() => new Audio('/sounds/lightweight-choice.mp3'), [])
 
     const hasPluggablePair = Object.values(pluggablePairs).some(v => v !== undefined);
     const hasMultipleSelection = multipleSelections.length > 0;
@@ -249,7 +250,7 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
     const { user } = useSelector((state: RootState) => state.auth);
     const { fullCourses } = useSelector((state: RootState) => state.fullCourse);
     const { userProgress } = useSelector((state: RootState) => state.userProgress);
-    const { loading: courseLoading } = useSelector((state: RootState) => state.course);
+    const { courseloading: courseLoading } = useSelector((state: RootState) => state.course);
     const { currentPageNumber, totalPages } = useSelector((state: RootState) => state.coursePage);
 
     const isCompleted = userProgress.some(progress => progress.course_id === course_id);
@@ -263,9 +264,14 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
     useEffect(() => {
         if (activeId) {
             setIsCorrect(options?.find(option => option.id === activeId)?.isCorrect || false);
+
         }
         setIsPopUpOpen(false);
     }, [activeId])
+
+    useEffect(() => {
+        lightweight.play()
+    }, [activeId, multipleSelections, sequentialSelections, pluggablePairs])
 
     const handleActiveOption = (answerId: number) => {
         switch (test_type) {

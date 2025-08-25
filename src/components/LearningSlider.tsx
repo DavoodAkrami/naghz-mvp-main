@@ -71,9 +71,12 @@ const LearningSlider: React.FC<LearningPropsType> = (props: LearningPropsType) =
   const canGoPrev = currentIndex > 0;
   const canGoNext = currentIndex < (pages.length || props.pageLength) - 1;
 
+  const continueSound = useMemo(() => new Audio('/sounds/continue.mp3'), []);
+
   const handleNext = async () => {
     if (!canGoNext) return;
     const nextIndex = currentIndex + 1;
+    continueSound.play();
     setDirection(1);
     setCurrentIndex(nextIndex);
     const page = pages[nextIndex];

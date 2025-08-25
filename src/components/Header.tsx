@@ -16,6 +16,7 @@ import SideBar from "./SideBar";
 import { FaArrowRight } from "react-icons/fa6";
 import { IoMenu } from "react-icons/io5";
 import { MdKeyboardArrowLeft } from "react-icons/md";
+import NaghzLogo from "./NaghzLogo";
 
 
 
@@ -148,8 +149,10 @@ const Header = () => {
                         <h1
                             className="h1"
                         >
-                            <Link href="/">
-                                Naghz
+                            <Link href="/" className="flex items-center gap-[0.4rem] text-[#000]">
+                                <NaghzLogo size="header" className="max-md:hidden" />
+                                <NaghzLogo size="sm" className="md:hidden" />
+                                <span className="pt-[0.9rem] max-md:pt-[0rem]">Naghz</span>
                             </Link>
                         </h1>
                         {!isAuthenticated ? (
@@ -157,7 +160,7 @@ const Header = () => {
                                 className="flex gap-[1rem] max-md:gap-[0.2rem]"
                             >
                                 <Link
-                                    className="max-[400px]:hidden button-secondary rounded-full"
+                                    className="max-[450px]:hidden button-secondary rounded-full"
                                     href="/auth/sign-in"
                                 >
                                     وارد شوید
