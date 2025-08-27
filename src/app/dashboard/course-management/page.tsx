@@ -42,13 +42,19 @@ interface PageFormData {
   title: string;
   content: string;
   question: string;
-  test_type: 'Default' | 'Multiple' | 'Sequential' | 'Pluggable';
+  test_type: 'Default' | 'Multiple' | 'Sequential' | 'Pluggable' | 'Input';
   test_grid: 'col' | 'grid-2' | 'grid-row';
   correct_answer: number[];
   page_length: number;
   order_index: number;
   image?: string;
   why?: string | null;
+  ai_enabled: boolean;
+  give_feedback: boolean;
+  give_point: boolean;
+  score_threshold: number;
+  low_score_page_id?: string | null;
+  high_score_page_id?: string | null;
 }
 
 interface OptionFormData {
@@ -118,7 +124,13 @@ export default function CourseManagement() {
     page_length: 1,
     order_index: 0,
     image: '',
-    why: null
+    why: null,
+    ai_enabled: false,
+    give_feedback: false,
+    give_point: false,
+    score_threshold: 0,
+    low_score_page_id: null,
+    high_score_page_id: null
   });
   const [optionsByPage, setOptionsByPage] = useState<Record<number, OptionFormData[]>>({});
   const [showOptionsModal, setShowOptionsModal] = useState(false);
@@ -132,7 +144,7 @@ export default function CourseManagement() {
 
   // Converts the UI's number[] into DB JSONB per test type
   const toDbCorrectAnswer = (
-    testType: 'Default' | 'Multiple' | 'Sequential' | 'Pluggable',
+    testType: 'Default' | 'Multiple' | 'Sequential' | 'Pluggable' | 'Input',
     values: number[]
   ): number | number[] | [number, number][] | null => {
     switch (testType) {
@@ -140,6 +152,7 @@ export default function CourseManagement() {
         return typeof values?.[0] === 'number' ? values[0] : null;
       case 'Multiple':
       case 'Sequential':
+      case 'Input':
         return Array.isArray(values) ? values : [];
       case 'Pluggable': {
         const pairs: [number, number][] = [];
@@ -511,7 +524,7 @@ export default function CourseManagement() {
         }
 
         const pageOptions = optionsByPage[i] || [];
-        if ((page.page_type === 'test' || page.page_type === 'testNext') && pageOptions.length > 0) {
+        if ((page.page_type === 'test' || page.page_type === 'testNext') && page.test_type !== 'Input' && pageOptions.length > 0) {
           console.log(`Creating ${pageOptions.length} options for page ${i + 1}:`, pageOptions);
           for (let j = 0; j < pageOptions.length; j++) {
             const option = pageOptions[j];
@@ -623,29 +636,22 @@ export default function CourseManagement() {
               image: page.image,
               page_length: page.page_length,
               order_index: page.order_index,
-              why: page.why
+              why: page.why,
+              ai_enabled: page.ai_enabled,
+              give_feedback: page.give_feedback,
+              give_point: page.give_point,
+              score_threshold: page.score_threshold,
+              low_score_page_id: page.low_score_page_id,
+              high_score_page_id: page.high_score_page_id
             })
             .eq('id', pageId);
           if (updErr) throw updErr;
         } else {
           const { data: insertedPage, error: insertPageError } = await supabase
-            .from('course_pages')
-            .insert({
-              page_number: page.page_number,
-              page_type: page.page_type,
-              title: page.title,
-              content: page.content,
-              question: page.question,
-              test_type: page.test_type,
-              test_grid: page.test_grid,
-              correct_answer: toDbCorrectAnswer(page.test_type, page.correct_answer),
-              image: page.image,
-              page_length: page.page_length,
-              order_index: page.order_index,
-              course_id: courseId,
-            })
-            .select()
-            .single();
+             .from('course_pages')
+             .insert({ page_number: page.page_number, page_type: page.page_type, title: page.title, content: page.content, question: page.question, test_type: page.test_type, test_grid: page.test_grid, correct_answer: toDbCorrectAnswer(page.test_type, page.correct_answer), image: page.image, page_length: page.page_length, order_index: page.order_index, course_id: courseId, ai_enabled: page.ai_enabled, give_feedback: page.give_feedback, give_point: page.give_point, score_threshold: page.score_threshold, low_score_page_id: page.low_score_page_id, high_score_page_id: page.high_score_page_id })
+             .select()
+             .single();
           if (insertPageError) throw insertPageError;
           pageId = insertedPage!.id as string;
         }
@@ -662,6 +668,12 @@ export default function CourseManagement() {
 
         if (!pageId) continue;
 
+        if (page.test_type === 'Input') {
+          
+          const { error: delOptsForInputErr } = await supabase.from('page_options').delete().eq('page_id', pageId);
+          if (delOptsForInputErr) throw delOptsForInputErr;
+          continue; 
+        }
         const pageOptions = optionsByPage[i] || [];
         const { data: existingOpts, error: fetchOptErr } = await supabase
           .from('page_options')
@@ -748,7 +760,15 @@ export default function CourseManagement() {
       test_grid: 'col',
       correct_answer: [],
       page_length: pages.length + 1,
-      order_index: pages.length
+      order_index: pages.length,
+      image: '',
+      why: null,
+      ai_enabled: false,
+      give_feedback: false,
+      give_point: false,
+      score_threshold: 50,
+      low_score_page_id: null,
+      high_score_page_id: null
     }]);
     setOptionsByPage(prev => ({ ...prev, [pages.length]: [] }));
   };
@@ -845,16 +865,23 @@ export default function CourseManagement() {
         const pagesData: PageFormData[] = (dbPages || []).map((p: Record<string, unknown>, idx: number) => ({
           id: p.id as string,
           page_number: p.page_number as number,
-          page_type: p.page_type as 'text' | 'test',
+          page_type: p.page_type as 'text' | 'test' | 'testNext',
           title: (p.title as string) || '',
           content: (p.content as string) || '',
           question: (p.question as string) || '',
-          test_type: (p.test_type as 'Default' | 'Multiple' | 'Sequential' | 'Pluggable') || 'Default',
+          test_type: (p.test_type as 'Default' | 'Multiple' | 'Sequential' | 'Pluggable' | 'Input') || 'Default',
           test_grid: (p.test_grid as 'col' | 'grid-2' | 'grid-row') || 'col',
           correct_answer: fromDbCorrectAnswer(p.correct_answer),
           image: (p.image as string) || '',
           page_length: (p.page_length as number) || (dbPages?.length || 1),
-          order_index: (p.order_index as number) || idx
+          order_index: (p.order_index as number) || idx,
+          why: (p.why as string) || null,
+          ai_enabled: (p.ai_enabled as boolean) || false,
+          give_feedback: (p.give_feedback as boolean) || false,
+          give_point: (p.give_point as boolean) || false,
+          score_threshold: (p.score_threshold as number) || 50,
+          low_score_page_id: (p.low_score_page_id as string) || null,
+          high_score_page_id: (p.high_score_page_id as string) || null
         }));
         setPages(pagesData);
         setOriginalPageIds((dbPages || []).map((p: Record<string, unknown>) => p.id as string));
@@ -1234,13 +1261,14 @@ export default function CourseManagement() {
                           <label className="block text-sm font-medium mb-2">نوع آزمون</label>
                           <select
                             value={page.test_type}
-                            onChange={(e) => updatePage(index, { test_type: e.target.value as 'Default' | 'Multiple' | 'Sequential' | 'Pluggable' })}
+                            onChange={(e) => updatePage(index, { test_type: e.target.value as 'Default' | 'Multiple' | 'Sequential' | 'Pluggable' | 'Input' })}
                             className="w-full p-2 border rounded"
                           >
                             <option value="Default">تک انتخابی</option>
                             <option value="Multiple">چند انتخابی</option>
                             <option value="Sequential">ترتیبی</option>
                             <option value="Pluggable">جفت سازی</option>
+                            <option value="Input">ورودی (متنی)</option>
                           </select>
                         </div>
                         <div>
@@ -1255,6 +1283,34 @@ export default function CourseManagement() {
                             <option value="grid-row">شبکه سطری</option>
                           </select>
                         </div>
+                        <div className="flex items-center gap-[5px]">
+                          <label>هوش مصنوعی: </label>
+                          <input 
+                            type="checkbox"
+                            checked={page.ai_enabled}
+                            onChange={(e) => updatePage(index, { ai_enabled: e.target.checked })}
+                          />
+                        </div><br />
+                        {page.ai_enabled &&
+                          <>
+                            <div className="flex gap-[5px] items-center">
+                              <label>امتیاز توسط AI:</label>
+                              <input 
+                                type="checkbox"
+                                checked={page.give_point}
+                                onChange={(e) => updatePage(index, { give_point: e.target.checked })} 
+                              />
+                            </div>
+                            <div>
+                              <label>فیدبک توسط AI:</label>
+                                <input 
+                                  type="checkbox"
+                                  checked={page.give_feedback}
+                                  onChange={(e) => updatePage(index, { give_feedback: e.target.checked })} 
+                                />
+                            </div>
+                          </>
+                        }
                         {page.page_type != "testNext" &&
                           <>
                           <div className="col-span-2">
@@ -1678,13 +1734,14 @@ export default function CourseManagement() {
                           <label className="block text-sm font-medium mb-2">نوع آزمون</label>
                           <select
                             value={page.test_type}
-                            onChange={(e) => updatePage(index, { test_type: e.target.value as 'Default' | 'Multiple' | 'Sequential' | 'Pluggable' })}
+                            onChange={(e) => updatePage(index, { test_type: e.target.value as 'Default' | 'Multiple' | 'Sequential' | 'Pluggable' | 'Input' })}
                             className="w-full p-2 border rounded"
                           >
                             <option value="Default">تک انتخابی</option>
                             <option value="Multiple">چند انتخابی</option>
                             <option value="Sequential">ترتیبی</option>
                             <option value="Pluggable">جفت سازی</option>
+                            <option value="Input">ورودی</option>
                           </select>
                         </div>
                         <div>
@@ -1699,7 +1756,69 @@ export default function CourseManagement() {
                             <option value="grid-row">شبکه سطری</option>
                           </select>
                         </div>
-                        {page.page_type != "testNext" &&
+                        <div className="flex items-center gap-[5px]">
+                          <label>هوش مصنوعی: </label>
+                          <input 
+                            type="checkbox"
+                            checked={page.ai_enabled}
+                            onChange={(e) => updatePage(index, { ai_enabled: e.target.checked })}
+                          />
+                        </div><br />
+                        {page.ai_enabled &&
+                          <>
+                            <div className="flex gap-[5px] items-center">
+                              <label>امتیاز توسط AI:</label>
+                              <input 
+                                type="checkbox"
+                                checked={page.give_point}
+                                onChange={(e) => updatePage(index, { give_point: e.target.checked })} 
+                              />
+                            </div>
+                            <div>
+                              <label>فیدبک توسط AI:</label>
+                                <input 
+                                  type="checkbox"
+                                  checked={page.give_feedback}
+                                  onChange={(e) => updatePage(index, { give_feedback: e.target.checked })} 
+                                />
+                            </div>
+                          </>
+                        }
+                        {page.ai_enabled && page.give_point && 
+                          <div>
+                            <div>
+                              <label>صفحه‌ برای امتیاز زیر 50:</label>
+                              <select
+                                value={page.low_score_page_id || ''}
+                                onChange={(e) => updatePage(index, { low_score_page_id: e.target.value || null })}
+                                className="w-full p-2 border rounded"
+                              >
+                                <option value="">انتخاب کنید...</option>
+                                {pages.map((p) => (
+                                  <option key={p.id} value={p.id}>
+                                    {p.title || p.question}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                            <div>
+                              <label>صفحه‌ برای امتیاز بالای 50:</label>
+                              <select
+                                value={page.high_score_page_id || ''}
+                                onChange={(e) => updatePage(index, { high_score_page_id: e.target.value || null })}
+                                className="w-full p-2 border rounded"
+                              >
+                                <option value="">انتخاب کنید...</option>
+                                {pages.map((p, pi) => (
+                                  <option key={p.id || pi} value={p.id || ''}>
+                                    {p.title || p.question || `صفحه ${pi + 1}`}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                          </div>
+                        }
+                        {page.page_type != "testNext" && page.test_type != "Input" &&
                           <>
                           <div className="col-span-2">
                           <label className="block text-sm font-medium mb-2">دلیل</label>
@@ -1837,79 +1956,81 @@ export default function CourseManagement() {
                         </div>
                         </>
                         }
-                        <div className="col-span-2">
-                          <div className="flex justify-between items-center mb-2">
-                            <h5 className="font-medium">گزینه‌های آزمون</h5>
-                            <button
-                              onClick={() => setOptionsByPage(prev => ({ ...prev, [index]: [] }))}
-                              className="text-blue-500 hover:text-blue-700"
-                            >
-                              پاک کردن همه
-                            </button>
-                          </div>
-                          <button
-                            onClick={() => addOptionForPage(index)}
-                            className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
-                          >
-                            افزودن گزینه
-                          </button>
-
-                          {(optionsByPage[index] || []).map((option, optIndex) => (
-                            <div key={optIndex} className="border p-3 rounded mt-2">
-                              <div className="flex justify-between items-center mb-2">
-                                <span className="text-sm font-medium">گزینه {optIndex + 1}</span>
-                                <button
-                                  onClick={() => removeOptionForPage(index, optIndex)}
-                                  className="text-red-500 hover:text-red-700"
-                                >
-                                  حذف
-                                </button>
-                              </div>
-
-                              <div className="grid grid-cols-3 gap-2">
-                                <input
-                                  type="text"
-                                  value={option.option_text}
-                                  onChange={(e) => updateOptionForPage(index, optIndex, { option_text: e.target.value })}
-                                  className="p-2 border rounded text-sm"
-                                  placeholder="متن گزینه"
-                                />
-                                <input
-                                  type="number"
-                                  value={option.option_order}
-                                  onChange={(e) => updateOptionForPage(index, optIndex, { option_order: parseInt(e.target.value) })}
-                                  className="p-2 border rounded text-sm"
-                                  placeholder="ترتیب"
-                                />
-                                <label className="flex items-center gap-1 text-sm">
-                                  <input
-                                    type="checkbox"
-                                    checked={option.is_correct}
-                                    onChange={(e) => updateOptionForPage(index, optIndex, { is_correct: e.target.checked })}
-                                  />
-                                  صحیح
-                                </label>
-                                {page.page_type === 'testNext' && (
-                                  <div className="flex items-center col-start-1 col-end-3 max-md:flex-col gap-2 mt-2">
-                                    <label className="text-sm">صفحه بعدی برای این گزینه</label>
-                                    <select
-                                      value={option.next_page_id || ''}
-                                      onChange={(e) => updateOptionForPage(index, optIndex, { next_page_id: e.target.value || null })}
-                                      className="p-2 border rounded text-sm"
-                                    >
-                                      <option value="">پیش‌فرض (صفحه بعدی خطی)</option>
-                                      {pages.map((p, pi) => (
-                                        <option key={p.id || pi} value={p.id || ''}>
-                                          {p.title || p.question || `صفحه ${pi + 1}`}
-                                        </option>
-                                      ))}
-                                    </select>
-                                  </div>
-                                )}
-                              </div>
+                        {page.test_type != "Input" &&
+                          <div className="col-span-2">
+                            <div className="flex justify-between items-center mb-2">
+                              <h5 className="font-medium">گزینه‌های آزمون</h5>
+                              <button
+                                onClick={() => setOptionsByPage(prev => ({ ...prev, [index]: [] }))}
+                                className="text-blue-500 hover:text-blue-700"
+                              >
+                                پاک کردن همه
+                              </button>
                             </div>
-                          ))}
-                        </div>
+                            <button
+                              onClick={() => addOptionForPage(index)}
+                              className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
+                            >
+                              افزودن گزینه
+                            </button>
+
+                            {(optionsByPage[index] || []).map((option, optIndex) => (
+                              <div key={optIndex} className="border p-3 rounded mt-2">
+                                <div className="flex justify-between items-center mb-2">
+                                  <span className="text-sm font-medium">گزینه {optIndex + 1}</span>
+                                  <button
+                                    onClick={() => removeOptionForPage(index, optIndex)}
+                                    className="text-red-500 hover:text-red-700"
+                                  >
+                                    حذف
+                                  </button>
+                                </div>
+
+                                <div className="grid grid-cols-3 gap-2">
+                                  <input
+                                    type="text"
+                                    value={option.option_text}
+                                    onChange={(e) => updateOptionForPage(index, optIndex, { option_text: e.target.value })}
+                                    className="p-2 border rounded text-sm"
+                                    placeholder="متن گزینه"
+                                  />
+                                  <input
+                                    type="number"
+                                    value={option.option_order}
+                                    onChange={(e) => updateOptionForPage(index, optIndex, { option_order: parseInt(e.target.value) })}
+                                    className="p-2 border rounded text-sm"
+                                    placeholder="ترتیب"
+                                  />
+                                  <label className="flex items-center gap-1 text-sm">
+                                    <input
+                                      type="checkbox"
+                                      checked={option.is_correct}
+                                      onChange={(e) => updateOptionForPage(index, optIndex, { is_correct: e.target.checked })}
+                                    />
+                                    صحیح
+                                  </label>
+                                  {page.page_type === 'testNext' && (
+                                    <div className="flex items-center col-start-1 col-end-3 max-md:flex-col gap-2 mt-2">
+                                      <label className="text-sm">صفحه بعدی برای این گزینه</label>
+                                      <select
+                                        value={option.next_page_id || ''}
+                                        onChange={(e) => updateOptionForPage(index, optIndex, { next_page_id: e.target.value || null })}
+                                        className="p-2 border rounded text-sm"
+                                      >
+                                        <option value="">پیش‌فرض (صفحه بعدی خطی)</option>
+                                        {pages.map((p, pi) => (
+                                          <option key={p.id || pi} value={p.id || ''}>
+                                            {p.title || p.question || `صفحه ${pi + 1}`}
+                                          </option>
+                                        ))}
+                                      </select>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        }
                       </>
                     )}
                   </div>

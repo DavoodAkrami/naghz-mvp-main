@@ -4,6 +4,7 @@ import courseReducer from './slices/courseSlice'
 import fullCourseReducer from './slices/fullCourseSlice'
 import coursePageReducer from './slices/coursePageSlice'
 import userProgressReducer from './slices/userProgressSlice'
+import aiReducer from './slices/aiSlice'
 
 export const store = configureStore({
     reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
         fullCourse: fullCourseReducer,
         coursePage: coursePageReducer,
         userProgress: userProgressReducer,
+        ai: aiReducer,
     }
 })
 

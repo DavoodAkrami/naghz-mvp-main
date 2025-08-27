@@ -23,7 +23,7 @@ const PopUp: React.FC<PopUpProps> = ({ isCorrect, onNext, onRetry, onWhy, onCorr
                 exit={{ y: 100, opacity: 0 }}
                 transition={{ duration: 0.4 }}
                 className={clsx(
-                    "w-[100%] backdrop-blur-sm rounded-full py-8 px-12 flex items-center justify-between shadow-lg border-[4px] max-md:py-4 max-md:px-6 max-sm:scale-[0.9]",
+                    "w-[100%] backdrop-blur-sm rounded-3xl py-8 px-12 flex items-center justify-between shadow-lg border-[4px] max-md:py-4 max-md:px-6 max-sm:scale-[0.9]",
                     !isOpen && "hidden",
                     !isCorrect && "bg-[var(--secondary-color2)]/80 border-[var(--secondary-color2)]",
                     isCorrect && "bg-[var(--secondary-color1)]/80 border-[var(--secondary-color1)]"

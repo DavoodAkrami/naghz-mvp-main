@@ -7,6 +7,7 @@ import { AppDispatch, RootState } from "@/store/store";
 import { IconType } from "react-icons";
 import FullCourseCard from "@/components/FullCourseCard";
 import { useRouter } from "next/navigation";
+import NeatBackground from "@/components/NeatBg";
 
 
 const FullCourseDetailPage = () => {
@@ -35,6 +36,7 @@ const FullCourseDetailPage = () => {
             dir="rtl"
             className="py-[5vh] px-[10vw] max-md:px-[5vw]"
         >
+            <NeatBackground />
             <h2
                 className="mb-[8vh] mt-[3vh] h1 text-center"
             >

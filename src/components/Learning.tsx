@@ -9,6 +9,11 @@ import { AppDispatch, RootState } from "@/store/store";
 import { saveProgress } from "@/store/slices/userProgressSlice";
 import Image from "next/image";
 import { FullCourse } from "@/store/slices/fullCourseSlice";
+import { OptionCard } from "./options";
+import { getFeedBack, getPoint, clearAi } from "@/store/slices/aiSlice";
+import ButtonLoading from "./ButtonLoading";
+import { motion, AnimatePresence } from "framer-motion";
+
 
 
 
@@ -24,7 +29,7 @@ export interface LearningPropsType {
     page_type: "test" | "text" | "testNext";
     header?: string;
     text?: string;
-    test_type?: "Sequential" | "Pluggable" | "Multiple" | "Default";
+    test_type?: "Sequential" | "Pluggable" | "Multiple" | "Default" | "Input";
     test_grid?: "col" | "grid-2" | "grid-row";
     question?: string;
     options?: options[];
@@ -38,79 +43,16 @@ export interface LearningPropsType {
     why?: string | null;
     preloadedImages?: string[];
     onTestNextSelect?: (optionOrder: number) => void;
+    ai_enabled?: boolean;
+    give_feedback?: boolean;
+    give_point?: boolean;
+    score_threshold?: number;
+    low_score_page_id?: string | null;
+    high_score_page_id?: string | null;
 }
 
 
-interface OptionCardProps {
-    icon_name?: string;
-    answer: string;
-    id: number;
-    test_type?: "Sequential" | "Pluggable" | "Multiple" | "Default";
-    isSelected: boolean;
-    onSelect: (answerId: number) => void;
-    getSequentialOrder?: (id: number) => number;
-    getPluggablePair?: (id: number) => string;
-    classname?: string;
-}
-
-const OptionCard: React.FC<OptionCardProps> = ({ icon_name, answer, id, test_type="Default", isSelected, onSelect, getSequentialOrder, getPluggablePair, classname }) => {
-    const getCardStyle = () => {
-        const baseStyle = "px-[2rem] py-[1.4rem] rounded-full border-[2px] box-border cursor-pointer flex justify-between items-center transition-all duration-200 shadow-sm box-border  max-md:scale-[0.85]";
-        
-        switch (test_type) {
-            case "Default":
-                return clsx(
-                    baseStyle,
-                    "border-[var(--accent-color1)]",
-                    isSelected && "border-[3px] border-[var(--accent-color2)] bg-[var(--accent-color2)]/10 shadow-md"
-                );
-            case "Multiple":
-                return clsx(
-                    baseStyle,
-                    "border-[var(--accent-color1)]",
-                    isSelected && "border-[3px] border-[var(--accent-color2)] bg-[var(--accent-color2)]/10 shadow-md"
-                );
-            case "Sequential":
-                return clsx(
-                    baseStyle,
-                    "border-[var(--accent-color1)]",
-                    isSelected && "border-[3px] border-[var(--accent-color2)] bg-[var(--accent-color2)]/10 shadow-md"
-                );
-            case "Pluggable":
-                return clsx(
-                    baseStyle,
-                    "border-[var(--accent-color1)]",
-                    isSelected && "border-[3px] border-[var(--accent-color2)] bg-[var(--accent-color2)]/10 shadow-md"
-                );
-            default:
-                return clsx(baseStyle, "border-[var(--accent-color1)]");
-        }
-    };
-
-    return (
-        <div 
-            onClick={() => onSelect(id)}
-            className={clsx(getCardStyle(), classname)}
-        >
-            <div className="flex items-center text-center gap-[0.8rem]">
-                {icon_name && <span className="text-[1.2rem]">📝</span>}
-                <p className="font-medium text-[1.4rem] text-center">{answer}</p>
-            </div>
-            <div className="flex items-center gap-[0.5rem]">
-                {test_type === "Sequential" && isSelected && getSequentialOrder && (
-                    <span className="bg-[var(--accent-color2)] text-white text-xs px-2 py-1 rounded-full font-bold">
-                        {getSequentialOrder(id)}
-                    </span>
-                )}
-                {test_type === "Pluggable" && isSelected && getPluggablePair && (
-                    <span className="bg-[var(--accent-color2)] text-white text-xs px-2 py-1 rounded-full font-bold">
-                        {getPluggablePair(id)}
-                    </span>
-                )}
-            </div>
-        </div>
-    )
-}
+ 
 
 // Helper function to parse and render rich text
 const renderRichText = (text: string) => {
@@ -201,7 +143,7 @@ const ImagePreloader: React.FC<{ images: string[] }> = ({ images }) => {
     loadImagesWithConcurrency();
   }, [images]);
 
-  // Optional: Log loading progress
+  
   useEffect(() => {
     if (images.length > 0) {
       const total = images.length;
@@ -214,11 +156,11 @@ const ImagePreloader: React.FC<{ images: string[] }> = ({ images }) => {
     }
   }, [loadedImages, failedImages, images.length]);
 
-  return null; // This component doesn't render anything
+  return null; 
 };
 
 
-const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, header, test_type="Default", test_grid= "col", options, question, correct_answer, course_id, page_number, pageLength, handleNext, handlePrev, image, why, preloadedImages, onTestNextSelect}) => {
+const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, header, test_type="Default", test_grid= "col", options, question, correct_answer, course_id, page_number, pageLength, handleNext, handlePrev, image, why, preloadedImages, onTestNextSelect, give_point, give_feedback, low_score_page_id, high_score_page_id}) => {
     const router = useRouter();
 
     const [activeId, setActiveId] = useState<number | null>(null);
@@ -232,6 +174,7 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
     const [isWhyModalOpen, setIsWhyModalOpen] = useState<boolean>(false);
     const [whyModalContent, setWhyModalContent] = useState<string>("");
     const [saveProgressLoading, setSaveProgressLoading] = useState<boolean>(false);
+    const [userAnswer, setUserAnswer] = useState<string>("");
 
     const successSound = useMemo(() => new Audio('/sounds/correct.mp3'), []);
     const wrongSound = useMemo(() => new Audio('/sounds/incorrect.mp3'), []);
@@ -252,9 +195,17 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
     const { userProgress } = useSelector((state: RootState) => state.userProgress);
     const { courseloading: courseLoading } = useSelector((state: RootState) => state.course);
     const { currentPageNumber, totalPages } = useSelector((state: RootState) => state.coursePage);
-
+        
     const isCompleted = userProgress.some(progress => progress.course_id === course_id);
 
+
+    const { feedBack, score, aiLoading } = useSelector((state: RootState) => state.ai);
+    
+
+    useEffect(() => {
+        dispatch(clearAi());
+        setUserAnswer("");
+    }, [id])
 
     useEffect(() => {
         const foundCourse: FullCourse | undefined = fullCourses.find(course => pathname.includes(course.slug));
@@ -354,6 +305,26 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                 dispatch(saveProgress({ courseId: course_id, userId: user?.id || '' }))
                 setSaveProgressLoading(false)
             }
+        } else if (test_type === "Input" && page_type === "testNext" && give_point) {
+            if (userAnswer.trim() === "") {
+                wrongSound.play();
+                console.error("برای ادامه چیزی بنویسید");
+            } else {
+                dispatch(getPoint({
+                    question: question || "",
+                    answer: userAnswer,
+                    subject: "softSkills",
+                    lowScorePageId: low_score_page_id,
+                    highScorePageId: high_score_page_id
+                }))
+                setUserAnswer("");
+            }
+        } else if (give_feedback && !feedBack) {
+            dispatch(getFeedBack({
+                question: question || "",
+                answer: userAnswer,
+                subject: "softSkills",
+            }))
         } else {
             if (page_type != 'text' && page_type != "testNext")
             successSound.play();
@@ -617,7 +588,7 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                     {text &&
                         <RichText
                             content={text}
-                            className="text-justify whitespace-pre-wrap text-[1.2rem] font-black max-w-[90%] mx-auto order-[3px] border-[var(--primary-color1)] bg-[var(--primary-color1)]/50 backdrop-blur-xl p-4 rounded-2xl text-[var(--text-primary)] my-[2vh]"
+                            className="text-justify whitespace-pre-wrap text-[1.2rem] font-black max-w-[100%] mx-auto order-[3px] border-[var(--primary-color1)] bg-[var(--primary-color1)]/50 backdrop-blur-xl p-4 rounded-2xl text-[var(--text-primary)] my-[2vh]"
                         />
                     }
                 </div>
@@ -642,7 +613,7 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                     {text && (
                         <RichText
                             content={text}
-                            className="text-[1.2rem] whitespace-pre-wrap text-[var(--text-primary)] border-[3px] border-[var(--primary-color1)] bg-[var(--primary-color1)]/50 backdrop-blur-xl p-4 rounded-2xl max-w-[90%] mx-auto text-justify my-[3vh]"
+                            className="text-[1.2rem] whitespace-pre-wrap text-[var(--text-primary)] border-[3px] border-[var(--primary-color1)] bg-[var(--primary-color1)]/50 backdrop-blur-xl p-4 rounded-2xl max-w-[100%] mx-auto text-justify my-[3vh]"
                         />
                     )}
                     {question && (
@@ -652,7 +623,27 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                         />
                     )}
                     {getTestTypeIndicator()}
-                    {(options && !courseLoading) && (
+                    {test_type === "Input" ? (
+                        <div
+                            className="max-w-[60vw] w-full mx-auto max-md:max-w-[100vw] max-md:w-[95%]"
+                        >
+                            <textarea 
+                                value={userAnswer}
+                                onChange={(e) => {
+                                    setUserAnswer(e.target.value);
+                                    e.target.style.height = 'auto';
+                                    e.target.style.height = Math.min(e.target.scrollHeight, 150) + 'px';
+                                }}
+                                onInput={(e) => {
+                                    const target = e.target as HTMLTextAreaElement;
+                                    target.style.height = 'auto';
+                                    target.style.height = Math.min(target.scrollHeight, 200) + 'px';
+                                }}
+                                className="w-full rounded-2xl py-2 px-5 text-[1.4rem] font-normal border-2 border-[var(--primary-color1)]/50 backdrop-blur-2xl focus:outline-none focus:ring-[2px] focus:ring-[var(--accent-color1)] flex-1 flex items-center transition-all duration-150 resize-none overflow-hidden min-h-[4rem] max-h-[150px]"
+                                placeholder="پاسخ خود را بنویسید..."
+                            />
+                        </div>
+                    ) : (options && options.length > 0 && !courseLoading) ? (
                         <div
                             className={clsx(
                                 "w-[50vw] mx-auto max-md:w-[80vw]",
@@ -663,7 +654,7 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                             )}
                             style={
                                 test_grid === "grid-row"
-                                    ? { gridTemplateColumns: `repeat(${Math.max(1, options?.length || 1)}, minmax(0, 1fr))` }
+                                    ? { gridTemplateColumns: `repeat(${Math.max(1, options.length)}, minmax(0, 1fr))` }
                                     : undefined
                             }
                         >
@@ -682,7 +673,28 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                                 />
                             ))}
                         </div>
-                    )}
+                    ) : null}
+                    <AnimatePresence>
+                        {feedBack.trim() != "" &&
+                            <motion.div
+                                initial={{ height: 0 }}
+                                animate={{ height: 'auto' }}
+                                exit={{ height: 0 }}
+                                transition={{ duration: 0.5}}
+                            >
+                                <h2
+                                    className="h2 text-center mt-[3rem]"
+                                >
+                                    فیدبک هوش مصنوعی
+                                </h2>
+                                <motion.div
+                                    className="max-w-[80%] mx-auto text-[1.2rem] border-[2px] border-[var(--primary-color1)] bg-[var(--primary-color1)]/40 p-4 rounded-xl mt-[1rem] overflow-hidden"
+                                >
+                                    {aiLoading ? 'Loading...' : feedBack}
+                                </motion.div>
+                            </motion.div>
+                        }
+                    </AnimatePresence>
                     {(options && courseLoading) && (
                         <div
                             className={clsx(
@@ -720,15 +732,16 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                             : test_type === "Sequential"
                               ? (!hasSequentialSelection || isPopUpOpen)
                               : (!activeId || isPopUpOpen))
-                      : false
+                                : test_type === "Input" ? (aiLoading || userAnswer.trim() === ""):
+                      false
                   }
                 className={clsx(
-                    "button-primary rounded-full shadow-xl hover:bg active:shadow-none w-[10rem] mx-auto scale-[1.4] mt-[3vh] mb-[3vh]",
+                    "button-primary rounded-2xl shadow-xl hover:bg active:shadow-none w-[10rem] mx-auto scale-[1.4] mt-[3vh] mb-[3vh] disabled:opacity-50 disabled:pointer-events-none",
                     page_type === "test" && !activeId && "disabled:opacity-50",
-                    page_type === "testNext" && options && "hidden" 
+                    page_type === "testNext" && test_type !== "Input" && options && options.length > 0 && "hidden" 
                 )}
             >
-                {page_number >= pageLength ? "پایان" : "ادامه"}
+                {aiLoading ? (<ButtonLoading size="md" />) : (page_number >= pageLength ? "پایان" : "ادامه")}
             </button>
             {page_type === "test" && 
                 <div 

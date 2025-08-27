@@ -11,6 +11,8 @@ import { fetchFullCourses, FullCourse } from "@/store/slices/fullCourseSlice";
 import * as LuIcons from "react-icons/lu";
 import { usePathname } from "next/navigation";
 import { IoArrowBackCircleOutline } from "react-icons/io5";
+import Image from "next/image";
+import NeatBackground from "@/components/NeatBg";
 
 
 const getIconComponent = (iconName?: string): typeof LuIcons.LuBrain => {
@@ -87,14 +89,21 @@ const Curses: React.FC = () => {
             dir="rtl"
             className="mt-[3rem] mb-[2rem] p-12 max-md:p-8" 
         >
-            <h1 className="text-center text-[3rem] font-bold maxx-md:text-[2rem] mb-[2rem]">{pageHeader}</h1>
+            <NeatBackground />
             <div
                 className="flex items-start max-md:flex-col max-md:items-center gap-[3rem] max-md:gap-[0.4rem]"
             >
                 <div
-                    className="w-[40%] md:sticky top-[10vh] max-md:w-[100%]"
+                    className="w-[40%] md:sticky top-[10vh] max-md:w-[100%] max-md:mt-[2rem]"
                 >
                     <div className="min-h-[40vh] max-md:min-h-[20vh] bg-[var(--primary-color1)]/50 backdrop-blur-2xl shadow-lg p-6 rounded-3xl border-[2.5px] border-[var(--primary-color1)]">
+                        {fullCourse?.image && <Image
+                            src={fullCourse?.image || ""}
+                            alt={fullCourse?.title || ""}
+                            width={500}
+                            height={500}
+                            className="object-cover rounded-3xl mx-auto max-w-[80%]"
+                        />}
                         <h1 className="h1 text-center mb-[1rem]">
                             {fullCourse?.title}
                         </h1>

@@ -4,6 +4,8 @@ import Learning from "./Learning";
 import { LearningPropsType } from "./Learning";
 import { AnimatePresence, motion } from "framer-motion";
 import { supabase } from "@/config/supabase";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
 
 type DbPage = {
   id: string;
@@ -12,11 +14,17 @@ type DbPage = {
   title?: string;
   content?: string;
   question?: string;
-  test_type?: "Default" | "Multiple" | "Sequential" | "Pluggable";
+  test_type?: "Default" | "Multiple" | "Sequential" | "Pluggable" | "Input";
   test_grid?: "col" | "grid-2" | "grid-row";
   correct_answer?: number[];
   image?: string;
   why?: string | null;
+  ai_enabled?: boolean;
+  give_feedback?: boolean;
+  give_point?: boolean;
+  score_threshold?: number;
+  low_score_page_id?: string | null;
+  high_score_page_id?: string | null;
 };
 
 type DbOption = {
@@ -35,6 +43,9 @@ const LearningSlider: React.FC<LearningPropsType> = (props: LearningPropsType) =
   const [optionsByPageId, setOptionsByPageId] = useState<Record<string, DbOption[]>>({});
   const [loading, setLoading] = useState<boolean>(true);
   const [direction, setDirection] = useState<1 | -1>(1);
+  
+  
+  const { nextPageId } = useSelector((state: RootState) => state.ai);
 
   useEffect(() => {
     const loadPages = async () => {
@@ -89,6 +100,17 @@ const LearningSlider: React.FC<LearningPropsType> = (props: LearningPropsType) =
     return map;
   }, [pages]);
 
+  // Handle AI routing when nextPageId changes
+  useEffect(() => {
+    if (nextPageId && pageIndexById[nextPageId] !== undefined) {
+      const targetIndex = pageIndexById[nextPageId];
+      setDirection(1);
+      setCurrentIndex(targetIndex);
+      const page = pages[targetIndex];
+      if (page) loadOptionsForPage(page.id);
+    }
+  }, [nextPageId, pageIndexById, pages]);
+
   const handleTestNextSelect = async (optionOrder: number) => {
     const page = pages[currentIndex];
     if (!page) return;
@@ -133,7 +155,13 @@ const LearningSlider: React.FC<LearningPropsType> = (props: LearningPropsType) =
       page_number: currentIndex + 1,
       pageLength: pages.length || props.pageLength,
       image: page.image,
-      why: page.why || null
+      why: page.why || null,
+      ai_enabled: page.ai_enabled || false,
+      give_feedback: page.give_feedback || false,
+      give_point: page.give_point || false,
+      score_threshold: page.score_threshold || 50,
+      low_score_page_id: page.low_score_page_id || null,
+      high_score_page_id: page.high_score_page_id || null
     };
   }, [pages, currentIndex, optionsByPageId, props.course_id, props.pageLength]);
 

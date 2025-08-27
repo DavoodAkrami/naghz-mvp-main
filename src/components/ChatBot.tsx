@@ -56,12 +56,22 @@ const ChatBot: React.FC<chatBotProp> = ({ sender="user", aiMessage, loading, isO
                                     className="text-[2.2rem] text-[white]"
                                 />
                             </button>
-                            <input 
-                                type="text"
-                                className="rounded-full py-2 px-4 text-[1.4rem] font-normal bg-[var(--primary-color1)]/70 backdrop-blur-2xl text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-[var(--accent-color2)] flex-1 flex items-center w-[90%]"
+                            <textarea 
+                                className="rounded-full py-2 px-4 text-[1.4rem] font-normal bg-[var(--primary-color1)]/70 backdrop-blur-2xl text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-[var(--accent-color2)] flex-1 flex items-center w-[90%] resize-none overflow-hidden min-h-[3rem] max-h-[150px]"
                                 placeholder="پیام خود را بنویسید..."
                                 value={userMessage}
-                                onChange={(e) => setUserMessage(e.target.value)}
+                                onChange={(e) => {
+                                    setUserMessage(e.target.value);
+                                    // Auto-resize functionality
+                                    e.target.style.height = 'auto';
+                                    e.target.style.height = Math.min(e.target.scrollHeight, 150) + 'px';
+                                }}
+                                onInput={(e) => {
+                                    // Auto-resize on input as well
+                                    const target = e.target as HTMLTextAreaElement;
+                                    target.style.height = 'auto';
+                                    target.style.height = Math.min(target.scrollHeight, 150) + 'px';
+                                }}
                             />    
                         </div>                 */}
                     </motion.div>  

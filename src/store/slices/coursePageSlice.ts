@@ -9,13 +9,21 @@ export interface CoursePage {
   title?: string;
   content?: string;
   question?: string;
-  test_type?: 'Default' | 'Multiple' | 'Sequential' | 'Pluggable';
+  test_type?: 'Default' | 'Multiple' | 'Sequential' | 'Pluggable' | 'Input';
   test_grid?: 'col' | 'grid-2' | 'grid-row';
   correct_answer?: number[] | number;
   page_length: number;
   order_index: number;
   why?: string;
   image?: string; 
+  feedback_by_ai?: string | null;
+  point_by_ai?: number | null;
+  ai_enabled?: boolean;
+  give_feedback?: boolean;
+  give_point?: boolean;
+  score_threshold?: number;
+  low_score_page_id?: string | null;
+  high_score_page_id?: string | null;
 }
 
 export interface PageOption {

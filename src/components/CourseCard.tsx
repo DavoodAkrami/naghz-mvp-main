@@ -1,7 +1,7 @@
 "use client"
 import { motion, AnimatePresence } from "framer-motion";
 import clsx from "clsx";
-import React from "react";
+import React, { useMemo } from "react";
 import { IconType } from "react-icons";
 import { SiTicktick } from "react-icons/si";
 
@@ -33,6 +33,37 @@ const CourseCard: React.FC<CurseCardProps> = ({
     isAdmin = false
 }) => {
     const truncatedDescription = description.length > 80 ? `${description.slice(0, 80)}...` : description;
+
+    const renderRichText = (text: string) => {
+        if (!text) return '';
+        
+        let html = text
+          .replace(/\[([^\]]+)\]\(([^)]+)(?:\|([^)]+))?\)/g, (match, linkText, url, target) => {
+            const targetAttr = target ? ` target="${target}"` : ' target="_blank"';
+            return `<a href="${url}"${targetAttr} class="text-blue-600 hover:text-blue-800 underline transition-colors duration-200" rel="noopener noreferrer">${linkText}</a>`;
+          })
+          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+          .replace(/__(.*?)__/g, '<strong>$1</strong>')
+          .replace(/\*(.*?)\*/g, '<em>$1</em>')
+          .replace(/_(.*?)_/g, '<em>$1</em>')
+          .replace(/~(.*?)~/g, '<u>$1</u>')
+          .replace(/~~(.*?)~~/g, '<del>$1</del>')
+          .replace(/`(.*?)`/g, '<code class="bg-gray-100 px-1 rounded text-sm">$1</code>')
+          .replace(/\n/g, '<br />');
+      
+        return html;
+      };
+
+    const RichText: React.FC<{ content: string; className?: string }> = ({ content, className }) => {
+        const htmlContent = useMemo(() => renderRichText(content), [content]);
+        
+        return (
+          <div 
+            className={className}
+            dangerouslySetInnerHTML={{ __html: htmlContent }}
+          />
+        );
+      };
 
     return (
         <AnimatePresence>
@@ -68,11 +99,10 @@ const CourseCard: React.FC<CurseCardProps> = ({
                     >
                         {title}
                     </h2>
-                    <p
+                    <RichText
+                        content={truncatedDescription}
                         className="text-gray-600 text-sm leading-relaxed"
-                    >
-                        {truncatedDescription}
-                    </p>
+                    />
                 </div>
             </motion.div>
         </AnimatePresence>
@@ -89,6 +119,36 @@ export const CourseCardOpen: React.FC<CurseCardProps> = ({
     isActive,
     isAdmin = false
 }) => {
+    const renderRichText = (text: string) => {
+        if (!text) return '';
+        
+        let html = text
+          .replace(/\[([^\]]+)\]\(([^)]+)(?:\|([^)]+))?\)/g, (match, linkText, url, target) => {
+            const targetAttr = target ? ` target="${target}"` : ' target="_blank"';
+            return `<a href="${url}"${targetAttr} class="text-blue-600 hover:text-blue-800 underline transition-colors duration-200" rel="noopener noreferrer">${linkText}</a>`;
+          })
+          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+          .replace(/__(.*?)__/g, '<strong>$1</strong>')
+          .replace(/\*(.*?)\*/g, '<em>$1</em>')
+          .replace(/_(.*?)_/g, '<em>$1</em>')
+          .replace(/~(.*?)~/g, '<u>$1</u>')
+          .replace(/~~(.*?)~~/g, '<del>$1</del>')
+          .replace(/`(.*?)`/g, '<code class="bg-gray-100 px-1 rounded text-sm">$1</code>')
+          .replace(/\n/g, '<br />');
+      
+        return html;
+      };
+
+    const RichText: React.FC<{ content: string; className?: string }> = ({ content, className }) => {
+        const htmlContent = useMemo(() => renderRichText(content), [content]);
+        
+        return (
+          <div 
+            className={className}
+            dangerouslySetInnerHTML={{ __html: htmlContent }}
+          />
+        );
+      };
     return (
         <AnimatePresence>
             <motion.div
@@ -110,11 +170,10 @@ export const CourseCardOpen: React.FC<CurseCardProps> = ({
                     >
                         {title}
                     </h2>
-                    <p
-                        className=""
-                    >
-                        {description}
-                    </p>
+                    <RichText
+                        content={description}
+                    />
+
                 </div>
                 {startOnClick && (
                     <button

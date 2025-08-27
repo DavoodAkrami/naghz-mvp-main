@@ -56,6 +56,10 @@ body {
     overflow-x: hidden;
 }
 
+a[href*="firecms"] {
+    display: none !important;
+}
+
 
 
 .h1 {
