@@ -25,6 +25,7 @@ type DbPage = {
   score_threshold?: number;
   low_score_page_id?: string | null;
   high_score_page_id?: string | null;
+  tip?: string;
 };
 
 type DbOption = {
@@ -161,7 +162,8 @@ const LearningSlider: React.FC<LearningPropsType> = (props: LearningPropsType) =
       give_point: page.give_point || false,
       score_threshold: page.score_threshold || 50,
       low_score_page_id: page.low_score_page_id || null,
-      high_score_page_id: page.high_score_page_id || null
+      high_score_page_id: page.high_score_page_id || null,
+      tip: page.tip
     };
   }, [pages, currentIndex, optionsByPageId, props.course_id, props.pageLength]);
 

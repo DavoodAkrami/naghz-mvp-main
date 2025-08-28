@@ -25,7 +25,7 @@ const NeatBackground: React.FC = () => {
     <canvas
       ref={canvasRef}
       id="gradient"
-      className="blur-[4px] fixed top-0 left-0 w-[100vw] h-[100vh] -z-10"
+      className="fixed top-0 left-0 w-[100vw] h-[100vh] -z-10"
     />
   );
 };

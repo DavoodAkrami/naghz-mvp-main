@@ -71,9 +71,9 @@ const CourseCard: React.FC<CurseCardProps> = ({
                 layoutId={layoutId}
                 onClick={onClick}
                 className={clsx(
-                    "bg-[var(--primary-color1)]/20 px-[1rem] shadow-lg h-[150px] border border-[var(--bg-color-secondary)] rounded-md hover:bg-[var(--primary-color1)]/30 cursor-pointer flex justify-baseline items-center gap-[10%] transition-all duration-200 w-[100%] relative",
+                    "bg-[var(--primary-color1)]/30 px-[1rem] shadow-lg h-[150px] border border-[var(--bg-color-secondary)] rounded-2xl hover:bg-[var(--primary-color1)]/45 cursor-pointer flex justify-baseline items-center gap-[10%] transition-all duration-200 w-[100%] relative",
                     !isActive && !isAdmin && "opacity-[0.5] cursor-default pointer-events-none hover:border-none bg-[var(--primary-color1)]/5",
-                    isCompleted && "bg-green-50 border-green-500 hover:bg-green-100"
+                    isCompleted && "bg-green-50/50 border-green-500 hover:bg-green-100"
                 )}
             >
                 {isCompleted && (
@@ -115,6 +115,7 @@ export const CourseCardOpen: React.FC<CurseCardProps> = ({
     icon: Icon, 
     layoutId, 
     startOnClick, 
+    isCompleted,
     classname,
     isActive,
     isAdmin = false
@@ -153,7 +154,10 @@ export const CourseCardOpen: React.FC<CurseCardProps> = ({
         <AnimatePresence>
             <motion.div
                 layoutId={layoutId}
-                className="flex flex-col items-center justify-center gap-[1rem] bg-[white] p-8 rounded-xl md:w-[50vw] max-w-[95vw] relative"
+                className={clsx(
+                    "flex flex-col items-center justify-center gap-[1rem] bg-[var(--primary-color1)]/50 text-[white] p-8 rounded-xl md:w-[50vw] max-w-[95vw] relative",
+                    isCompleted && "bg-green-50/50 border-green-500 border-[2px]"
+                )}
             >
                 {/* Admin indicator for inactive courses */}
                 {isAdmin && !isActive && (

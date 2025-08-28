@@ -152,7 +152,7 @@ const Header = () => {
                             <Link href="/" className="flex items-center gap-[0.4rem] text-[#000]">
                                 <NaghzLogo size="header" className="max-md:hidden" />
                                 <NaghzLogo size="sm" className="md:hidden" />
-                                <span className="pt-[0.9rem] max-md:pt-[0rem]">Naghz</span>
+                                <span className="pt-[0.2rem] max-md:pt-[0rem]">Naghz</span>
                             </Link>
                         </h1>
                         {!isAuthenticated ? (
@@ -213,7 +213,7 @@ const Header = () => {
                                                 >
                                                     {routes.filter(route => route.profilePage === true).map((route, index) => (
                                                         <li
-                                                            className="text-[1.4rem] max-md:text-[1.2rem] font-bold hover:cursor-pointer bg-[var(--primary-color4)]/50 hover:bg-[var(--primary-color4)]/65"
+                                                            className="text-[1.4rem] max-md:text-[1.2rem] font-bold max-md:font-normal hover:cursor-pointer bg-[var(--primary-color4)]/50 hover:bg-[var(--primary-color4)]/65"
                                                             key={index}
                                                         >
                                                             <Link
@@ -248,7 +248,7 @@ const Header = () => {
                                                 dir="rtl"
                                                 initial={{ opacity: 0, y: -120, scale: 0, x: 130 }}
                                                 animate={{ opacity: 1, y: 0, scale: 1, x: 0 }}
-                                                transition={{ duration: 0.3 }}
+                                                transition={{ duration: 0.2 }}
                                                 exit={{ opacity: 0, y: -120, scale: 0, x: 130 }}
                                                 className="overflow-hidden absolute right-[140px] select-none top-[90px] mt-2 rounded-3xl min-w-[20vw] max-md:w-[70vw] max-md:top-[60px] max-md:right-[5vw] shadow-lg z-50  bg-[var(--primary-color4)]/60 backdrop-blur-2xl"
                                             >
@@ -267,7 +267,7 @@ const Header = () => {
                                                                 }
                                                             }}
                                                             className={clsx(
-                                                                "flex items-center justify-between text-[1.4rem] max-md:text-[1.2rem] font-bold hover:cursor-pointer hover:bg-[var(--primary-color4)]/80 px-4 py-3 backdrop-blur-2xl",
+                                                                "flex items-center justify-between text-[1.4rem] max-md:text-[1.2rem] max-md:font-normal font-bold hover:cursor-pointer hover:bg-[var(--primary-color4)]/80 px-4 py-3 backdrop-blur-2xl",
                                                                 option.id !== navMenuOptions.length && "border-b border-[var(--text-primary)]/20 max-md:border-[var(--text-primary)]/30"
                                                             )}
                                                         >
@@ -302,7 +302,7 @@ const Header = () => {
                                                                                 }
                                                                             }}
                                                                             className={clsx(
-                                                                                "text-[1.4rem] max-md:text-[1.2rem] font-bold hover:cursor-pointer hover:bg-[var(--primary-color4)]/80 px-6 py-3 backdrop-blur-3xl",
+                                                                                "text-[1.4rem] max-md:text-[1.2rem] font-bold max-md:font-normal hover:cursor-pointer hover:bg-[var(--primary-color4)]/80 px-6 py-3 backdrop-blur-3xl",
                                                                                 subOption.id !== navMenuOptions.length && "border-b border-[var(--text-primary)]/20"
                                                                             )}
                                                                         >

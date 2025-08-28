@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Vazirmatn } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
 import Reduxrovider from "../providers/ReduxProvider";
@@ -15,6 +15,13 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+const vazirmatn = Vazirmatn({
+  subsets: ["arabic"],
+  weight: ["400", "700"],
+  display: "swap",
+  fallback: ["Tahoma", "Arial", "sans-serif"],
 });
 
 export const metadata: Metadata = {
@@ -99,7 +106,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fa" dir="rtl">
+    <html lang="fa" dir="rtl" className={vazirmatn.className}>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
         <meta name="format-detection" content="telephone=no" />

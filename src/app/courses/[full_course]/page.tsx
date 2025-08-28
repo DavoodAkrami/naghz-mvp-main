@@ -166,6 +166,7 @@ const Curses: React.FC = () => {
                                         icon={getIconComponent(course.icon_name)}
                                         layoutId={course.slug}
                                         isActive={course.is_active}
+                                        isCompleted={isCourseCompleted(course.id)}
                                         onClick={() => handleModalOpen(null)}
                                         startOnClick={course.slug ? () => handleStartOnClick(course.slug!) : undefined}
                                         isAdmin={user?.user_metadata?.role === 'admin'}

@@ -13,6 +13,7 @@ import { OptionCard } from "./options";
 import { getFeedBack, getPoint, clearAi } from "@/store/slices/aiSlice";
 import ButtonLoading from "./ButtonLoading";
 import { motion, AnimatePresence } from "framer-motion";
+import TipModal from "./TipModal";
 
 
 
@@ -49,6 +50,7 @@ export interface LearningPropsType {
     score_threshold?: number;
     low_score_page_id?: string | null;
     high_score_page_id?: string | null;
+    tip?: string;
 }
 
 
@@ -160,7 +162,7 @@ const ImagePreloader: React.FC<{ images: string[] }> = ({ images }) => {
 };
 
 
-const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, header, test_type="Default", test_grid= "col", options, question, correct_answer, course_id, page_number, pageLength, handleNext, handlePrev, image, why, preloadedImages, onTestNextSelect, give_point, give_feedback, low_score_page_id, high_score_page_id}) => {
+const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, header, test_type="Default", test_grid= "col", options, question, correct_answer, course_id, page_number, pageLength, handleNext, handlePrev, image, why, preloadedImages, onTestNextSelect, give_point, give_feedback, low_score_page_id, high_score_page_id, tip}) => {
     const router = useRouter();
 
     const [activeId, setActiveId] = useState<number | null>(null);
@@ -175,6 +177,7 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
     const [whyModalContent, setWhyModalContent] = useState<string>("");
     const [saveProgressLoading, setSaveProgressLoading] = useState<boolean>(false);
     const [userAnswer, setUserAnswer] = useState<string>("");
+    const [isTipModalOpen, setIsTipModalOpen] = useState<boolean>(false);
 
     const successSound = useMemo(() => new Audio('/sounds/correct.mp3'), []);
     const wrongSound = useMemo(() => new Audio('/sounds/incorrect.mp3'), []);
@@ -521,6 +524,10 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
         return "Waiting...";
     };
 
+    const handleTipModalOpen = () => {
+        setIsTipModalOpen(!isTipModalOpen);
+    }
+
     const getTestTypeIndicator = () => {
         switch (test_type) {
             case "Default":
@@ -787,6 +794,14 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                 </p>
             </Modal>
             {preloadedImages && <ImagePreloader images={preloadedImages} />}
+            {page_type != "text" &&       
+                <TipModal 
+                    header={header || text}
+                    tip={tip}
+                    openTipModal={isTipModalOpen}
+                    handleTipModalOpen={handleTipModalOpen}
+                />
+            }
         </div>
     )
 }

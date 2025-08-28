@@ -55,6 +55,7 @@ interface PageFormData {
   score_threshold: number;
   low_score_page_id?: string | null;
   high_score_page_id?: string | null;
+  tip?: string;
 }
 
 interface OptionFormData {
@@ -130,7 +131,8 @@ export default function CourseManagement() {
     give_point: false,
     score_threshold: 0,
     low_score_page_id: null,
-    high_score_page_id: null
+    high_score_page_id: null,
+    tip: "",
   });
   const [optionsByPage, setOptionsByPage] = useState<Record<number, OptionFormData[]>>({});
   const [showOptionsModal, setShowOptionsModal] = useState(false);
@@ -483,7 +485,8 @@ export default function CourseManagement() {
           .insert({
             ...page,
             correct_answer: toDbCorrectAnswer(page.test_type, page.correct_answer),
-            course_id: course.id
+            course_id: course.id,
+            tip: page.tip
           })
           .select()
           .single();
@@ -642,14 +645,15 @@ export default function CourseManagement() {
               give_point: page.give_point,
               score_threshold: page.score_threshold,
               low_score_page_id: page.low_score_page_id,
-              high_score_page_id: page.high_score_page_id
+              high_score_page_id: page.high_score_page_id,
+              tip: page.tip
             })
             .eq('id', pageId);
           if (updErr) throw updErr;
         } else {
           const { data: insertedPage, error: insertPageError } = await supabase
              .from('course_pages')
-             .insert({ page_number: page.page_number, page_type: page.page_type, title: page.title, content: page.content, question: page.question, test_type: page.test_type, test_grid: page.test_grid, correct_answer: toDbCorrectAnswer(page.test_type, page.correct_answer), image: page.image, page_length: page.page_length, order_index: page.order_index, course_id: courseId, ai_enabled: page.ai_enabled, give_feedback: page.give_feedback, give_point: page.give_point, score_threshold: page.score_threshold, low_score_page_id: page.low_score_page_id, high_score_page_id: page.high_score_page_id })
+             .insert({ page_number: page.page_number, page_type: page.page_type, title: page.title, content: page.content, question: page.question, test_type: page.test_type, test_grid: page.test_grid, correct_answer: toDbCorrectAnswer(page.test_type, page.correct_answer), image: page.image, page_length: page.page_length, order_index: page.order_index, course_id: courseId, ai_enabled: page.ai_enabled, give_feedback: page.give_feedback, give_point: page.give_point, score_threshold: page.score_threshold, low_score_page_id: page.low_score_page_id, high_score_page_id: page.high_score_page_id, tip: page.tip })
              .select()
              .single();
           if (insertPageError) throw insertPageError;
@@ -881,7 +885,8 @@ export default function CourseManagement() {
           give_point: (p.give_point as boolean) || false,
           score_threshold: (p.score_threshold as number) || 50,
           low_score_page_id: (p.low_score_page_id as string) || null,
-          high_score_page_id: (p.high_score_page_id as string) || null
+          high_score_page_id: (p.high_score_page_id as string) || null,
+          tip: (p.tip as string) || ''
         }));
         setPages(pagesData);
         setOriginalPageIds((dbPages || []).map((p: Record<string, unknown>) => p.id as string));
@@ -1258,6 +1263,16 @@ export default function CourseManagement() {
                           />
                         </div>
                         <div>
+                          <label className="block text-sm font-medium mb-2">تیپ: </label>
+                          <textarea
+                            value={page.tip}
+                            onChange={(e) => updatePage(index, { tip: e.target.value })}
+                            className="w-full p-2 border rounded"
+                            rows={3}
+                            placeholder="تیپ"
+                          />
+                        </div>
+                        <div>
                           <label className="block text-sm font-medium mb-2">نوع آزمون</label>
                           <select
                             value={page.test_type}
@@ -1310,6 +1325,40 @@ export default function CourseManagement() {
                                 />
                             </div>
                           </>
+                        }
+                        {page.ai_enabled && page.give_point && 
+                          <div>
+                            <div>
+                              <label>صفحه‌ برای امتیاز زیر 50:</label>
+                              <select
+                                value={page.low_score_page_id || ''}
+                                onChange={(e) => updatePage(index, { low_score_page_id: e.target.value || null })}
+                                className="w-full p-2 border rounded"
+                              >
+                                <option value="">انتخاب کنید...</option>
+                                {pages.map((p) => (
+                                  <option key={p.id} value={p.id}>
+                                    {p.title || p.question}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                            <div>
+                              <label>صفحه‌ برای امتیاز بالای 50:</label>
+                              <select
+                                value={page.high_score_page_id || ''}
+                                onChange={(e) => updatePage(index, { high_score_page_id: e.target.value || null })}
+                                className="w-full p-2 border rounded"
+                              >
+                                <option value="">انتخاب کنید...</option>
+                                {pages.map((p, pi) => (
+                                  <option key={p.id || pi} value={p.id || ''}>
+                                    {p.title || p.question || `صفحه ${pi + 1}`}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                          </div>
                         }
                         {page.page_type != "testNext" &&
                           <>
@@ -1728,6 +1777,16 @@ export default function CourseManagement() {
                             onChange={(e) => updatePage(index, { question: e.target.value })}
                             className="w-full p-2 border rounded"
                             placeholder="سوال آزمون"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium mb-2">تیپ: </label>
+                          <textarea
+                            value={page.tip}
+                            onChange={(e) => updatePage(index, { tip: e.target.value })}
+                            className="w-full p-2 border rounded"
+                            rows={3}
+                            placeholder="تیپ"
                           />
                         </div>
                         <div>

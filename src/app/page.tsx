@@ -474,14 +474,14 @@ const Home = () => {
                 <ChallengPopUp 
                     type="text"
                     text="چالش امروز رو انجام دادی؟"
-                    openPopUp={isPopUpOpen}
+                    openPopUp={false}
                     onAccept={handlePopupAccept}
                     onClose={handlePopupClose}
                 />
                 <ChallengPopUp 
                     type="form"
                     question="پس درباره‌ش برامون یه جمله بنویس:"
-                    openPopUp={isChallengPopUpOpen}
+                    openPopUp={false}
                     onClose={handlePopupClose}
                     onSubmit={handlePopUpSubmit}
                 />

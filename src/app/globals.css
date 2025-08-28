@@ -34,17 +34,9 @@
 }
 
 
-@font-face {
-    font-family: 'Yekan';
-    src: url('/font/Yekan.ttf') format('truetype'),
-         url('/font/Yekan.woff2') format('woff2'),
-         url('/font/Yekan.woff') format('woff');
-    font-weight: normal;
-    font-style: normal;
-}
+/* Vazirmatn is loaded via next/font in layout.tsx */
 
 body {
-    font-family: 'Yekan', 'Tahoma', 'Arial', sans-serif;
     font-feature-settings: "lnum", "tnum";
     -webkit-font-feature-settings: "lnum", "tnum";
     -moz-font-feature-settings: "lnum", "tnum";
