@@ -11,6 +11,7 @@ type DbPage = {
   id: string;
   page_number: number;
   page_type: "text" | "test" | "testNext";
+  name?: string;
   title?: string;
   content?: string;
   question?: string;
@@ -147,7 +148,7 @@ const LearningSlider: React.FC<LearningPropsType> = (props: LearningPropsType) =
       page_type: page.page_type,
       header: page.title,
       text: page.content,
-      name: page.name,
+      name: page.name || "",
       test_type: page.test_type,
       test_grid: page.test_grid,
       question: page.question,
