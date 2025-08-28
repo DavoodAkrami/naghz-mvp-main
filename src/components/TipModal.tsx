@@ -17,7 +17,7 @@ const TipModal: React.FC<tipModalProp> = ({ header, tip, handleTipModalOpen, ope
         <div>
             <button
                 onClick={handleTipModalOpen}
-                className="rounded-full p-4 bg-[var(--primary-color1)]/50 backdrop-blur-xl border-[2px] border-[var(--primary-color1)] fixed bottom-[2rem] right-[2rem] hover:bg-[var(--primary-color1)]/30 hover:cursor-pointer"
+                className="rounded-full p-4 bg-[var(--primary-color1)]/30 backdrop-blur-xl border-[2px] border-[var(--primary-color1)] fixed bottom-[2rem] right-[2rem] hover:bg-[var(--primary-color1)]/15 hover:cursor-pointer"
             >
                 <MdOutlineQuestionMark className="text-[white] text-[1.6rem] max-md:text-[1.4rem]" />
             </button>

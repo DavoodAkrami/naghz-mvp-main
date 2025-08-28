@@ -123,7 +123,7 @@ const Header = () => {
     
     if (showSkeleton && headerPage) {
         return (
-            <header className="top-[2.5vh] py-[0.4vh] pt-[1.4vh] rounded-full w-[90%] mx-auto sticky shadow-lg bg-[var(--primary-color1)]/40 backdrop-blur-xl z-1000 max-md:py-0 max-md:pt-[0.3rem]">
+            <header className="top-[2.5vh] py-[0.4vh] pt-[1.4vh] rounded-full w-[90%] mx-auto sticky shadow-lg bg-[var(--primary-color1)]/30 backdrop-blur-xl z-1000 max-md:py-0 max-md:pt-[0.3rem]">
                 <div className="py-[1.8rem] flex items-center justify-between w-[80%] max-lg:w-[90%] mx-auto max-md:py-[1.2rem]">
                     <div className="h-12 w-32 bg-gray-200 rounded animate-pulse max-md:w-24 max-md:h-8" />
                     <div className="flex gap-[1rem] max-md:gap-[0.2rem]">
@@ -141,7 +141,7 @@ const Header = () => {
         <>
             {headerPage ? (
                 <header
-                    className="top-[2.5vh] py-[0.4vh] pt-[1.4vh] rounded-full w-[90%] mx-auto sticky shadow-lg bg-[var(--primary-color1)]/40 backdrop-blur-xl z-1000 max-md:py-0 max-md:pt-[0.3rem] max-md:mb-[2rem] text-[var]"
+                    className="top-[2.5vh] py-[0.4vh] pt-[1.4vh] rounded-full w-[90%] mx-auto sticky shadow-lg bg-[var(--primary-color1)]/30 backdrop-blur-xl z-1000 max-md:py-0 max-md:pt-[0.3rem] max-md:mb-[2rem] text-[var]"
                 >
                     <div
                         className="py-[1rem] flex items-center justify-between w-[80%] max-lg:w-[90%] mx-auto"

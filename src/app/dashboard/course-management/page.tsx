@@ -39,6 +39,7 @@ interface PageFormData {
   id?: string;
   page_number: number;
   page_type: 'text' | 'test' | 'testNext';
+  name?: string;
   title: string;
   content: string;
   question: string;
@@ -116,6 +117,7 @@ export default function CourseManagement() {
   const [pageFormData, setPageFormData] = useState<PageFormData>({
     page_number: 1,
     page_type: 'text',
+    name: '',
     title: '',
     content: '',
     question: '',
@@ -189,6 +191,9 @@ export default function CourseManagement() {
   };
 
   const getPageDisplayText = (page: PageFormData) => {
+    if (page.name && page.name.trim()) {
+      return page.name;
+    }
     if (page.title && page.title.trim()) {
       return page.title;
     }
@@ -486,7 +491,8 @@ export default function CourseManagement() {
             ...page,
             correct_answer: toDbCorrectAnswer(page.test_type, page.correct_answer),
             course_id: course.id,
-            tip: page.tip
+            tip: page.tip,
+            name: page.name
           })
           .select()
           .single();
@@ -646,14 +652,15 @@ export default function CourseManagement() {
               score_threshold: page.score_threshold,
               low_score_page_id: page.low_score_page_id,
               high_score_page_id: page.high_score_page_id,
-              tip: page.tip
+              tip: page.tip,
+              name: page.name
             })
             .eq('id', pageId);
           if (updErr) throw updErr;
         } else {
           const { data: insertedPage, error: insertPageError } = await supabase
              .from('course_pages')
-             .insert({ page_number: page.page_number, page_type: page.page_type, title: page.title, content: page.content, question: page.question, test_type: page.test_type, test_grid: page.test_grid, correct_answer: toDbCorrectAnswer(page.test_type, page.correct_answer), image: page.image, page_length: page.page_length, order_index: page.order_index, course_id: courseId, ai_enabled: page.ai_enabled, give_feedback: page.give_feedback, give_point: page.give_point, score_threshold: page.score_threshold, low_score_page_id: page.low_score_page_id, high_score_page_id: page.high_score_page_id, tip: page.tip })
+             .insert({ page_number: page.page_number, page_type: page.page_type, title: page.title, content: page.content, question: page.question, test_type: page.test_type, test_grid: page.test_grid, correct_answer: toDbCorrectAnswer(page.test_type, page.correct_answer), image: page.image, page_length: page.page_length, order_index: page.order_index, course_id: courseId, ai_enabled: page.ai_enabled, give_feedback: page.give_feedback, give_point: page.give_point, score_threshold: page.score_threshold, low_score_page_id: page.low_score_page_id, high_score_page_id: page.high_score_page_id, tip: page.tip, name: page.name })
              .select()
              .single();
           if (insertPageError) throw insertPageError;
@@ -870,6 +877,7 @@ export default function CourseManagement() {
           id: p.id as string,
           page_number: p.page_number as number,
           page_type: p.page_type as 'text' | 'test' | 'testNext',
+          name: (p.name as string) || '',
           title: (p.title as string) || '',
           content: (p.content as string) || '',
           question: (p.question as string) || '',
@@ -1156,28 +1164,7 @@ export default function CourseManagement() {
                 </label>
               </div>
             </div>
-
-            <div className="mb-6">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-semibold">صفحات دوره</h3>
-                <div className="flex gap-2">
-                  <button
-                    onClick={addPage}
-                    className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-                  >
-                    افزودن صفحه
-                  </button>
-                  {pages.length > 1 && (
-                    <button
-                      onClick={openReorderModal}
-                      className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 flex items-center gap-2"
-                    >
-                      <FiMove size={16} />
-                      تغییر ترتیب
-                    </button>
-                  )}
-                </div>
-              </div>
+            <h3 className="text-xl font-semibold my-[1rem]">صفحات دوره</h3>
               
               {pages.map((page, index) => (
                 <div key={index} className="border p-4 rounded mb-4">
@@ -1203,6 +1190,16 @@ export default function CourseManagement() {
                         <option value="test">آزمون</option>
                         <option value="testNext">رد شدنی</option>
                       </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">نام صفحه (اختیاری)</label>
+                      <input
+                        type="text"
+                        value={page.name || ''}
+                        onChange={(e) => updatePage(index, { name: e.target.value })}
+                        className="w-full p-2 border rounded"
+                        placeholder="نام صفحه"
+                      />
                     </div>
                     <div>
                       <label className="block text-sm font-medium mb-2">{page.page_type === "text" ? "عنوان" : "توضیحات"}</label>
@@ -1338,7 +1335,7 @@ export default function CourseManagement() {
                                 <option value="">انتخاب کنید...</option>
                                 {pages.map((p) => (
                                   <option key={p.id} value={p.id}>
-                                    {p.title || p.question}
+                                    {p.name || p.title || p.question}
                                   </option>
                                 ))}
                               </select>
@@ -1353,7 +1350,7 @@ export default function CourseManagement() {
                                 <option value="">انتخاب کنید...</option>
                                 {pages.map((p, pi) => (
                                   <option key={p.id || pi} value={p.id || ''}>
-                                    {p.title || p.question || `صفحه ${pi + 1}`}
+                                    {p.name || p.title || p.question || `صفحه ${pi + 1}`}
                                   </option>
                                 ))}
                               </select>
@@ -1561,7 +1558,7 @@ export default function CourseManagement() {
                                       <option value="">پیش‌فرض (صفحه بعدی خطی)</option>
                                       {pages.map((p, pi) => (
                                         <option key={p.id || pi} value={p.id || ''}>
-                                          {p.title || p.question || `صفحه ${pi + 1}`}
+                                          {p.name || p.title || p.question || `صفحه ${pi + 1}`}
                                         </option>
                                       ))}
                                     </select>
@@ -1576,6 +1573,26 @@ export default function CourseManagement() {
                   </div>
                 </div>
               ))}
+              <div className="mb-6">
+              <div className="flex justify-between items-center mb-4">
+                <div className="flex gap-2">
+                  <button
+                    onClick={addPage}
+                    className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                  >
+                    افزودن صفحه
+                  </button>
+                  {pages.length > 1 && (
+                    <button
+                      onClick={openReorderModal}
+                      className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 flex items-center gap-2"
+                    >
+                      <FiMove size={16} />
+                      تغییر ترتیب
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
 
             <div className="flex gap-4 justify-end">
@@ -1665,27 +1682,7 @@ export default function CourseManagement() {
               </div>
             </div>
 
-            <div className="mb-6">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-semibold">صفحات دوره</h3>
-                <div className="flex gap-2">
-                  <button
-                    onClick={addPage}
-                    className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-                  >
-                    افزودن صفحه
-                  </button>
-                  {pages.length > 1 && (
-                    <button
-                      onClick={openReorderModal}
-                      className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 flex items-center gap-2"
-                    >
-                      <FiMove size={16} />
-                      تغییر ترتیب
-                    </button>
-                  )}
-                </div>
-              </div>
+            <h3 className="text-xl font-semibold my-[1rem]">صفحات دوره</h3>
 
               {pages.map((page, index) => (
                 <div key={index} className="border p-4 rounded mb-4">
@@ -1712,6 +1709,16 @@ export default function CourseManagement() {
                         <option value="testNext">رد شدنی</option>
 
                       </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">نام صفحه (اختیاری)</label>
+                      <input
+                        type="text"
+                        value={page.name || ''}
+                        onChange={(e) => updatePage(index, { name: e.target.value })}
+                        className="w-full p-2 border rounded"
+                        placeholder="نام صفحه"
+                      />
                     </div>
                     <div>
                       <label className="block text-sm font-medium mb-2">{page.page_type === "text" ? "عنوان" : "توضیحات"}</label>
@@ -1855,7 +1862,7 @@ export default function CourseManagement() {
                                 <option value="">انتخاب کنید...</option>
                                 {pages.map((p) => (
                                   <option key={p.id} value={p.id}>
-                                    {p.title || p.question}
+                                    {p.name || p.title || p.question}
                                   </option>
                                 ))}
                               </select>
@@ -1870,7 +1877,7 @@ export default function CourseManagement() {
                                 <option value="">انتخاب کنید...</option>
                                 {pages.map((p, pi) => (
                                   <option key={p.id || pi} value={p.id || ''}>
-                                    {p.title || p.question || `صفحه ${pi + 1}`}
+                                    {p.name || p.title || p.question || `صفحه ${pi + 1}`}
                                   </option>
                                 ))}
                               </select>
@@ -2079,7 +2086,7 @@ export default function CourseManagement() {
                                         <option value="">پیش‌فرض (صفحه بعدی خطی)</option>
                                         {pages.map((p, pi) => (
                                           <option key={p.id || pi} value={p.id || ''}>
-                                            {p.title || p.question || `صفحه ${pi + 1}`}
+                                            {p.name || p.title || p.question || `صفحه ${pi + 1}`}
                                           </option>
                                         ))}
                                       </select>
@@ -2095,7 +2102,27 @@ export default function CourseManagement() {
                   </div>
                 </div>
               ))}
-            </div>
+              <div className="mb-6">
+                <div className="flex justify-between items-center mb-4">
+                  <div className="flex gap-2">
+                    <button
+                      onClick={addPage}
+                      className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                    >
+                      افزودن صفحه
+                    </button>
+                    {pages.length > 1 && (
+                      <button
+                        onClick={openReorderModal}
+                        className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 flex items-center gap-2"
+                      >
+                        <FiMove size={16} />
+                        تغییر ترتیب
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
 
             <div className="flex gap-4 justify-end">
               <button

@@ -33,7 +33,7 @@ const ChallengPopUp: React.FC<ChallengPopUpProp> = ({ text, onSubmit, type, ques
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.5 }}
                     dir="rtl"
-                    className="z-100000 fixed bottom-0 w-full bg-[var(--primary-color1)]/40 backdrop-blur-xl border-t-[3px] border-[var(--primary-color1)] py-[7vh] max-md:py-[5vh]"
+                    className="z-100000 fixed bottom-0 w-full bg-[var(--primary-color1)]/30 backdrop-blur-xl border-t-[3px] border-[var(--primary-color1)] py-[7vh] max-md:py-[5vh]"
                 >
                     {type === "text" ? (
                         <div

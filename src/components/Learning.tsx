@@ -14,6 +14,7 @@ import { getFeedBack, getPoint, clearAi } from "@/store/slices/aiSlice";
 import ButtonLoading from "./ButtonLoading";
 import { motion, AnimatePresence } from "framer-motion";
 import TipModal from "./TipModal";
+import { reduceHeart } from "@/store/slices/heartSlice";
 
 
 
@@ -30,6 +31,7 @@ export interface LearningPropsType {
     page_type: "test" | "text" | "testNext";
     header?: string;
     text?: string;
+    name?: string;
     test_type?: "Sequential" | "Pluggable" | "Multiple" | "Default" | "Input";
     test_grid?: "col" | "grid-2" | "grid-row";
     question?: string;
@@ -199,10 +201,11 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
     const { courseloading: courseLoading } = useSelector((state: RootState) => state.course);
     const { currentPageNumber, totalPages } = useSelector((state: RootState) => state.coursePage);
         
+    const { heartsLoading } = useSelector((state: RootState) => state.hearts);
     const isCompleted = userProgress.some(progress => progress.course_id === course_id);
 
 
-    const { feedBack, score, aiLoading } = useSelector((state: RootState) => state.ai);
+    const { feedBack, aiLoading } = useSelector((state: RootState) => state.ai);
     
 
     useEffect(() => {
@@ -441,21 +444,42 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                   activeId !== null &&
                   correct_answer[0] === activeId;
             setIsCorrect(!!correct);
-            correct ? successSound.play() : wrongSound.play();
+            if (correct) {
+                successSound.play();
+            } else {
+                wrongSound.play();
+                if (user?.id) {
+                    dispatch(reduceHeart(user.id));
+                }
+            }
         } else if (test_type === "Multiple") {
             const correct =
             Array.isArray(correct_answer) &&
             multipleSelections.length === correct_answer.length &&
             correct_answer.every(id => multipleSelections.includes(id));
             setIsCorrect(!!correct);
-            correct ? successSound.play() : wrongSound.play();
+            if (correct) {
+                successSound.play();
+            } else {
+                wrongSound.play();
+                if (user?.id) {
+                    dispatch(reduceHeart(user.id));
+                }
+            }
         } else if (test_type === "Sequential") {
             const correct =
             Array.isArray(correct_answer) &&
             sequentialSelections.length === correct_answer.length &&
             correct_answer.every((id, idx) => sequentialSelections[idx] === id);
             setIsCorrect(!!correct);
-            correct ? successSound.play() : wrongSound.play();
+            if (correct) {
+                successSound.play();
+            } else {
+                wrongSound.play();
+                if (user?.id) {
+                    dispatch(reduceHeart(user.id));
+                }
+            }
         } else if (test_type === "Pluggable") {
             // Build user pairs from the mapping { [id]: pairedId }
             const userPairs: [number, number][] = [];
@@ -503,7 +527,14 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                 userPairs.every((p, i) => p[0] === expectedPairs[i][0] && p[1] === expectedPairs[i][1]);
 
             setIsCorrect(!!correct);
-            correct ? successSound.play() : wrongSound.play();
+            if (correct) {
+                successSound.play();
+            } else {
+                wrongSound.play();
+                if (user?.id) {
+                    dispatch(reduceHeart(user.id));
+                }
+            }
         }
         setIsPopUpOpen(true);
     }
@@ -595,7 +626,7 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                     {text &&
                         <RichText
                             content={text}
-                            className="text-justify whitespace-pre-wrap text-[1.2rem] font-black max-w-[100%] mx-auto order-[3px] border-[var(--primary-color1)] bg-[var(--primary-color1)]/50 backdrop-blur-xl p-4 rounded-2xl text-[var(--text-primary)] my-[2vh]"
+                            className="text-justify whitespace-pre-wrap text-[1.2rem] font-black max-w-[100%] mx-auto order-[3px] border-[var(--primary-color1)] bg-[var(--primary-color1)]/30 backdrop-blur-xl p-4 rounded-2xl text-[var(--text-primary)] my-[2vh]"
                         />
                     }
                 </div>
@@ -620,7 +651,7 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                     {text && (
                         <RichText
                             content={text}
-                            className="text-[1.2rem] whitespace-pre-wrap text-[var(--text-primary)] border-[3px] border-[var(--primary-color1)] bg-[var(--primary-color1)]/50 backdrop-blur-xl p-4 rounded-2xl max-w-[100%] mx-auto text-justify my-[3vh]"
+                            className="text-[1.2rem] whitespace-pre-wrap text-[var(--text-primary)] border-[3px] border-[var(--primary-color1)] bg-[var(--primary-color1)]/30 backdrop-blur-xl p-4 rounded-2xl max-w-[100%] mx-auto text-justify my-[3vh]"
                         />
                     )}
                     {question && (
@@ -646,7 +677,7 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                                     target.style.height = 'auto';
                                     target.style.height = Math.min(target.scrollHeight, 200) + 'px';
                                 }}
-                                className="w-full rounded-2xl py-2 px-5 text-[1.4rem] font-normal border-2 border-[var(--primary-color1)]/50 backdrop-blur-2xl focus:outline-none focus:ring-[2px] focus:ring-[var(--accent-color1)] flex-1 flex items-center transition-all duration-150 resize-none overflow-hidden min-h-[4rem] max-h-[150px]"
+                                className="w-full rounded-2xl py-2 px-5 text-[1.4rem] font-normal border-2 border-[var(--primary-color1)]/30 backdrop-blur-2xl focus:outline-none focus:ring-[2px] focus:ring-[var(--accent-color1)] flex-1 flex items-center transition-all duration-150 resize-none overflow-hidden min-h-[4rem] max-h-[150px]"
                                 placeholder="پاسخ خود را بنویسید..."
                             />
                         </div>
@@ -695,7 +726,7 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                                     فیدبک هوش مصنوعی
                                 </h2>
                                 <motion.div
-                                    className="max-w-[80%] mx-auto text-[1.2rem] border-[2px] border-[var(--primary-color1)] bg-[var(--primary-color1)]/40 p-4 rounded-xl mt-[1rem] overflow-hidden"
+                                    className="max-w-[80%] mx-auto text-[1.2rem] border-[2px] border-[var(--primary-color1)] bg-[var(--primary-color1)]/30 p-4 rounded-xl mt-[1rem] overflow-hidden"
                                 >
                                     {aiLoading ? 'Loading...' : feedBack}
                                 </motion.div>
@@ -748,7 +779,7 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                     page_type === "testNext" && test_type !== "Input" && options && options.length > 0 && "hidden" 
                 )}
             >
-                {aiLoading ? (<ButtonLoading size="md" />) : (page_number >= pageLength ? "پایان" : "ادامه")}
+                {aiLoading || heartsLoading ? (<ButtonLoading size="md" />) : (page_number >= pageLength ? "پایان" : "ادامه")}
             </button>
             {page_type === "test" && 
                 <div 

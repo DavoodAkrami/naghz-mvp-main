@@ -155,7 +155,7 @@ export const CourseCardOpen: React.FC<CurseCardProps> = ({
             <motion.div
                 layoutId={layoutId}
                 className={clsx(
-                    "flex flex-col items-center justify-center gap-[1rem] bg-[var(--primary-color1)]/50 text-[white] p-8 rounded-xl md:w-[50vw] max-w-[95vw] relative",
+                    "flex flex-col items-center justify-center gap-[1rem] bg-[var(--primary-color1)]/30 text-[white] p-8 rounded-xl md:w-[50vw] max-w-[95vw] relative",
                     isCompleted && "bg-green-50/50 border-green-500 border-[2px]"
                 )}
             >

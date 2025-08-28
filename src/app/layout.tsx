@@ -6,6 +6,7 @@ import Reduxrovider from "../providers/ReduxProvider";
 import AuthStatusProvider from "@/providers/authProvider";
 import { Analytics } from "@vercel/analytics/next"
 import Footer from "@/components/Footer";
+import HeartsProvider from "@/providers/heartsProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -118,10 +119,12 @@ export default function RootLayout({
       >
         <Reduxrovider>
           <AuthStatusProvider>
+            <HeartsProvider>
             <Header />
             {children}
             <Footer />
             <Analytics />
+            </HeartsProvider>
           </AuthStatusProvider>
         </Reduxrovider>
       </body>

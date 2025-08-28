@@ -6,6 +6,7 @@ export interface CoursePage {
   course_id: string;
   page_number: number;
   page_type: 'text' | 'test' | 'testNext';
+  name?: string;
   title?: string;
   content?: string;
   question?: string;

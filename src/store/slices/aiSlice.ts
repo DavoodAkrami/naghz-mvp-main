@@ -47,7 +47,7 @@ export const getPoint = createAsyncThunk(
     'ai/getPoint',
     async ({question, answer, subject, lowScorePageId, highScorePageId} : {question: string, answer: string, subject: string, lowScorePageId?: string | null, highScorePageId?: string | null}) => {
         const response = await openai.chat.completions.create({
-            model: "gpt-4o-mini",
+            model: "gpt-5-nano",
             messages: [
                 {
                     role: "system",

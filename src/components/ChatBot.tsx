@@ -25,7 +25,7 @@ const ChatBot: React.FC<chatBotProp> = ({ sender="user", aiMessage, loading, isO
                         animate={{ opacity: 1, scale: 1, y: 0, x: 0 }}
                         exit={{ opacity: 0, scale: 0.5, y: 150, x: 150 }}
                         transition={{ duration: 0.5 }}
-                        className="min-h-[70vh] py-4 text-center text-[2rem] font-bold max-md:min-h-[75vh] min-w-[35vw] max-md:min-w-[90vw] bg-[var(--primary-color1)]/50 backdrop-blur-2xl fixed right-[2vw] bottom-[12vh] max-md:left-[50%] max-md:transform max-md:-translate-x-1/2 z-1000000 rounded-3xl"
+                        className="min-h-[70vh] py-4 text-center text-[2rem] font-bold max-md:min-h-[75vh] min-w-[35vw] max-md:min-w-[90vw] bg-[var(--primary-color1)]/30 backdrop-blur-2xl fixed right-[2vw] bottom-[12vh] max-md:left-[50%] max-md:transform max-md:-translate-x-1/2 z-1000000 rounded-3xl"
                     >
                         <header
                             className="flex justify-center items-center text-[white]"
@@ -49,7 +49,7 @@ const ChatBot: React.FC<chatBotProp> = ({ sender="user", aiMessage, loading, isO
                             className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center gap-[0.8rem] w-[85%]"
                         >
                             <button
-                                className="rounded-full p-2 bg-[var(--primary-color1)]/70 backdrop-blur-2xl disabled:opacity-[0.6] hover:bg-[var(--primary-color1)]/40 cursor-pointer"  
+                                className="rounded-full p-2 bg-[var(--primary-color1)]/30 backdrop-blur-2xl disabled:opacity-[0.6] hover:bg-[var(--primary-color1)]/15 cursor-pointer"  
                                 disabled={loading || userMessage === ""}
                             >
                                 <MdKeyboardArrowRight 

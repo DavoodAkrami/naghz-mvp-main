@@ -486,7 +486,7 @@ const Home = () => {
                     onSubmit={handlePopUpSubmit}
                 />
                 <div
-                    className="fixed bottom-[3vh] right-[4vh] p-4 bg-[var(--primary-color1)]/50 backdrop-blur-xl flex items-center justify-center rounded-full hover:cursor-pointer hover:bg-[var(--primary-color1)]/40 transition-all duration-200 max-md:text-[2rem] max-md:p-2 max-md:right-[2.5vw] max-md:bottom-[2vh]"
+                    className="fixed bottom-[3vh] right-[4vh] p-4 bg-[var(--primary-color1)]/30 backdrop-blur-xl flex items-center justify-center rounded-full hover:cursor-pointer hover:bg-[var(--primary-color1)]15 transition-all duration-200 max-md:text-[2rem] max-md:p-2 max-md:right-[2.5vw] max-md:bottom-[2vh]"
                     onClick={() => setIsChatBotOpen(!isChatBotOpen)}
                 >
                     <button
