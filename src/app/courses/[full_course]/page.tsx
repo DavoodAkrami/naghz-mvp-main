@@ -119,7 +119,8 @@ const Curses: React.FC = () => {
             router.push(`/courses/${fullCourseSlug}/${slug}`)
             startSound.play();
         } else {
-            setIsHeartModalOpen(false);
+            setIsHeartModalOpen(true);
+            setIsModalOpen(null);
         }
     }
 

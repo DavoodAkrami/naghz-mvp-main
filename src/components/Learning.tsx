@@ -626,7 +626,7 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                     {text &&
                         <RichText
                             content={text}
-                            className="text-justify whitespace-pre-wrap text-[1.2rem] font-black max-w-[100%] mx-auto order-[3px] border-[var(--primary-color1)] bg-[var(--primary-color1)]/30 backdrop-blur-xl p-4 rounded-2xl text-[var(--text-primary)] my-[2vh]"
+                            className="text-justify whitespace-pre-wrap text-[1.2rem] font-black max-w-[90%] mx-auto order-[3px] border-[var(--primary-color1)] bg-[var(--primary-color1)]/30 backdrop-blur-xl p-4 rounded-2xl text-[var(--text-primary)] my-[2vh]"
                         />
                     }
                 </div>
@@ -648,19 +648,23 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                             />
                         )
                     )}
-                    {text && (
-                        <RichText
-                            content={text}
-                            className="text-[1.2rem] whitespace-pre-wrap text-[var(--text-primary)] border-[3px] border-[var(--primary-color1)] bg-[var(--primary-color1)]/30 backdrop-blur-xl p-4 rounded-2xl max-w-[100%] mx-auto text-justify my-[3vh]"
-                        />
-                    )}
-                    {question && (
-                        <RichText
-                            content={question}
-                            className="text-[2rem] whitespace-pre-wrap font-bold mb-[5vh] text-center max-w-[90%] max-md:max-w-[95%] mx-auto"
-                        />
-                    )}
-                    {getTestTypeIndicator()}
+                    <div
+                        className="max-w-[70%] mx-auto max-md:max-w-[95%]"
+                    >
+                        {text && (
+                            <RichText
+                                content={text}
+                                className="text-[1.2rem] whitespace-pre-wrap text-[var(--text-primary)] border-[3px] border-[var(--primary-color1)] bg-[var(--primary-color1)]/30 backdrop-blur-xl p-4 rounded-2xl max-w-[90%] mx-auto text-justify my-[3vh]"
+                            />
+                        )}
+                        {question && (
+                            <RichText
+                                content={question}
+                                className="text-[2rem] whitespace-pre-wrap font-bold mb-[5vh] text-center max-w-[90%] max-md:max-w-[95%] mx-auto"
+                            />
+                        )}
+                        {getTestTypeIndicator()}
+                    </div>
                     {test_type === "Input" ? (
                         <div
                             className="max-w-[60vw] w-full mx-auto max-md:max-w-[100vw] max-md:w-[95%]"
@@ -825,7 +829,7 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                 </p>
             </Modal>
             {preloadedImages && <ImagePreloader images={preloadedImages} />}
-            {page_type != "text" &&       
+            {page_type != "text" && tip?.trim() != "" &&       
                 <TipModal 
                     header={header || text}
                     tip={tip}

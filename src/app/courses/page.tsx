@@ -8,6 +8,7 @@ import { IconType } from "react-icons";
 import FullCourseCard from "@/components/FullCourseCard";
 import { useRouter } from "next/navigation";
 import NeatBackground from "@/components/NeatBg";
+import clsx from "clsx";
 
 
 const FullCourseDetailPage = () => {
@@ -42,7 +43,10 @@ const FullCourseDetailPage = () => {
             >
                 دوره‌ها
             </h2>
-            <div className="grid grid-cols-2 max-md:grid-cols-1 gap-[3rem] max-md:gap-[1.6rem]">
+            <div className={clsx(
+                "grid grid-cols-2 max-md:grid-cols-1 gap-[3rem] max-md:gap-[1.6rem]",
+                fullCourses.length === 1 && "grid-cols-1"
+            )}>
                 {fullCourseLoading || fullCourses.length === 0 ? (
                     Array.from({ length: 4 }).map((_, index) => (
                         <div key={index} className="w-full animate-pulse">
