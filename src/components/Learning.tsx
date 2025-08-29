@@ -16,6 +16,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import TipModal from "./TipModal";
 import { reduceHeart } from "@/store/slices/heartSlice";
 import { getPointFroTip } from "@/store/slices/aiSlice";
+ 
 
 
 
@@ -102,7 +103,47 @@ const RichText: React.FC<{ content: string; className?: string }> = ({ content, 
   );
 };
 
-// Image Preloader Component
+
+const AnimatedRichText: React.FC<{ content: string; className?: string }> = ({ content, className }) => {
+  const isRTL = useMemo(() => /[\u0600-\u06FF]/.test(content || ''), [content]);
+  const rawLines = useMemo(() => (content || '').split('\n'), [content]);
+  const htmlLines = useMemo(() => rawLines.map(line => renderRichText(line)), [rawLines]);
+
+  const getLineDuration = (len: number) => Math.min(2.0, Math.max(0.6, len / 35));
+  const lineDurations = useMemo(() => rawLines.map(l => getLineDuration(l.length)), [rawLines]);
+  const lineDelays = useMemo(() => {
+    const delays: number[] = [];
+    let acc = 0;
+    for (let i = 0; i < lineDurations.length; i++) {
+      delays.push(acc);
+      acc += lineDurations[i] + 0.05;
+    }
+    return delays;
+  }, [lineDurations]);
+
+  return (
+    <div className={className}>
+      {htmlLines.map((htmlContent, idx) => (
+        <div key={idx} className="relative w-full">
+          <div
+            className="opacity-70 pointer-events-none"
+            dangerouslySetInnerHTML={{ __html: htmlContent }}
+          />
+          <motion.div
+            className="absolute inset-0 overflow-hidden"
+            initial={{ clipPath: isRTL ? 'inset(0 0 0 100%)' : 'inset(0 100% 0 0)' }}
+            animate={{ clipPath: 'inset(0 0 0 0)' }}
+            transition={{ duration: lineDurations[idx], ease: 'linear', delay: lineDelays[idx] }}
+          >
+            <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
+          </motion.div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+
 const ImagePreloader: React.FC<{ images: string[] }> = ({ images }) => {
   const [loadedImages, setLoadedImages] = useState<Set<string>>(new Set());
   const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
@@ -321,7 +362,7 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
             }
         } else if (page_type === "testNext" && test_type === "Input" && give_point_by_ai) {
             dispatch(getPointFroTip({
-                adminSystemPrompt: system_prompt || "",
+                adminSystemPrompt: tip || "",
                 answer: userAnswer,
                 question: question || "",
                 setIsTipModalOpen,
@@ -359,7 +400,7 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                 }))
             } else if (feedBack.trim() !== "") {
                 dispatch(getPointFroTip({
-                    adminSystemPrompt: system_prompt || "",
+                    adminSystemPrompt: tip || "",
                     answer: userAnswer,
                     question: question || "",
                     setIsTipModalOpen,
@@ -633,13 +674,13 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
     return (
         <div
             className={clsx(
-                "h-[75vh] flex flex-col justify-center items-baseline max-md:h-auto",
+                "flex flex-col justify-center items-baseline max-md:h-auto",
                 image && "min-h-[100vh] h-auto"
             )}
         >
             {page_type === "text" ?(
                 <div
-                    className="flex flex-col justify-center items-center max-w-[80%] max-md:max-w[95%] mx-auto"
+                    className="flex flex-col justify-center items-center max-w-[80%] max-md:max-w[95%] mx-auto  border-[2px] border-[var(--primary-color1)] bg-[var(--primary-color1)]/30 backdrop-blur-xl p-4 rounded-2xl text-[var(--text-primary)]"
                 >
                     {image && (
                         courseLoading || saveProgressLoading ? (
@@ -662,9 +703,9 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                         />
                     }
                     {text &&
-                        <RichText
+                        <AnimatedRichText
                             content={text}
-                            className="text-justify whitespace-pre-wrap text-[1.2rem] font-black max-w-[90%] mx-auto order-[3px] border-[var(--primary-color1)] bg-[var(--primary-color1)]/30 backdrop-blur-xl p-4 rounded-2xl text-[var(--text-primary)] my-[2vh]"
+                            className="text-justify whitespace-pre-wrap text-[1.2rem] font-black max-w-[90%] mx-auto my-[2vh]"
                         />
                     }
                 </div>
@@ -672,37 +713,42 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                 <div
                     className="flex flex-col justify-center mx-auto py-[5vh]"
                 >
-                    {image && (
-                        courseLoading ? (
-                            <div className="animate-pulse bg-[var(--hover-color)]/60 max-h-[70vh] h-[40vh] max-w-[80%] max-md:max-w-[95%] mx-auto rounded-xl mb-6" />
-                        ) : (
-                            <Image 
-                                src={image} 
-                                width={450}
-                                height={100000}
-                                alt="تصویر صفحه"
-                                priority 
-                                className="max-h-[70vh] max-w-[80%] max-md:max-w-[95%] max-md:max-h-max mx-auto object-cover rounded-xl mb-6"
-                            />
-                        )
-                    )}
                     <div
-                        className="max-w-[70%] mx-auto max-md:max-w-[95%]"
+                        className="border-[2px] mb-[2rem] border-[var(--primary-color1)] bg-[var(--primary-color1)]/30 backdrop-blur-xl p-4 rounded-2xl max-w-[90%] mx-auto text-justify"
                     >
-                        {text && (
-                            <RichText
-                                content={text}
-                                className="text-[1.2rem] whitespace-pre-wrap text-[var(--text-primary)] border-[3px] border-[var(--primary-color1)] bg-[var(--primary-color1)]/30 backdrop-blur-xl p-4 rounded-2xl max-w-[90%] mx-auto text-justify my-[3vh]"
-                            />
+                        {image && (
+                            courseLoading ? (
+                                <div className="animate-pulse bg-[var(--hover-color)]/60 max-h-[70vh] h-[40vh] max-w-[80%] max-md:max-w-[95%] mx-auto rounded-xl mb-6" />
+                            ) : (
+                                <Image 
+                                    src={image} 
+                                    width={450}
+                                    height={100000}
+                                    alt="تصویر صفحه"
+                                    priority 
+                                    className="max-h-[70vh] max-w-[80%] max-md:max-w-[95%] max-md:max-h-max mx-auto object-cover rounded-xl mb-6"
+                                />
+                            )
                         )}
-                        {question && (
-                            <RichText
-                                content={question}
-                                className="text-[2rem] whitespace-pre-wrap font-bold mb-[5vh] text-center max-w-[90%] max-md:max-w-[95%] mx-auto"
-                            />
-                        )}
-                        {getTestTypeIndicator()}
+                        <div
+                            className="max-w-[70%] mx-auto max-md:max-w-[95%]"
+                        >
+                            {text && (
+                                <AnimatedRichText
+                                    content={text}
+                                    className="text-[1.2rem] whitespace-pre-wrap text-[var(--text-primary)] my-[3vh]"
+                                />
+                            )}
+                            {question && (
+                                <RichText
+                                    content={question}
+                                    className="text-[2rem] whitespace-pre-wrap font-bold mb-[5vh] text-center max-w-[90%] max-md:max-w-[95%] mx-auto"
+                                />
+                            )}
+                            
+                        </div>
                     </div>
+                    {getTestTypeIndicator()}
                     {test_type === "Input" ? (
                         <div
                             className="max-w-[60vw] w-full mx-auto max-md:max-w-[100vw] max-md:w-[95%]"
@@ -869,7 +915,6 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
             {preloadedImages && <ImagePreloader images={preloadedImages} />}
             {page_type != "text" && tip?.trim() != "" &&       
                 <TipModal 
-                    header={header || text}
                     tip={tip}
                     openTipModal={isTipModalOpen}
                     handleTipModalOpen={handleTipModalOpen}

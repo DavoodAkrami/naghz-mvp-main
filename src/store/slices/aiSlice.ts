@@ -93,7 +93,7 @@ export const getPointFroTip = createAsyncThunk(
             messages: [
                 {
                     role: "system",
-                    content: `Based on the following system prompt, only return a score between 0 and 100 (0 is the worst and 100 is the best) for the answer: ${adminSystemPrompt} and question: ${question}`
+                    content: `Based on this tip: ${adminSystemPrompt} and this question: ${question} give me a score between 0 and 100 (0 is the worst and 100 is the best) for the answer: ${answer}. Be extremely strict.`
                 },
                 {
                     role: "user",
@@ -111,7 +111,8 @@ export const getPointFroTip = createAsyncThunk(
             wrongSound.play();
             setIsTipModalOpen(true);
         } else if (30 < parsed && parsed < 60) {
-            pulseTip();
+            wrongSound.play();
+            setIsTipModalOpen(true);
         }  else if (60 < parsed && parsed < 100) {
             successSound.play();
             handleNext();

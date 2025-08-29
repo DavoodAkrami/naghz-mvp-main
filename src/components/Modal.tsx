@@ -25,7 +25,7 @@ const Modal: React.FC<modalPropsType> = ({ children, onClose, onOpen, classname}
             onClick={onClose}
         >
             <div className={clsx(
-                "bg-[var(--primary-color4)]/70 backdrop-blur-2xl rounded-lg p-6 max-w-md w-full",
+                "bg-[var(--primary-color4)]/70 backdrop-blur-2xl rounded-lg p-6 max-w-md w-full" ,
                 classname
             )}>
                         {children}

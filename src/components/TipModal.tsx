@@ -4,7 +4,6 @@ import { MdOutlineQuestionMark } from "react-icons/md";
 
 
 export interface tipModalProp {
-    header?: string;
     tip?:string;
     handleTipModalOpen?: () => void;
     openTipModal?: boolean;
@@ -12,7 +11,7 @@ export interface tipModalProp {
 }
 
 
-const TipModal: React.FC<tipModalProp> = ({ header, tip, handleTipModalOpen, openTipModal, pulse = false}) => {
+const TipModal: React.FC<tipModalProp> = ({ tip, handleTipModalOpen, openTipModal, pulse = false}) => {
 
     return (
         <div>
@@ -28,9 +27,11 @@ const TipModal: React.FC<tipModalProp> = ({ header, tip, handleTipModalOpen, ope
             <Modal
                 onClose={handleTipModalOpen}
                 onOpen={openTipModal}
+                classname="min-w-[90vw] md:min-w-[60vw] mx-auto"
             >
+                
                 <h3 className="h3 text-center mb-[2rem]">
-                    {header}
+                    نکته
                 </h3>
                 <p className="text-justify px-[5%] text-[1.2rem]">
                     {tip} 
