@@ -7,6 +7,7 @@ interface AiState {
     systemPrompt: string;
     feedBack: string;
     score: number;
+    tipScore: number;
     aiLoading: boolean;
     error: string | null;
     nextPageId: string | null;
@@ -17,6 +18,7 @@ const initialState: AiState = {
     systemPrompt: "",
     feedBack: "",
     score: 0,
+    tipScore: 0,
     aiLoading: false,
     error: null,
     nextPageId: null,
@@ -83,6 +85,42 @@ export const getPoint = createAsyncThunk(
     }
 )
 
+export const getPointFroTip = createAsyncThunk(
+    'ai/getPointFroTip',
+    async ({adminSystemPrompt, answer, question, setIsTipModalOpen, pulseTip, handleNext, wrongSound, successSound} : {adminSystemPrompt: string, answer: string, question: string, setIsTipModalOpen: (isOpen: boolean) => void, pulseTip: () => void, handleNext: () => void, wrongSound: HTMLAudioElement, successSound: HTMLAudioElement}) => {
+        const response = await openai.chat.completions.create({
+            model: "gpt-5-nano",
+            messages: [
+                {
+                    role: "system",
+                    content: `Based on the following system prompt, only return a score between 0 and 100 (0 is the worst and 100 is the best) for the answer: ${adminSystemPrompt} and question: ${question}`
+                },
+                {
+                    role: "user",
+                    content: `answer: ${answer}`
+                }
+            ],
+        })
+        const raw = response.choices[0].message?.content ?? '';
+        const match = raw.match(/\d+(\.\d+)?/);
+        const parsed = match ? Number(match[0]) : NaN;
+        if (!Number.isFinite(parsed)) {
+          throw new Error('Model did not return a numeric score');
+        }
+        if (parsed < 30) {
+            wrongSound.play();
+            setIsTipModalOpen(true);
+        } else if (30 < parsed && parsed < 60) {
+            pulseTip();
+        }  else if (60 < parsed && parsed < 100) {
+            successSound.play();
+            handleNext();
+        }
+        console.log("parsed", parsed);
+        return parsed;
+    }
+)
+
 
 const aiSlice = createSlice({
     name: "ai",
@@ -94,7 +132,7 @@ const aiSlice = createSlice({
         setSystemPrompt: (state, action) => {
             state.systemPrompt = action.payload;
         },
-        clearAi: (state) => { state.feedBack = ""; state.score = 0; state.aiLoading = false; state.error = null; },
+        clearAi: (state) => { state.feedBack = ""; state.score = 0; state.tipScore = 0; state.aiLoading = false; state.error = null; },
     },
     extraReducers(builder) {
         builder
@@ -118,6 +156,17 @@ const aiSlice = createSlice({
                 state.nextPageId = action.payload.nextPageId || null;
             })
             .addCase(getPoint.rejected, (state, action) => {
+                state.aiLoading = false;
+                state.error = action.error.message ?? "خطا در گرفتن نمره";
+            })
+            .addCase(getPointFroTip.pending, (state) => {
+                state.aiLoading = true;
+            })
+            .addCase(getPointFroTip.fulfilled, (state, action) => {
+                state.aiLoading = false;
+                state.tipScore = action.payload;
+            })
+            .addCase(getPointFroTip.rejected, (state, action) => {
                 state.aiLoading = false;
                 state.error = action.error.message ?? "خطا در گرفتن نمره";
             })

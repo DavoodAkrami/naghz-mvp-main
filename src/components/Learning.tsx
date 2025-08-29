@@ -15,6 +15,7 @@ import ButtonLoading from "./ButtonLoading";
 import { motion, AnimatePresence } from "framer-motion";
 import TipModal from "./TipModal";
 import { reduceHeart } from "@/store/slices/heartSlice";
+import { getPointFroTip } from "@/store/slices/aiSlice";
 
 
 
@@ -49,10 +50,12 @@ export interface LearningPropsType {
     ai_enabled?: boolean;
     give_feedback?: boolean;
     give_point?: boolean;
+    give_point_by_ai?: boolean;
     score_threshold?: number;
     low_score_page_id?: string | null;
     high_score_page_id?: string | null;
     tip?: string;
+    system_prompt?: string;
 }
 
 
@@ -164,7 +167,7 @@ const ImagePreloader: React.FC<{ images: string[] }> = ({ images }) => {
 };
 
 
-const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, header, test_type="Default", test_grid= "col", options, question, correct_answer, course_id, page_number, pageLength, handleNext, handlePrev, image, why, preloadedImages, onTestNextSelect, give_point, give_feedback, low_score_page_id, high_score_page_id, tip}) => {
+const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, header, test_type="Default", test_grid= "col", options, question, correct_answer, course_id, page_number, pageLength, handleNext, handlePrev, image, why, preloadedImages, onTestNextSelect, give_point, give_feedback, low_score_page_id, high_score_page_id, tip, give_point_by_ai, system_prompt}) => {
     const router = useRouter();
 
     const [activeId, setActiveId] = useState<number | null>(null);
@@ -180,6 +183,11 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
     const [saveProgressLoading, setSaveProgressLoading] = useState<boolean>(false);
     const [userAnswer, setUserAnswer] = useState<string>("");
     const [isTipModalOpen, setIsTipModalOpen] = useState<boolean>(false);
+    const [tipPulse, setTipPulse] = useState<boolean>(false);
+    const pulseTip = () => {
+      setTipPulse(true);
+      setTimeout(() => setTipPulse(false), 1000);
+    };
 
     const successSound = useMemo(() => new Audio('/sounds/correct.mp3'), []);
     const wrongSound = useMemo(() => new Audio('/sounds/incorrect.mp3'), []);
@@ -205,7 +213,7 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
     const isCompleted = userProgress.some(progress => progress.course_id === course_id);
 
 
-    const { feedBack, aiLoading } = useSelector((state: RootState) => state.ai);
+    const { feedBack, aiLoading, tipScore } = useSelector((state: RootState) => state.ai);
     
 
     useEffect(() => {
@@ -311,6 +319,17 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                 dispatch(saveProgress({ courseId: course_id, userId: user?.id || '' }))
                 setSaveProgressLoading(false)
             }
+        } else if (page_type === "testNext" && test_type === "Input" && give_point_by_ai) {
+            dispatch(getPointFroTip({
+                adminSystemPrompt: system_prompt || "",
+                answer: userAnswer,
+                question: question || "",
+                setIsTipModalOpen,
+                pulseTip,
+                handleNext: handleNext || (() => {}),
+                wrongSound,
+                successSound
+            }))
         } else if (test_type === "Input" && page_type === "testNext" && give_point) {
             if (userAnswer.trim() === "") {
                 wrongSound.play();
@@ -331,6 +350,25 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                 answer: userAnswer,
                 subject: "softSkills",
             }))
+        } else if (page_type === "testNext" && test_type === "Input" && give_feedback && give_point_by_ai) {
+            if (feedBack.trim() === "") {
+                dispatch(getFeedBack({
+                    question: question || "",
+                    answer: userAnswer,
+                    subject: "softSkills",
+                }))
+            } else if (feedBack.trim() !== "") {
+                dispatch(getPointFroTip({
+                    adminSystemPrompt: system_prompt || "",
+                    answer: userAnswer,
+                    question: question || "",
+                    setIsTipModalOpen,
+                    pulseTip,
+                    handleNext: handleNext || (() => {}),
+                    wrongSound,
+                    successSound
+                }))
+            }
         } else {
             if (page_type != 'text' && page_type != "testNext")
             successSound.play();
@@ -835,6 +873,7 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                     tip={tip}
                     openTipModal={isTipModalOpen}
                     handleTipModalOpen={handleTipModalOpen}
+                    pulse={tipPulse}
                 />
             }
         </div>

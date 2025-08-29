@@ -23,10 +23,12 @@ type DbPage = {
   ai_enabled?: boolean;
   give_feedback?: boolean;
   give_point?: boolean;
+  give_point_by_ai?: boolean;
   score_threshold?: number;
   low_score_page_id?: string | null;
   high_score_page_id?: string | null;
   tip?: string;
+  system_prompt?: string;
 };
 
 type DbOption = {
@@ -162,10 +164,12 @@ const LearningSlider: React.FC<LearningPropsType> = (props: LearningPropsType) =
       ai_enabled: page.ai_enabled || false,
       give_feedback: page.give_feedback || false,
       give_point: page.give_point || false,
+      give_point_by_ai: page.give_point_by_ai ?? page.give_point ?? false,
       score_threshold: page.score_threshold || 50,
       low_score_page_id: page.low_score_page_id || null,
       high_score_page_id: page.high_score_page_id || null,
-      tip: page.tip
+      tip: page.tip,
+      system_prompt: page.system_prompt || ""
     };
   }, [pages, currentIndex, optionsByPageId, props.course_id, props.pageLength]);
 

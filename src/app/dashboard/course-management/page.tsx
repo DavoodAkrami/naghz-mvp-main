@@ -50,13 +50,15 @@ interface PageFormData {
   order_index: number;
   image?: string;
   why?: string | null;
-  ai_enabled: boolean;
-  give_feedback: boolean;
-  give_point: boolean;
+  ai_enabled?: boolean;
+  give_feedback?: boolean;
+  give_point?: boolean;
+  give_point_by_ai?: boolean;
   score_threshold: number;
   low_score_page_id?: string | null;
   high_score_page_id?: string | null;
   tip?: string;
+  system_prompt?: string;
 }
 
 interface OptionFormData {
@@ -117,7 +119,6 @@ export default function CourseManagement() {
   const [pageFormData, setPageFormData] = useState<PageFormData>({
     page_number: 1,
     page_type: 'text',
-    name: '',
     title: '',
     content: '',
     question: '',
@@ -128,13 +129,16 @@ export default function CourseManagement() {
     order_index: 0,
     image: '',
     why: null,
+    name: '',
     ai_enabled: false,
     give_feedback: false,
     give_point: false,
-    score_threshold: 0,
+    give_point_by_ai: false,
+    score_threshold: 50,
     low_score_page_id: null,
     high_score_page_id: null,
     tip: "",
+    system_prompt: ""
   });
   const [optionsByPage, setOptionsByPage] = useState<Record<number, OptionFormData[]>>({});
   const [showOptionsModal, setShowOptionsModal] = useState(false);
@@ -490,9 +494,11 @@ export default function CourseManagement() {
           .insert({
             ...page,
             correct_answer: toDbCorrectAnswer(page.test_type, page.correct_answer),
-            course_id: course.id,
-            tip: page.tip,
-            name: page.name
+            give_point_by_ai: page.give_point_by_ai ?? false,
+            tip: page.tip || '',
+            name: page.name || '',
+            system_prompt: page.system_prompt || '',
+            course_id: course.id
           })
           .select()
           .single();
@@ -649,18 +655,20 @@ export default function CourseManagement() {
               ai_enabled: page.ai_enabled,
               give_feedback: page.give_feedback,
               give_point: page.give_point,
+              give_point_by_ai: page.give_point_by_ai ?? false,
               score_threshold: page.score_threshold,
               low_score_page_id: page.low_score_page_id,
               high_score_page_id: page.high_score_page_id,
               tip: page.tip,
-              name: page.name
+              name: page.name,
+              system_prompt: page.system_prompt || ''
             })
             .eq('id', pageId);
           if (updErr) throw updErr;
         } else {
           const { data: insertedPage, error: insertPageError } = await supabase
              .from('course_pages')
-             .insert({ page_number: page.page_number, page_type: page.page_type, title: page.title, content: page.content, question: page.question, test_type: page.test_type, test_grid: page.test_grid, correct_answer: toDbCorrectAnswer(page.test_type, page.correct_answer), image: page.image, page_length: page.page_length, order_index: page.order_index, course_id: courseId, ai_enabled: page.ai_enabled, give_feedback: page.give_feedback, give_point: page.give_point, score_threshold: page.score_threshold, low_score_page_id: page.low_score_page_id, high_score_page_id: page.high_score_page_id, tip: page.tip, name: page.name })
+             .insert({ page_number: page.page_number, page_type: page.page_type, title: page.title, content: page.content, question: page.question, test_type: page.test_type, test_grid: page.test_grid, correct_answer: toDbCorrectAnswer(page.test_type, page.correct_answer), image: page.image, page_length: page.page_length, order_index: page.order_index, course_id: courseId, ai_enabled: page.ai_enabled, give_feedback: page.give_feedback, give_point: page.give_point, score_threshold: page.score_threshold, low_score_page_id: page.low_score_page_id, high_score_page_id: page.high_score_page_id, tip: page.tip, name: page.name, system_prompt: page.system_prompt || '' })
              .select()
              .single();
           if (insertPageError) throw insertPageError;
@@ -736,8 +744,8 @@ export default function CourseManagement() {
       setOptionsByPage({});
       setOriginalPageIds([]);
       refreshCourses();
-    } catch (error) {
-      console.error('Error updating course:', error);
+    } catch (error: any) {
+      console.error('Error updating course:', error?.message || error, error);
     } finally {
       setEditLoading(false);
     }
@@ -777,6 +785,7 @@ export default function CourseManagement() {
       ai_enabled: false,
       give_feedback: false,
       give_point: false,
+      give_point_by_ai: false,
       score_threshold: 50,
       low_score_page_id: null,
       high_score_page_id: null
@@ -891,10 +900,12 @@ export default function CourseManagement() {
           ai_enabled: (p.ai_enabled as boolean) || false,
           give_feedback: (p.give_feedback as boolean) || false,
           give_point: (p.give_point as boolean) || false,
+          give_point_by_ai: (p.give_point_by_ai as boolean) || false,
           score_threshold: (p.score_threshold as number) || 50,
           low_score_page_id: (p.low_score_page_id as string) || null,
           high_score_page_id: (p.high_score_page_id as string) || null,
-          tip: (p.tip as string) || ''
+          tip: (p.tip as string) || '',
+          system_prompt: (p.system_prompt as string) || ''
         }));
         setPages(pagesData);
         setOriginalPageIds((dbPages || []).map((p: Record<string, unknown>) => p.id as string));
@@ -1259,6 +1270,16 @@ export default function CourseManagement() {
                             placeholder="سوال آزمون"
                           />
                         </div>
+                        <div className="col-span-2">
+                          <label className="block text-sm font-medium mb-2">System Prompt (اختیاری)</label>
+                          <textarea
+                            value={page.system_prompt || ''}
+                            onChange={(e) => updatePage(index, { system_prompt: e.target.value })}
+                            className="w-full p-2 border rounded"
+                            rows={3}
+                            placeholder="متن system prompt برای AI"
+                          />
+                        </div>
                         <div>
                           <label className="block text-sm font-medium mb-2">تیپ: </label>
                           <textarea
@@ -1320,6 +1341,16 @@ export default function CourseManagement() {
                                   checked={page.give_feedback}
                                   onChange={(e) => updatePage(index, { give_feedback: e.target.checked })} 
                                 />
+                            </div>
+                            <div className="col-span-2 mt-2">
+                              <label className="inline-flex items-center gap-2 text-sm">
+                                <input
+                                  type="checkbox"
+                                  checked={page.give_point_by_ai || false}
+                                  onChange={(e) => updatePage(index, { give_point_by_ai: e.target.checked })}
+                                />
+                                محاسبه نمره توسط هوش مصنوعی (give_point_by_ai)
+                              </label>
                             </div>
                           </>
                         }
@@ -1786,6 +1817,16 @@ export default function CourseManagement() {
                             placeholder="سوال آزمون"
                           />
                         </div>
+                        <div className="col-span-2">
+                          <label className="block text-sm font-medium mb-2">System Prompt (اختیاری)</label>
+                          <textarea
+                            value={page.system_prompt || ''}
+                            onChange={(e) => updatePage(index, { system_prompt: e.target.value })}
+                            className="w-full p-2 border rounded"
+                            rows={3}
+                            placeholder="متن system prompt برای AI"
+                          />
+                        </div>
                         <div>
                           <label className="block text-sm font-medium mb-2">تیپ: </label>
                           <textarea
@@ -1807,7 +1848,7 @@ export default function CourseManagement() {
                             <option value="Multiple">چند انتخابی</option>
                             <option value="Sequential">ترتیبی</option>
                             <option value="Pluggable">جفت سازی</option>
-                            <option value="Input">ورودی</option>
+                            <option value="Input">ورودی (متنی)</option>
                           </select>
                         </div>
                         <div>
@@ -1848,6 +1889,16 @@ export default function CourseManagement() {
                                   onChange={(e) => updatePage(index, { give_feedback: e.target.checked })} 
                                 />
                             </div>
+                            <div className="col-span-2 mt-2">
+                              <label className="inline-flex items-center gap-2 text-sm">
+                                <input
+                                  type="checkbox"
+                                  checked={page.give_point_by_ai || false}
+                                  onChange={(e) => updatePage(index, { give_point_by_ai: e.target.checked })}
+                                />
+                                محاسبه نمره توسط هوش مصنوعی (give_point_by_ai)
+                              </label>
+                          </div>
                           </>
                         }
                         {page.ai_enabled && page.give_point && 
