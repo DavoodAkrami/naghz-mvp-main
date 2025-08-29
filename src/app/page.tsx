@@ -90,7 +90,7 @@ const Home = () => {
 
     useEffect(() => {
         if (isAuthenticated) {
-            setLinkCarry(links.courses);
+            setLinkCarry('courses/clear-communication');
         } else {
             setLinkCarry(links.signUp);
         }
@@ -463,7 +463,7 @@ const Home = () => {
                             transition={{  delay: 0.5, duration: 0.6}}
                             className="button-primary rounded-full mt-[5vh] shadow-lg md:scale-[1.5] max-md:scale-[1.3] mb-[10vh] min-w-[15vw]"
                         >
-                            <Link href="/auth/sign-up"
+                            <Link href={linkCarry}
                                 className="block w-[100%] h-[100%]"
                             >
                                 ادامه ماجرا
