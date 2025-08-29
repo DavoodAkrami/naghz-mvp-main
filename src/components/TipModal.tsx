@@ -1,5 +1,6 @@
 import Modal from "./Modal";
 import { MdOutlineQuestionMark } from "react-icons/md";
+import Button from "./Button";
 
 
 
@@ -15,15 +16,15 @@ const TipModal: React.FC<tipModalProp> = ({ tip, handleTipModalOpen, openTipModa
 
     return (
         <div>
-            <button
+            <Button
+                classname="rounded-full p-4 bg-[var(--primary-color1)]/30 backdrop-blur-xl border-[2px] border-[var(--primary-color1)] fixed bottom-[2rem] right-[2rem] hover:bg-[var(--primary-color1)]/15 hover:cursor-pointer transition-all duration-200"
                 onClick={handleTipModalOpen}
-                className="rounded-full p-4 bg-[var(--primary-color1)]/30 backdrop-blur-xl border-[2px] border-[var(--primary-color1)] fixed bottom-[2rem] right-[2rem] hover:bg-[var(--primary-color1)]/15 hover:cursor-pointer"
             >
                 {pulse && (
                     <span className="pointer-events-none absolute inset-0 rounded-full ring-4 ring-yellow-400/70 animate-ping" />
                 )}
                 <MdOutlineQuestionMark className="text-[white] text-[1.6rem] max-md:text-[1.4rem]" />
-            </button>
+            </Button>
             <Modal
                 onClose={handleTipModalOpen}
                 onOpen={openTipModal}

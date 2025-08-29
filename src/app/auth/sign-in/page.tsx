@@ -7,6 +7,7 @@ import { RootState, AppDispatch } from '@/store/store';
 import { AnimatePresence, motion } from "framer-motion";
 import clsx from 'clsx';
 import { MdNavigateNext, MdNavigateBefore } from "react-icons/md";
+import { isValidEmail, validatePassword } from "@/utils/validationHelpers";
 
 
 interface LogInFormData {
@@ -48,7 +49,7 @@ const LogInPage = () => {
     const validateStep1 = (): boolean => {
         const errors: Partial<LogInFormData> = {};
         if (!formData.email) errors.email = 'آدرس ایمیل را وارد کنید';
-        else if (!/\S+@\S+\.\S+/.test(formData.email)) errors.email = 'ایمیل نامعتبر است';
+        else if (!isValidEmail(formData.email)) errors.email = 'ایمیل نامعتبر است';
         setValidationErrors(errors);
         return Object.keys(errors).length === 0;
       };
@@ -56,7 +57,12 @@ const LogInPage = () => {
       const validateStep2 = (): boolean => {
         const errors: Partial<LogInFormData> = {};
         if (!formData.password) errors.password = 'پسوورد را وارد کنید';
-        else if (formData.password.length < 6) errors.password = 'پسوورد استباه است';
+        else {
+            const passwordValidation = validatePassword(formData.password);
+            if (!passwordValidation.isValid) {
+                errors.password = passwordValidation.errors[0] || 'پسوورد استباه است';
+            }
+        }
         setValidationErrors(errors);
         return Object.keys(errors).length === 0;
       };

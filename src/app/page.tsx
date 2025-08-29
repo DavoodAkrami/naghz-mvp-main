@@ -4,6 +4,7 @@ import { ImClock2 } from "react-icons/im";
 import { FaUsers } from "react-icons/fa";
 import { MdPsychologyAlt } from "react-icons/md";
 import React, { useState, useEffect } from "react";
+import Button from "@/components/Button";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useSelector, useDispatch } from "react-redux";
@@ -172,15 +173,16 @@ const Home = () => {
                     >
                         روشی رایگان موثر و تعاملی برای یادگیری مهارتهای نرم  
                     </h1> */}
-                    <button
-                        className="button-primary rounded-full mt-[2rem] shadow max-md:scale-[1.3] mb-[10vh] scale-[1.8]"
+                    <Button
+                        buttonType="button-primary"
+                        classname="rounded-full mt-[2rem] shadow max-md:scale-[1.3] mb-[10vh] scale-[1.8]"
                     >
                         <Link href={linkCarry}
                             className="block w-[100%] h-[100%]"
                         >
                             نغز شو!
                         </Link>
-                    </button>
+                    </Button>
                     <hr className="self-stretch border-t border-[var(--text-desable)] opacity-80" />
                     <div
                         className="flex justify-between gap-[1rem] w-[80%] py-[5vh] max-[1200px]:scale-[0.9] max-[1200px]:w-[100%] max-md:scale-[0.8] max-md:w-[115%] max-[500px]:justify-around"
@@ -420,12 +422,13 @@ const Home = () => {
                             اگه بخش نغزت هنوز زندست
                             اینجا می‌تونی باهاش وقت بگذرونی، پرورش بدی و با جمعی شبیه خودت، نغزتر بشی
                         </p>
-                        <button
+                        <Button
+                            buttonType="button-primary"
+                            classname="rounded-full mt-[3rem] w-[50%] scale-[1.2] mr-[1rem]"
                             onClick={() => window.open('https://t.me/naghzed')}
-                            className="button-primary rounded-full mt-[3rem] w-[50%] scale-[1.2] mr-[1rem]"
                         >
                             جامعه نغز
-                        </button>
+                        </Button>
                     </motion.div>
                 </section>
                 <section
@@ -455,20 +458,24 @@ const Home = () => {
                             تغییر نیاز به هیاهو نداره و از همون لحظه‌ای آغاز می‌شود که تصمیم می‌گیری.
                             آروم، ساده، اما واقعی
                         </motion.p>
-                        <motion.button
+                        <motion.div
                             initial={{ y: -90, opacity: 0 }}
                             whileInView={{ y: 0, opacity: 1 }}
                             exit={{ opacity: 0 }}
                             viewport={{ once: true }}
                             transition={{  delay: 0.5, duration: 0.6}}
-                            className="button-primary rounded-full mt-[5vh] shadow-lg md:scale-[1.5] max-md:scale-[1.3] mb-[10vh] min-w-[15vw]"
                         >
-                            <Link href={linkCarry}
-                                className="block w-[100%] h-[100%]"
+                            <Button
+                                buttonType="button-primary"
+                                classname="rounded-full mt-[5vh] shadow-lg md:scale-[1.5] max-md:scale-[1.3] mb-[10vh] min-w-[15vw]"
                             >
-                                ادامه ماجرا
-                            </Link>
-                        </motion.button>
+                                <Link href={linkCarry}
+                                    className="block w-[100%] h-[100%]"
+                                >
+                                    ادامه ماجرا
+                                </Link>
+                            </Button>
+                        </motion.div>
                     </div>
                 </section>
                 <ChallengPopUp 
@@ -489,8 +496,8 @@ const Home = () => {
                     className="fixed bottom-[3vh] right-[4vh] p-4 bg-[var(--primary-color1)]/30 backdrop-blur-xl flex items-center justify-center rounded-full hover:cursor-pointer hover:bg-[var(--primary-color1)]15 transition-all duration-200 max-md:text-[2rem] max-md:p-2 max-md:right-[2.5vw] max-md:bottom-[2vh]"
                     onClick={() => setIsChatBotOpen(!isChatBotOpen)}
                 >
-                    <button
-                        className={clsx(
+                    <Button
+                        classname={clsx(
                             'transition-all duration-400',
                             isChatBotOpen && 'rotate-360'
                         )}
@@ -498,7 +505,7 @@ const Home = () => {
                         <TbMessageChatbot 
                             className="text-[3rem] max-md:text-[2.4rem] text-[white] cursor-pointer"
                         />
-                    </button>
+                    </Button>
                 </div>
                 <ChatBot 
                     isOpen={isChatBotOpen}

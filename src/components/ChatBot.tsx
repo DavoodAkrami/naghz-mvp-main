@@ -2,6 +2,7 @@ import Message from "./message";
 import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
 import { MdKeyboardArrowRight } from "react-icons/md";
+import Button from "./Button";
 
 
 
@@ -48,14 +49,14 @@ const ChatBot: React.FC<chatBotProp> = ({ sender="user", aiMessage, loading, isO
                         <div
                             className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center gap-[0.8rem] w-[85%]"
                         >
-                            <button
-                                className="rounded-full p-2 bg-[var(--primary-color1)]/30 backdrop-blur-2xl disabled:opacity-[0.6] hover:bg-[var(--primary-color1)]/15 cursor-pointer"  
+                            <Button
+                                classname="rounded-full p-2 bg-[var(--primary-color1)]/30 backdrop-blur-2xl disabled:opacity-[0.6] hover:bg-[var(--primary-color1)]/15 cursor-pointer"  
                                 disabled={loading || userMessage === ""}
                             >
                                 <MdKeyboardArrowRight 
                                     className="text-[2.2rem] text-[white]"
                                 />
-                            </button>
+                            </Button>
                             <textarea 
                                 className="rounded-full py-2 px-4 text-[1.4rem] font-normal bg-[var(--primary-color1)]/70 backdrop-blur-2xl text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-[var(--accent-color2)] flex-1 flex items-center w-[90%] resize-none overflow-hidden min-h-[3rem] max-h-[150px]"
                                 placeholder="پیام خود را بنویسید..."

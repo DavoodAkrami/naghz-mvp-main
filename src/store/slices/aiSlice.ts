@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import openai from "@/config/openAi";
+import { parseAIScore, getNextPageId, evaluateTipScore, createFeedbackPrompt, createScoringPrompt, createTipScoringPrompt } from "@/utils/aiHelpers";
 
 
 interface AiState {
@@ -33,7 +34,7 @@ export const getFeedBack = createAsyncThunk(
             messages: [
                 {
                     role: "system",
-                    content: `you are an assistant going to give a feedback in Persian to the answer of ${question} in ${subject} subject based on best practices. FeedBack should be short and effiction and shouldn't be more than 300 charecters`
+                    content: createFeedbackPrompt(question, subject)
                 },
                 {
                     role: "user",
@@ -53,7 +54,7 @@ export const getPoint = createAsyncThunk(
             messages: [
                 {
                     role: "system",
-                    content: `You are an evaluator. Check how logically correct the answer to "${question}" is in the subject "${subject}". Return only a score from 0 (completely wrong) to 100 (fully correct)`
+                    content: createScoringPrompt(question, subject)
                 },
                 {
                     role: "user",
@@ -62,21 +63,8 @@ export const getPoint = createAsyncThunk(
             ],
         })
         const raw = response.choices[0].message?.content ?? '';
-
-        const match = raw.match(/\d+(\.\d+)?/);
-        const parsed = match ? Number(match[0]) : NaN;
-        if (!Number.isFinite(parsed)) {
-          throw new Error('Model did not return a numeric score');
-        }
-
-        const score = Math.max(0, Math.min(100, Math.round(parsed)));
-
-        let nextPageId = null;
-        if (score < 50) {
-            nextPageId = lowScorePageId;
-        } else {
-            nextPageId = highScorePageId;
-        }
+        const score = parseAIScore(raw);
+        const nextPageId = getNextPageId(score, lowScorePageId, highScorePageId, 50);
         
         console.log("score", score);
         console.log("nextPageId", nextPageId);
@@ -93,7 +81,7 @@ export const getPointFroTip = createAsyncThunk(
             messages: [
                 {
                     role: "system",
-                    content: `Based on this tip: ${adminSystemPrompt} and this question: ${question} give me a score between 0 and 100 (0 is the worst and 100 is the best) for the answer: ${answer}. Be extremely strict.`
+                    content: createTipScoringPrompt(adminSystemPrompt, question, answer)
                 },
                 {
                     role: "user",
@@ -102,23 +90,10 @@ export const getPointFroTip = createAsyncThunk(
             ],
         })
         const raw = response.choices[0].message?.content ?? '';
-        const match = raw.match(/\d+(\.\d+)?/);
-        const parsed = match ? Number(match[0]) : NaN;
-        if (!Number.isFinite(parsed)) {
-          throw new Error('Model did not return a numeric score');
-        }
-        if (parsed < 30) {
-            wrongSound.play();
-            setIsTipModalOpen(true);
-        } else if (30 < parsed && parsed < 60) {
-            wrongSound.play();
-            setIsTipModalOpen(true);
-        }  else if (60 < parsed && parsed < 100) {
-            successSound.play();
-            handleNext();
-        }
-        console.log("parsed", parsed);
-        return parsed;
+        const score = parseAIScore(raw);
+        evaluateTipScore(score, setIsTipModalOpen, pulseTip, handleNext, wrongSound, successSound);
+        console.log("parsed", score);
+        return score;
     }
 )
 

@@ -7,6 +7,7 @@ import { RootState, AppDispatch } from '@/store/store';
 import { AnimatePresence, motion } from "framer-motion";
 import clsx from 'clsx';
 import { MdNavigateNext, MdNavigateBefore } from "react-icons/md";
+import { isValidEmail, validatePassword } from "@/utils/validationHelpers";
 
 
 
@@ -54,7 +55,7 @@ const SignupPage = () => {
         const errors: Partial<SignupFormData> = {};
         if (!formData.full_name) errors.full_name = 'نام کاربری را وارد کنید';
         if (!formData.email) errors.email = 'آدرس ایمیل را وارد کنید';
-        else if (!/\S+@\S+\.\S+/.test(formData.email)) errors.email = 'ایمیل نامعتبر است';
+        else if (!isValidEmail(formData.email)) errors.email = 'ایمیل نامعتبر است';
         setValidationErrors(errors);
         return Object.keys(errors).length === 0;
       };
@@ -62,7 +63,12 @@ const SignupPage = () => {
       const validateStep2 = (): boolean => {
         const errors: Partial<SignupFormData> = {};
         if (!formData.password) errors.password = 'پسوورد را وارد کنید';
-        else if (formData.password.length < 6) errors.password = 'پسوورد باید حداقل 6 کاراکتر باشد';
+        else {
+            const passwordValidation = validatePassword(formData.password);
+            if (!passwordValidation.isValid) {
+                errors.password = passwordValidation.errors[0] || 'پسوورد باید حداقل 6 کاراکتر باشد';
+            }
+        }
         if (!formData.confirmPassword) errors.confirmPassword = 'لطفا پسوورد خود را تایید کنید';
         else if (formData.password !== formData.confirmPassword) errors.confirmPassword = 'پسووردها برابر نیستند';
         setValidationErrors(errors);

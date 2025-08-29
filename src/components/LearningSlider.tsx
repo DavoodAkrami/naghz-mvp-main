@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react"
 import { MdKeyboardArrowLeft } from "react-icons/md";
 import Learning from "./Learning";
+import Button from "./Button";
 import { LearningPropsType } from "./Learning";
 import { AnimatePresence, motion } from "framer-motion";
 import { supabase } from "@/config/supabase";
@@ -200,11 +201,11 @@ const LearningSlider: React.FC<LearningPropsType> = (props: LearningPropsType) =
   return (
     <div className="">
       <div dir="ltr" className="flex items-center justify-center w-[70%] mx-auto py-[3vh] max-md:w-[95%] mb-0">
-        <button onClick={handlePrevious} disabled={!canGoPrev} className="disabled:opacity-40">
+        <Button onClick={handlePrevious} disabled={!canGoPrev} classname="disabled:opacity-40">
             <MdKeyboardArrowLeft 
                 className="text-[2rem] cursor-pointer"
             />
-        </button>
+        </Button>
         <div className="w-[70%] max-md:w-[85%] mx-auto bg-gray-700 rounded-full h-3">
           <motion.div
             className="bg-[var(--accent-color1)] h-3 rounded-full"

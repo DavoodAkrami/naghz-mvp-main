@@ -1,6 +1,7 @@
 "use client"
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import Button from "./Button";
 
 
 interface ChallengPopUpProp {
@@ -47,18 +48,20 @@ const ChallengPopUp: React.FC<ChallengPopUpProp> = ({ text, onSubmit, type, ques
                             <div
                                 className="flex gap-[3.4rem] max-md:flex-col max-md:gap-[0.6rem]"
                             >
-                                <button
+                                <Button
+                                    buttonType="button-primary"
+                                    classname="md:scale-[1.3] scale-[1.1] rounded-xl shadow-xl"
                                     onClick={onAccept}
-                                    className="button-primary md:scale-[1.3] scale-[1.1] rounded-xl shadow-xl"
                                 >
                                     اره انجامش دادم
-                                </button>
-                                <button
+                                </Button>
+                                <Button
+                                    buttonType="button-secondary"
+                                    classname="md:scale-[1.3] scale-[1.1] rounded-xl shadow-xl text-[white]"
                                     onClick={onClose}
-                                    className="button-secondary md:scale-[1.3] scale-[1.1] rounded-xl shadow-xl text-[white]"
                                 >
                                     نه حوصلشو نداشتم
-                                </button>
+                                </Button>
                             </div>
                         </div>
                     ) : type === "form" ? (
@@ -89,12 +92,13 @@ const ChallengPopUp: React.FC<ChallengPopUpProp> = ({ text, onSubmit, type, ques
                                         className="bg-white/20 w-[35vw] max-md:w-[50vw] backdrop-blur-sm border-2 border-white/30 rounded-xl px-4 py-3 text-white placeholder-white/70 focus:outline-none focus:border-white/50 focus:bg-white/30 transition-all duration-200"
                                     />
                                 </div>
-                                <button
+                                <Button
+                                    buttonType="button-primary"
+                                    classname="md:scale-[1.3] scale-[1.1] rounded-xl shadow-xl fixed bottom-[7.3vh] max-md:bottom-[5.2vh] left-[10vw] max-md:left-4"
                                     type="submit"
-                                    className="button-primary md:scale-[1.3] scale-[1.1] rounded-xl shadow-xl fixed bottom-[7.3vh] max-md:bottom-[5.2vh] left-[10vw] max-md:left-4"
                                 >
                                     انجام چالش
-                                </button>
+                                </Button>
                             </form>
                         </div>
                     ) : null}
