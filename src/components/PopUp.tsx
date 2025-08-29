@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import React from "react";
 import clsx from "clsx";
+import Button from "./Button";
 
 
 export interface PopUpProps {
@@ -32,18 +33,20 @@ const PopUp: React.FC<PopUpProps> = ({ isCorrect, onNext, onRetry, onWhy, onCorr
                 <div
                     className="flex items-center gap-[0.8rem] max-md:gap-0"
                 >
-                    <button
-                        className="button-primary rounded-full max-md:scale-[0.9]"
+                    <Button
+                        buttonType="button-primary"
+                        classname="rounded-full max-md:scale-[0.9]"
                         onClick={isCorrect ? onNext : onCorrectAnswer}
                     >   
                         {isCorrect ? "ادامه" : "جواب درست؟"}
-                    </button>
-                    <button 
-                        className="button-primary rounded-full max-md:scale-[0.9]"
+                    </Button>
+                    <Button 
+                        buttonType="button-primary"
+                        classname="rounded-full max-md:scale-[0.9]"
                         onClick={isCorrect ? onWhy : onRetry}
                     >
                         {isCorrect ? "چرا؟" : "دوباره امتحان کن"}
-                    </button>
+                    </Button>
                 </div>
                 <div
                     className={clsx(

@@ -2,8 +2,10 @@
 import { motion, AnimatePresence } from "framer-motion";
 import clsx from "clsx";
 import React, { useMemo } from "react";
+import Button from "./Button";
 import { IconType } from "react-icons";
 import { SiTicktick } from "react-icons/si";
+import { renderRichText } from "@/utils/richText";
 
 
 export interface CurseCardProps {
@@ -34,25 +36,7 @@ const CourseCard: React.FC<CurseCardProps> = ({
 }) => {
     const truncatedDescription = description.length > 80 ? `${description.slice(0, 80)}...` : description;
 
-    const renderRichText = (text: string) => {
-        if (!text) return '';
-        
-        let html = text
-          .replace(/\[([^\]]+)\]\(([^)]+)(?:\|([^)]+))?\)/g, (match, linkText, url, target) => {
-            const targetAttr = target ? ` target="${target}"` : ' target="_blank"';
-            return `<a href="${url}"${targetAttr} class="text-blue-600 hover:text-blue-800 underline transition-colors duration-200" rel="noopener noreferrer">${linkText}</a>`;
-          })
-          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-          .replace(/__(.*?)__/g, '<strong>$1</strong>')
-          .replace(/\*(.*?)\*/g, '<em>$1</em>')
-          .replace(/_(.*?)_/g, '<em>$1</em>')
-          .replace(/~(.*?)~/g, '<u>$1</u>')
-          .replace(/~~(.*?)~~/g, '<del>$1</del>')
-          .replace(/`(.*?)`/g, '<code class="bg-gray-100 px-1 rounded text-sm">$1</code>')
-          .replace(/\n/g, '<br />');
-      
-        return html;
-      };
+
 
     const RichText: React.FC<{ content: string; className?: string }> = ({ content, className }) => {
         const htmlContent = useMemo(() => renderRichText(content), [content]);
@@ -120,26 +104,6 @@ export const CourseCardOpen: React.FC<CurseCardProps> = ({
     isActive,
     isAdmin = false
 }) => {
-    const renderRichText = (text: string) => {
-        if (!text) return '';
-        
-        let html = text
-          .replace(/\[([^\]]+)\]\(([^)]+)(?:\|([^)]+))?\)/g, (match, linkText, url, target) => {
-            const targetAttr = target ? ` target="${target}"` : ' target="_blank"';
-            return `<a href="${url}"${targetAttr} class="text-blue-600 hover:text-blue-800 underline transition-colors duration-200" rel="noopener noreferrer">${linkText}</a>`;
-          })
-          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-          .replace(/__(.*?)__/g, '<strong>$1</strong>')
-          .replace(/\*(.*?)\*/g, '<em>$1</em>')
-          .replace(/_(.*?)_/g, '<em>$1</em>')
-          .replace(/~(.*?)~/g, '<u>$1</u>')
-          .replace(/~~(.*?)~~/g, '<del>$1</del>')
-          .replace(/`(.*?)`/g, '<code class="bg-gray-100 px-1 rounded text-sm">$1</code>')
-          .replace(/\n/g, '<br />');
-      
-        return html;
-      };
-
     const RichText: React.FC<{ content: string; className?: string }> = ({ content, className }) => {
         const htmlContent = useMemo(() => renderRichText(content), [content]);
         
@@ -180,12 +144,13 @@ export const CourseCardOpen: React.FC<CurseCardProps> = ({
 
                 </div>
                 {startOnClick && (
-                    <button
-                        className="button-primary rounded-full mt-[1rem]"
+                    <Button
+                        buttonType="button-primary"
+                        classname="rounded-full mt-[1rem]"
                         onClick={startOnClick}
                     >
                         شروع کن
-                    </button>
+                    </Button>
                 )}
             </motion.div>
         </AnimatePresence>

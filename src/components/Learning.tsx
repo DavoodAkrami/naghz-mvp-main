@@ -16,6 +16,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import TipModal from "./TipModal";
 import { reduceHeart } from "@/store/slices/heartSlice";
 import { getPointFroTip } from "@/store/slices/aiSlice";
+import Button from "./Button";
+import { renderRichText, isRTLText, getLineDuration, calculateLineDelays } from "@/utils/richText";
+import { validateTest } from "@/utils/testValidation";
+import { loadImage, loadImagesWithConcurrency, trackImageLoading, calculateLoadingProgress } from "@/utils/imageHelpers";
  
 
 
@@ -59,39 +63,6 @@ export interface LearningPropsType {
     system_prompt?: string;
 }
 
-
- 
-
-// Helper function to parse and render rich text
-const renderRichText = (text: string) => {
-  if (!text) return '';
-  
-  // Convert markdown-like syntax to HTML
-  let html = text
-    // Links: [text](url) or [text](url|target)
-    .replace(/\[([^\]]+)\]\(([^)]+)(?:\|([^)]+))?\)/g, (match, linkText, url, target) => {
-      const targetAttr = target ? ` target="${target}"` : ' target="_blank"';
-      return `<a href="${url}"${targetAttr} class="text-blue-600 hover:text-blue-800 underline transition-colors duration-200" rel="noopener noreferrer">${linkText}</a>`;
-    })
-    // Bold: **text** or __text__
-    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-    .replace(/__(.*?)__/g, '<strong>$1</strong>')
-    // Italic: *text* or _text_
-    .replace(/\*(.*?)\*/g, '<em>$1</em>')
-    .replace(/_(.*?)_/g, '<em>$1</em>')
-    // Underline: ~text~
-    .replace(/~(.*?)~/g, '<u>$1</u>')
-    // Strikethrough: ~~text~~
-    .replace(/~~(.*?)~~/g, '<del>$1</del>')
-    // Code: `text`
-    .replace(/`(.*?)`/g, '<code class="bg-gray-100 px-1 rounded text-sm">$1</code>')
-    // Line breaks
-    .replace(/\n/g, '<br />');
-
-  return html;
-};
-
-
 const RichText: React.FC<{ content: string; className?: string }> = ({ content, className }) => {
   const htmlContent = useMemo(() => renderRichText(content), [content]);
   
@@ -105,21 +76,12 @@ const RichText: React.FC<{ content: string; className?: string }> = ({ content, 
 
 
 const AnimatedRichText: React.FC<{ content: string; className?: string }> = ({ content, className }) => {
-  const isRTL = useMemo(() => /[\u0600-\u06FF]/.test(content || ''), [content]);
+  const isRTL = useMemo(() => isRTLText(content), [content]);
   const rawLines = useMemo(() => (content || '').split('\n'), [content]);
   const htmlLines = useMemo(() => rawLines.map(line => renderRichText(line)), [rawLines]);
 
-  const getLineDuration = (len: number) => Math.min(2.0, Math.max(0.6, len / 35));
   const lineDurations = useMemo(() => rawLines.map(l => getLineDuration(l.length)), [rawLines]);
-  const lineDelays = useMemo(() => {
-    const delays: number[] = [];
-    let acc = 0;
-    for (let i = 0; i < lineDurations.length; i++) {
-      delays.push(acc);
-      acc += lineDurations[i] + 0.05;
-    }
-    return delays;
-  }, [lineDurations]);
+  const lineDelays = useMemo(() => calculateLineDelays(lineDurations), [lineDurations]);
 
   return (
     <div className={className}>
@@ -151,44 +113,7 @@ const ImagePreloader: React.FC<{ images: string[] }> = ({ images }) => {
   useEffect(() => {
     if (!images || images.length === 0) return;
 
-    const loadImage = (imageUrl: string): Promise<void> => {
-      return new Promise((resolve, reject) => {
-        const img = new window.Image();
-        
-        img.onload = () => {
-          setLoadedImages(prev => new Set(prev).add(imageUrl));
-          resolve();
-        };
-        
-        img.onerror = () => {
-          setFailedImages(prev => new Set(prev).add(imageUrl));
-          console.warn(`Failed to preload image: ${imageUrl}`);
-          reject(new Error(`Failed to load image: ${imageUrl}`));
-        };
-
-        // Set crossOrigin for CORS images (like Supabase)
-        img.crossOrigin = 'anonymous';
-        img.src = imageUrl;
-      });
-    };
-
-    // Load images with concurrency control (max 3 at a time)
-    const loadImagesWithConcurrency = async () => {
-      const concurrency = 3;
-      const chunks = [];
-      
-      for (let i = 0; i < images.length; i += concurrency) {
-        chunks.push(images.slice(i, i + concurrency));
-      }
-
-      for (const chunk of chunks) {
-        await Promise.allSettled(
-          chunk.map(imageUrl => loadImage(imageUrl))
-        );
-      }
-    };
-
-    loadImagesWithConcurrency();
+    trackImageLoading(images, setLoadedImages, setFailedImages);
   }, [images]);
 
   
@@ -515,106 +440,38 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
     }
 
     const handlePopUpOpen = () => {
-        if (test_type === "Default") {
-            const correct =
-              typeof correct_answer === "number"
-                ? activeId !== null && activeId === correct_answer
-                : Array.isArray(correct_answer) &&
-                  activeId !== null &&
-                  correct_answer[0] === activeId;
-            setIsCorrect(!!correct);
-            if (correct) {
-                successSound.play();
-            } else {
-                wrongSound.play();
-                if (user?.id) {
-                    dispatch(reduceHeart(user.id));
-                }
-            }
-        } else if (test_type === "Multiple") {
-            const correct =
-            Array.isArray(correct_answer) &&
-            multipleSelections.length === correct_answer.length &&
-            correct_answer.every(id => multipleSelections.includes(id));
-            setIsCorrect(!!correct);
-            if (correct) {
-                successSound.play();
-            } else {
-                wrongSound.play();
-                if (user?.id) {
-                    dispatch(reduceHeart(user.id));
-                }
-            }
-        } else if (test_type === "Sequential") {
-            const correct =
-            Array.isArray(correct_answer) &&
-            sequentialSelections.length === correct_answer.length &&
-            correct_answer.every((id, idx) => sequentialSelections[idx] === id);
-            setIsCorrect(!!correct);
-            if (correct) {
-                successSound.play();
-            } else {
-                wrongSound.play();
-                if (user?.id) {
-                    dispatch(reduceHeart(user.id));
-                }
-            }
-        } else if (test_type === "Pluggable") {
-            // Build user pairs from the mapping { [id]: pairedId }
-            const userPairs: [number, number][] = [];
-            const seen = new Set<number>();
-            Object.keys(pluggablePairs).forEach(k => {
-                const a = parseInt(k);
-                const b = pluggablePairs[a];
-                if (typeof b !== 'number') return;
-                if (seen.has(a) || seen.has(b)) return;
-                const x = Math.min(a, b), y = Math.max(a, b);
-                seen.add(x); seen.add(y);
-                userPairs.push([x, y]);
-            });
-            userPairs.sort((p1, p2) => (p1[0] - p2[0]) || (p1[1] - p2[1]));
+        let userAnswer: any;
+        
+        switch (test_type) {
+            case "Default":
+                userAnswer = activeId;
+                break;
+            case "Multiple":
+                userAnswer = multipleSelections;
+                break;
+            case "Sequential":
+                userAnswer = sequentialSelections;
+                break;
+            case "Pluggable":
+                userAnswer = pluggablePairs;
+                break;
+            default:
+                userAnswer = null;
+        }
 
-            
-            const expectedPairs: [number, number][] = (() => {
-                if (Array.isArray(correct_answer)) {
-                    if (correct_answer.length > 0 && Array.isArray((correct_answer as unknown[])[0])) {
-
-                        const out: [number, number][] = [];
-                        for (const p of correct_answer as unknown[]) {
-                            if (Array.isArray(p) && typeof p[0] === 'number' && typeof p[1] === 'number') {
-                                const x = Math.min(p[0], p[1]);
-                                const y = Math.max(p[0], p[1]);
-                                out.push([x, y]);
-                            }
-                        }
-                        return out.sort((p1, p2) => (p1[0] - p2[0]) || (p1[1] - p2[1]));
-                    }
-                    
-                    const nums = correct_answer as number[];
-                    const out: [number, number][] = [];
-                    for (let i = 0; i + 1 < nums.length; i += 2) {
-                        const x = Math.min(nums[i], nums[i + 1]);
-                        const y = Math.max(nums[i], nums[i + 1]);
-                        out.push([x, y]);
-                    }
-                    return out.sort((p1, p2) => (p1[0] - p2[0]) || (p1[1] - p2[1]));
-                }
-                return [];
-            })();
-
-            const correct = userPairs.length === expectedPairs.length &&
-                userPairs.every((p, i) => p[0] === expectedPairs[i][0] && p[1] === expectedPairs[i][1]);
-
-            setIsCorrect(!!correct);
-            if (correct) {
-                successSound.play();
-            } else {
-                wrongSound.play();
-                if (user?.id) {
-                    dispatch(reduceHeart(user.id));
-                }
+        const validationResult = validateTest(test_type, userAnswer, correct_answer);
+        const correct = validationResult.isCorrect;
+        
+        setIsCorrect(!!correct);
+        if (correct) {
+            successSound.play();
+        } else {
+            wrongSound.play();
+            if (user?.id) {
+                dispatch(reduceHeart(user.id));
             }
         }
+        
         setIsPopUpOpen(true);
     }
 
@@ -847,7 +704,13 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                     error
                 </div>
             )}
-            <button
+            <Button
+                buttonType="button-primary"
+                classname={clsx(
+                    "rounded-2xl shadow-xl hover:bg active:shadow-none w-[10rem] mx-auto scale-[1.4] mt-[3vh] mb-[3vh] disabled:opacity-50 disabled:pointer-events-none",
+                    page_type === "test" && !activeId && "disabled:opacity-50",
+                    page_type === "testNext" && test_type !== "Input" && options && options.length > 0 && "hidden" 
+                )}
                 onClick={page_type === "test" ? handlePopUpOpen : handleNextPage}
                 disabled={
                     page_type === "test"
@@ -861,14 +724,9 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                                 : test_type === "Input" ? (aiLoading || userAnswer.trim() === ""):
                       false
                   }
-                className={clsx(
-                    "button-primary rounded-2xl shadow-xl hover:bg active:shadow-none w-[10rem] mx-auto scale-[1.4] mt-[3vh] mb-[3vh] disabled:opacity-50 disabled:pointer-events-none",
-                    page_type === "test" && !activeId && "disabled:opacity-50",
-                    page_type === "testNext" && test_type !== "Input" && options && options.length > 0 && "hidden" 
-                )}
             >
                 {aiLoading || heartsLoading ? (<ButtonLoading size="md" />) : (page_number >= pageLength ? "پایان" : "ادامه")}
-            </button>
+            </Button>
             {page_type === "test" && 
                 <div 
                     className="flex justify-center w-[40%] max-lg:w-[60%] fixed bottom-[1rem] left-0 right-0 mx-auto max-md:w-[100%] max-md:bottom-[1rem] max-md:scale-[0.92] z-10"

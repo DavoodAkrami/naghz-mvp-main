@@ -18,6 +18,7 @@ import ButtonLoading from "@/components/ButtonLoading";
 import clsx from "clsx";
 import { fetchUserHearts, fetchAndRefillHearts, addHeart } from "@/store/slices/heartSlice";
 import Modal from "@/components/Modal";
+import { calculateRemainingTime, formatTime, createCountdownInterval } from "@/utils/timeHelpers";
 
 
 
@@ -53,9 +54,7 @@ const Curses: React.FC = () => {
 
     useEffect(() => {
         if (typeof hearts === 'number' && hearts < 3) {
-            const countdown = setInterval(() => {
-                setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
-            }, 1000);
+            const countdown = createCountdownInterval(timeLeft, setTimeLeft);
             return () => clearInterval(countdown);
         }
         return () => {};
@@ -77,15 +76,8 @@ const Curses: React.FC = () => {
 
     useEffect(() => {
         if (typeof hearts === 'number' && hearts < 3 && hearts_updated_at) {
-            const lastUpdate = new Date(hearts_updated_at).getTime();
-            if (!Number.isNaN(lastUpdate)) {
-                const now = Date.now();
-                const elapsedSec = Math.max(0, Math.floor((now - lastUpdate) / 1000));
-                const remaining = Math.max(0, 600 - elapsedSec);
-                setTimeLeft(remaining);
-            } else {
-                setTimeLeft(600);
-            }
+            const remaining = calculateRemainingTime(hearts_updated_at, 600);
+            setTimeLeft(remaining);
         } else if (typeof hearts === 'number' && hearts >= 3) {
             setTimeLeft(0);
         }
@@ -128,8 +120,7 @@ const Curses: React.FC = () => {
         return userProgress.some(progress => progress.course_id === courseId);
     };
 
-    const minutes = Math.floor(timeLeft / 60);
-    const seconds = timeLeft % 60;
+    const { minutes, seconds } = formatTime(timeLeft);
 
     if (courseloading) return (
         <div className="min-h-screen flex items-center justify-center bg-[var(--bg-color)]" dir="rtl">
