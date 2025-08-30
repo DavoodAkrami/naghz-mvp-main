@@ -1,7 +1,7 @@
 import Modal from "./Modal";
 import { MdOutlineQuestionMark } from "react-icons/md";
 import Button from "./Button";
-
+import RichTextRender from "./RichTextRender";
 
 
 export interface tipModalProp {
@@ -34,9 +34,10 @@ const TipModal: React.FC<tipModalProp> = ({ tip, handleTipModalOpen, openTipModa
                 <h3 className="h3 text-center mb-[2rem]">
                     نکته
                 </h3>
-                <p className="text-justify px-[5%] text-[1.2rem]">
-                    {tip} 
-                </p>
+                <div 
+                    className="text-justify px-[5%] text-[1.2rem]"
+                    dangerouslySetInnerHTML={{ __html: RichTextRender(tip || '') }}
+                />
             </Modal>
         </div>
     )   
