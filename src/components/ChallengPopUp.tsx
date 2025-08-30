@@ -26,7 +26,7 @@ const ChallengPopUp: React.FC<ChallengPopUpProp> = ({ text, onSubmit, type, ques
     })
 
     const handleOpenChallenge = () => {
-        router.push("/challenge")
+        router.push("/today_challenge")
     }
     
 
@@ -57,7 +57,7 @@ const ChallengPopUp: React.FC<ChallengPopUpProp> = ({ text, onSubmit, type, ques
                                 <Button
                                     buttonType="button-primary"
                                     classname="rounded-xl shadow-xl"
-                                    onClick={handleOpenChallenge}
+                                    onClick={onAccept}
                                 >
                                     بزن بریم
                                 </Button>

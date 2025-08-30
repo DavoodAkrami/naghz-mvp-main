@@ -1,11 +1,12 @@
 import { configureStore } from '@reduxjs/toolkit';
-import authReducer from './slices/authSlice'
-import courseReducer from './slices/courseSlice'
-import fullCourseReducer from './slices/fullCourseSlice'
-import coursePageReducer from './slices/coursePageSlice'
-import userProgressReducer from './slices/userProgressSlice'
-import aiReducer from './slices/aiSlice'
-import heartsReducer from './slices/heartSlice'
+import authReducer from './slices/authSlice';
+import courseReducer from './slices/courseSlice';
+import fullCourseReducer from './slices/fullCourseSlice';
+import coursePageReducer from './slices/coursePageSlice';
+import userProgressReducer from './slices/userProgressSlice';
+import aiReducer from './slices/aiSlice';
+import heartsReducer from './slices/heartSlice';
+import challengesSlice from './slices/challengesSlice';
 
 export const store = configureStore({
     reducer: {
@@ -16,6 +17,7 @@ export const store = configureStore({
         userProgress: userProgressReducer,
         ai: aiReducer,
         hearts: heartsReducer,
+        challengse: challengesSlice,
     }
 })
 

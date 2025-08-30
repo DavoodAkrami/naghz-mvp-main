@@ -10,7 +10,7 @@ import { saveProgress } from "@/store/slices/userProgressSlice";
 import Image from "next/image";
 import { FullCourse } from "@/store/slices/fullCourseSlice";
 import { OptionCard } from "./options";
-import { getFeedBack, getPoint, clearAi } from "@/store/slices/aiSlice";
+import { getFeedBack, getPoint, clearAi, challengeAi } from "@/store/slices/aiSlice";
 import ButtonLoading from "./ButtonLoading";
 import { motion, AnimatePresence } from "framer-motion";
 import TipModal from "./TipModal";
@@ -20,6 +20,7 @@ import Button from "./Button";
 import { renderRichText, isRTLText, getLineDuration, calculateLineDelays } from "@/utils/richText";
 import { validateTest } from "@/utils/testValidation";
 import { loadImage, loadImagesWithConcurrency, trackImageLoading, calculateLoadingProgress } from "@/utils/imageHelpers";
+
  
 
 
@@ -61,6 +62,7 @@ export interface LearningPropsType {
     high_score_page_id?: string | null;
     tip?: string;
     system_prompt?: string;
+    challengePage?: boolean;
 }
 
 const RichText: React.FC<{ content: string; className?: string }> = ({ content, className }) => {
@@ -109,6 +111,7 @@ const AnimatedRichText: React.FC<{ content: string; className?: string }> = ({ c
 const ImagePreloader: React.FC<{ images: string[] }> = ({ images }) => {
   const [loadedImages, setLoadedImages] = useState<Set<string>>(new Set());
   const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
+  const [loadingProgress, setLoadingProgress] = useState<number>(0);
 
   useEffect(() => {
     if (!images || images.length === 0) return;
@@ -116,7 +119,6 @@ const ImagePreloader: React.FC<{ images: string[] }> = ({ images }) => {
     trackImageLoading(images, setLoadedImages, setFailedImages);
   }, [images]);
 
-  
   useEffect(() => {
     if (images.length > 0) {
       const total = images.length;
@@ -126,6 +128,9 @@ const ImagePreloader: React.FC<{ images: string[] }> = ({ images }) => {
       if (loaded + failed === total) {
         console.log(`Image preloading complete: ${loaded}/${total} loaded, ${failed} failed`);
       }
+
+      const progress = calculateLoadingProgress(loaded, total);
+      setLoadingProgress(progress);
     }
   }, [loadedImages, failedImages, images.length]);
 
@@ -133,7 +138,7 @@ const ImagePreloader: React.FC<{ images: string[] }> = ({ images }) => {
 };
 
 
-const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, header, test_type="Default", test_grid= "col", options, question, correct_answer, course_id, page_number, pageLength, handleNext, handlePrev, image, why, preloadedImages, onTestNextSelect, give_point, give_feedback, low_score_page_id, high_score_page_id, tip, give_point_by_ai, system_prompt}) => {
+const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, header, test_type="Default", test_grid= "col", options, question, correct_answer, course_id, page_number, pageLength, handleNext, handlePrev, image, why, preloadedImages, onTestNextSelect, give_point, give_feedback, low_score_page_id, high_score_page_id, tip, give_point_by_ai, challengePage, system_prompt}) => {
     const router = useRouter();
 
     const [activeId, setActiveId] = useState<number | null>(null);
@@ -185,7 +190,14 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
     useEffect(() => {
         dispatch(clearAi());
         setUserAnswer("");
-    }, [id])
+        
+
+        if (image) {
+            loadImage(image).catch(error => {
+                console.warn(`Failed to preload current page image: ${error}`);
+            });
+        }
+    }, [id, image])
 
     useEffect(() => {
         const foundCourse: FullCourse | undefined = fullCourses.find(course => pathname.includes(course.slug));
@@ -280,6 +292,9 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
         if (page_number >= pageLength) {
             endSound.play();
             router.push(`/courses/${fullCourseRoute}`)
+            if (challengePage) {
+                localStorage.setItem("isChallengeCompleted", "true");
+            }
             if (!isCompleted){ 
                 setSaveProgressLoading(true)
                 dispatch(saveProgress({ courseId: course_id, userId: user?.id || '' }))
@@ -311,6 +326,13 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                 setUserAnswer("");
             }
         } else if (give_feedback && !feedBack) {
+            if (challengePage) {
+                dispatch(challengeAi({
+                    question: question || "",
+                    answer: userAnswer,
+                    prompt: system_prompt || "",
+                }))
+            }
             dispatch(getFeedBack({
                 question: question || "",
                 answer: userAnswer,
@@ -537,7 +559,7 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
         >
             {page_type === "text" ?(
                 <div
-                    className="flex flex-col justify-center items-center max-w-[80%] max-md:max-w[95%] mx-auto  border-[2px] border-[var(--primary-color1)] bg-[var(--primary-color1)]/30 backdrop-blur-xl p-4 rounded-2xl text-[var(--text-primary)]"
+                    className="flex flex-col justify-center items-center max-w-[80%] max-md:max-w[95%] mx-auto min-w-[30vw] border-[2px] border-[var(--primary-color1)] bg-[var(--primary-color1)]/30 backdrop-blur-xl p-4 rounded-2xl text-[var(--text-primary)]"
                 >
                     {image && (
                         courseLoading || saveProgressLoading ? (
@@ -550,6 +572,8 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                                 alt="تصویر صفحه" 
                                 priority
                                 className="max-h-[70vh] max-w-[80%] max-md:max-w-[95%] max-md:max-h-max mx-auto object-cover rounded-xl mb-6"
+                                onLoad={() => console.log(`Image loaded: ${image}`)}
+                                onError={() => console.warn(`Image failed to load: ${image}`)}
                             />
                         )
                     )}
@@ -571,7 +595,7 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                     className="flex flex-col justify-center mx-auto py-[5vh]"
                 >
                     <div
-                        className="border-[2px] mb-[2rem] border-[var(--primary-color1)] bg-[var(--primary-color1)]/30 backdrop-blur-xl p-4 rounded-2xl max-w-[90%] mx-auto text-justify"
+                        className="border-[2px] mb-[2rem] border-[var(--primary-color1)] bg-[var(--primary-color1)]/30 backdrop-blur-xl p-4 rounded-2xl max-w-[90%] mx-auto text-justify min-w-[30vw]"
                     >
                         {image && (
                             courseLoading ? (
@@ -584,6 +608,8 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                                     alt="تصویر صفحه"
                                     priority 
                                     className="max-h-[70vh] max-w-[80%] max-md:max-w-[95%] max-md:max-h-max mx-auto object-cover rounded-xl mb-6"
+                                    onLoad={() => console.log(`Test image loaded: ${image}`)}
+                                    onError={() => console.warn(`Test image failed to load: ${image}`)}
                                 />
                             )
                         )}

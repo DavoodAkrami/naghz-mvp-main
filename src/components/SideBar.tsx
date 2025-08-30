@@ -15,6 +15,8 @@ import {
     FiShield,
     FiUsers
 } from "react-icons/fi";
+import { MdModelTraining } from "react-icons/md";
+
 
 interface sideBarTypes {
     routes: routesType[];
@@ -38,6 +40,8 @@ const SideBar: React.FC<sideBarTypes> = ({routes, classname}) => {
                 return <FiGrid className="w-5 h-5" />;
             case "کاربران":
                 return <FiUsers className="w-5 h-5" />;
+            case "چالش ها":
+                return <MdModelTraining className="w-5 h-5" />;
             default:
                 return <FiHome className="w-5 h-5" />;
         }

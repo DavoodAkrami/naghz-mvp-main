@@ -11,7 +11,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "@/store/store";
 import { links } from  "@/routes/routes";
 import { TbMessageChatbot } from "react-icons/tb";
-import ChallengPopUp from "@/components/ChallengPopUp";
+
 import ChatBot from "@/components/ChatBot";
 import clsx from "clsx";
 import { fetchUserProgress } from "@/store/slices/userProgressSlice";
@@ -55,9 +55,9 @@ const Home = () => {
     const { isAuthenticated, user, loading } = useSelector((state: RootState) => state.auth);
     const [linkCarry, setLinkCarry] = useState<string>(links.signUp);
     const [isPopUpOpen, setIsPopUpOpen] = useState<boolean>(false);
-    const [isChallengPopUpOpen, setIsChallengPopUpOpen] = useState<boolean>(false);
+
     const [isChatBotOpen, setIsChatBotOpen] = useState<boolean>(false);
-    const [shouldPopUpOpen, setShouldPopUpOpen] = useState<boolean>(false);
+
     const { userProgress } = useSelector((state: RootState) => state.userProgress);
     const dispatch = useDispatch<AppDispatch>();
 
@@ -70,27 +70,12 @@ const Home = () => {
 
 
     const handlePopupClose = () => {
-        if (isPopUpOpen) {
-            setIsPopUpOpen(false);
-        } else if (isChallengPopUpOpen) {
-            setIsChallengPopUpOpen(false);
-        }
-    }
-
-    const handlePopupAccept = () => {
         setIsPopUpOpen(false);
-        const timer = setTimeout(() => {
-            setIsChallengPopUpOpen(true)
-        }, 2000);
-        return () => clearTimeout(timer);
     }
 
-    const handlePopUpSubmit = () => {
-        setIsChallengPopUpOpen(false);
-        const today = new Date().toDateString();
-        localStorage.setItem("hasPopupOpen", "true");
-        localStorage.setItem("popupDate", today);
-    }
+
+
+
 
     useEffect(() => {
         if (isAuthenticated) {
@@ -136,9 +121,7 @@ const Home = () => {
     }, [isAuthenticated]);
 
 
-    useEffect((courseId="4930ad6d-aa59-4061-87aa-1b255d6355bf") => {
-        setShouldPopUpOpen(!!userProgress.find(course => course.course_id === courseId))
-    }, [userProgress])
+
 
     return (
         <AnimatePresence>
@@ -471,19 +454,6 @@ const Home = () => {
                         </motion.div>
                     </div>
                 </section>
-                <ChallengPopUp 
-                    type="text"
-                    text="چالش امروزتو انجام بده!"
-                    openPopUp={true}
-                    onClose={handlePopupClose}
-                />
-                {/* <ChallengPopUp 
-                    type="form"
-                    question="پس درباره‌ش برامون یه جمله بنویس:"
-                    openPopUp={false}
-                    onClose={handlePopupClose}
-                    onSubmit={handlePopUpSubmit}
-                /> */}
                 <div
                     className="fixed bottom-[3vh] right-[4vh] p-4 bg-[var(--primary-color1)]/30 backdrop-blur-xl flex items-center justify-center rounded-full hover:cursor-pointer hover:bg-[var(--primary-color1)]15 transition-all duration-200 max-md:text-[2rem] max-md:p-2 max-md:right-[2.5vw] max-md:bottom-[2vh]"
                     onClick={() => setIsChatBotOpen(!isChatBotOpen)}

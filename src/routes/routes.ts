@@ -55,6 +55,11 @@ const routes: routesType[]= [
         path: "/dashboard/user-management",
         adminRequaire: true  
     },
+    {
+        name: "چالش ها",
+        path: "/dashboard/challenges-management",
+        adminRequaire: true,
+    }
 ] 
 
 
@@ -81,6 +86,11 @@ export const dashboardPages: routesType[] = [
         path: "/dashboard/user-management",
         adminRequaire: true  
     },
+    {
+        name: "چالش ها",
+        path: "/dashboard/challenges-management",
+        adminRequaire: true,
+    }
 ];
 
 

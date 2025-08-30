@@ -7,6 +7,7 @@ import AuthStatusProvider from "@/providers/authProvider";
 import { Analytics } from "@vercel/analytics/next"
 import Footer from "@/components/Footer";
 import HeartsProvider from "@/providers/heartsProvider";
+import ChallengeProvider from "@/providers/challengeProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -120,10 +121,12 @@ export default function RootLayout({
         <Reduxrovider>
           <AuthStatusProvider>
             <HeartsProvider>
-            <Header />
-            {children}
-            <Footer />
-            <Analytics />
+              <ChallengeProvider>
+                <Header />
+                {children}
+                <Footer />
+                <Analytics />
+              </ChallengeProvider>
             </HeartsProvider>
           </AuthStatusProvider>
         </Reduxrovider>

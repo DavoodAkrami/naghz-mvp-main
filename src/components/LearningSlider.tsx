@@ -46,6 +46,7 @@ interface LearningSliderProps extends LearningPropsType {
   preloadedPages?: DbPage[];
   preloadedOptions?: Record<string, DbOption[]>;
   skipDatabase?: boolean;
+  challengePage?: boolean;
 }
 
 const LearningSlider: React.FC<LearningSliderProps> = (props: LearningSliderProps) => {
@@ -249,6 +250,7 @@ const LearningSlider: React.FC<LearningSliderProps> = (props: LearningSliderProp
             handlePrev={handlePrevious}
             preloadedImages={allImages}
             onTestNextSelect={handleTestNextSelect}
+            challengePage={props.challengePage || false}
           />
         </motion.div>
       </AnimatePresence>
