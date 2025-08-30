@@ -42,7 +42,14 @@ type DbOption = {
   next_page_id?: string | null;
 };
 
-const LearningSlider: React.FC<LearningPropsType> = (props: LearningPropsType) => {
+interface LearningSliderProps extends LearningPropsType {
+  preloadedPages?: DbPage[];
+  preloadedOptions?: Record<string, DbOption[]>;
+  skipDatabase?: boolean;
+  challengePage?: boolean;
+}
+
+const LearningSlider: React.FC<LearningSliderProps> = (props: LearningSliderProps) => {
   const [currentIndex, setCurrentIndex] = useState<number>(props.page_number - 1);
   const [pages, setPages] = useState<DbPage[]>([]);
   const [optionsByPageId, setOptionsByPageId] = useState<Record<string, DbOption[]>>({});
@@ -54,6 +61,17 @@ const LearningSlider: React.FC<LearningPropsType> = (props: LearningPropsType) =
 
   useEffect(() => {
     const loadPages = async () => {
+      // If we have preloaded data, use it instead of fetching from database
+      if (props.preloadedPages && props.skipDatabase) {
+        setPages(props.preloadedPages);
+        if (props.preloadedOptions) {
+          setOptionsByPageId(props.preloadedOptions);
+        }
+        setLoading(false);
+        return;
+      }
+
+      // Original database loading logic
       if (!supabase) return;
       setLoading(true);
       const { data, error } = await supabase
@@ -71,7 +89,7 @@ const LearningSlider: React.FC<LearningPropsType> = (props: LearningPropsType) =
     };
     loadPages();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [props.course_id]);
+  }, [props.course_id, props.preloadedPages, props.skipDatabase]);
 
   const loadOptionsForPage = async (pageId: string) => {
     if (optionsByPageId[pageId]) return; // cached
@@ -232,6 +250,7 @@ const LearningSlider: React.FC<LearningPropsType> = (props: LearningPropsType) =
             handlePrev={handlePrevious}
             preloadedImages={allImages}
             onTestNextSelect={handleTestNextSelect}
+            challengePage={props.challengePage || false}
           />
         </motion.div>
       </AnimatePresence>

@@ -27,6 +27,7 @@ interface navMenuOptionsType {
     action?: ((optionId?: number) => void | null) | (() => void | string);
     canOpen?: boolean;
     openedOption?: navMenuOptionsType[];
+    isTicked?: boolean;
 }
 
 const Header = () => {
@@ -34,11 +35,19 @@ const Header = () => {
     const router = useRouter();
     const headerPage = routes.find(route => route.path === pathName)?.header ?? false; 
     const { isAuthenticated } = useSelector((state: RootState) => state.auth);
+    const { userProgress } = useSelector((state: RootState) => state.userProgress);
     const [showSkeleton, setShowSkeleton] = useState(true);
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
     const [isNavMenuOpen, setIsNavMenuOpen] = useState<boolean>(false);
     const [isCanOpenMenuId, setIsCanMenuId] = useState<number | null>(null);
+    const [isChallengeDone, setIsChallengeDone] = useState<boolean>(false);
+
+    useEffect(() => {
+        const isChallengeDone: boolean = localStorage.getItem("isChallengeCompleted") === "true" ? true : false;
+        setIsChallengeDone(isChallengeDone);
+        console.log(isChallengeDone)
+    }, [])
 
     const navMenuOptions: navMenuOptionsType[] = [
         {
@@ -58,6 +67,12 @@ const Header = () => {
         },
         {
             id: 4,
+            title: "چالش امروز",
+            action: () => isAuthenticated && userProgress && !isChallengeDone ? router.push("/today-challenge") : null,
+            isTicked: isChallengeDone
+        },
+        {
+            id: 5,
             title: "کامیونیتی ما",
             action: (optionId?: number) => setIsCanMenuId(optionId || null),
             canOpen: true,
@@ -88,6 +103,7 @@ const Header = () => {
 
     const parts = pathName.split('/').filter(Boolean);
     const hideHeader = parts[0] === 'courses' && parts.length > 1;
+    const noHeaderPages = pathName.includes('/today-challenge');
 
 
     useEffect(() => {
@@ -135,7 +151,7 @@ const Header = () => {
         );
     }
 
-    if (hideHeader) return null;
+    if (hideHeader || noHeaderPages) return null;
 
     return (
         <>
@@ -268,7 +284,8 @@ const Header = () => {
                                                             }}
                                                             className={clsx(
                                                                 "flex items-center justify-between text-[1.4rem] max-md:text-[1.2rem] max-md:font-normal font-bold hover:cursor-pointer hover:bg-[var(--primary-color4)]/80 px-4 py-3 backdrop-blur-2xl",
-                                                                option.id !== navMenuOptions.length && "border-b border-[var(--text-primary)]/20 max-md:border-[var(--text-primary)]/30"
+                                                                option.id !== navMenuOptions.length && "border-b border-[var(--text-primary)]/20 max-md:border-[var(--text-primary)]/30",
+                                                                option.isTicked && "hidden"
                                                             )}
                                                         >
                                                             {option.title}
