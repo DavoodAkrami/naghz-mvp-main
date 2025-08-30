@@ -29,7 +29,7 @@ const FullCourseCard: React.FC<FullCourseCardProps> = ({ title, description, ico
         <div
             onClick={onClick}
             className={clsx(
-                "bg-[var(--primary-color1)]/30 backdrop-blur-xl px-[1rem] flex flex-col justify-center items-center gap-[1rem] rounded-3xl py-[1rem] border-[3px] border-[var(--primary-color1)]/60 hover:border-[var(--primary-color1)] hover:shadow-[0_0_12px_var(--primary-color1)] transition-all duration-200 cursor-pointer",
+                "bg-[var(--primary-color1)]/30 backdrop-blur-xl px-[1rem] flex flex-col justify-center items-center gap-[1rem] rounded-3xl py-[1rem] border-[3px] border-[var(--primary-color1)]/60 hover:border-[var(--primary-color1)] hover:shadow-[0_0_12px_var(--primary-color1)] transition-all duration-200 cursor-pointer  shadow-2xl",
                 !is_active && "opacity-[0.6] pointer-events-none"
             )}
         >

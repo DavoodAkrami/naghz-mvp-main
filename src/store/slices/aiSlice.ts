@@ -12,6 +12,7 @@ interface AiState {
     aiLoading: boolean;
     error: string | null;
     nextPageId: string | null;
+    challengeFeedBack: string;
 }
 
 const initialState: AiState = {
@@ -23,6 +24,7 @@ const initialState: AiState = {
     aiLoading: false,
     error: null,
     nextPageId: null,
+    challengeFeedBack: "",
 }
 
 
@@ -98,6 +100,27 @@ export const getPointFroTip = createAsyncThunk(
 )
 
 
+export const challengeAi = createAsyncThunk(
+    'ai/challengeAi',
+    async ({question, prompt, answer} : {question: string, prompt: string, answer: string}) => {
+        const response = await openai.chat.completions.create({
+            model: "gpt-5-nano",
+            messages: [
+                {
+                    role: "system",
+                    content: `Based on this question: ${question} and this solving guidline: ${prompt}, in Persian give a feedBack to user's answer, feedback should be between 150 to 300 charecter. `
+                },
+                {
+                    role: "user",
+                    content: `Answer: ${answer}`
+                }
+            ],
+        })
+        return response.choices[0].message?.content ?? "";
+    }
+)
+
+
 const aiSlice = createSlice({
     name: "ai",
     initialState,
@@ -145,6 +168,17 @@ const aiSlice = createSlice({
             .addCase(getPointFroTip.rejected, (state, action) => {
                 state.aiLoading = false;
                 state.error = action.error.message ?? "خطا در گرفتن نمره";
+            })
+            .addCase(challengeAi.pending, (state) => {
+                state.aiLoading = true;
+            })
+            .addCase(challengeAi.fulfilled, (state, action) => {
+                state.aiLoading = false;
+                state.challengeFeedBack = action.payload;
+            })
+            .addCase(challengeAi.rejected, (state, action) => {
+                state.aiLoading = false;
+                state.error = action.error.message ?? "خطا در گرفتن فیدبک";
             })
     },
 })

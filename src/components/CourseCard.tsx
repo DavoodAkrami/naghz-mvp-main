@@ -55,7 +55,7 @@ const CourseCard: React.FC<CurseCardProps> = ({
                 layoutId={layoutId}
                 onClick={onClick}
                 className={clsx(
-                    "bg-[var(--primary-color1)]/30 px-[1rem] shadow-lg h-[150px] border border-[var(--bg-color-secondary)] rounded-2xl hover:bg-[var(--primary-color1)]/45 cursor-pointer flex justify-baseline items-center gap-[10%] transition-all duration-200 w-[100%] relative",
+                    "bg-[var(--primary-color1)]/30 px-[1rem] h-[150px] border border-[var(--bg-color-secondary)] shadow-2xl rounded-2xl hover:bg-[var(--primary-color1)]/45 cursor-pointer flex justify-baseline items-center gap-[10%] transition-all duration-200 w-[100%] relative",
                     !isActive && !isAdmin && "opacity-[0.5] cursor-default pointer-events-none hover:border-none bg-[var(--primary-color1)]/5",
                     isCompleted && "bg-green-50/50 border-green-500 hover:bg-green-100"
                 )}
