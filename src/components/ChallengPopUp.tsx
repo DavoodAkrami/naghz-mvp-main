@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Button from "./Button";
+import { useRouter } from "next/navigation";
 
 
 interface ChallengPopUpProp {
@@ -15,6 +16,7 @@ interface ChallengPopUpProp {
 }
 
 const ChallengPopUp: React.FC<ChallengPopUpProp> = ({ text, onSubmit, type, question, onAccept, openPopUp, onClose }) => {
+    const router = useRouter();
     type answer = {
         answer: string;
     }
@@ -22,6 +24,10 @@ const ChallengPopUp: React.FC<ChallengPopUpProp> = ({ text, onSubmit, type, ques
     const [formData, setFormData] = useState<answer>({
         answer: ""
     })
+
+    const handleOpenChallenge = () => {
+        router.push("/challenge")
+    }
     
 
 
@@ -34,7 +40,7 @@ const ChallengPopUp: React.FC<ChallengPopUpProp> = ({ text, onSubmit, type, ques
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.5 }}
                     dir="rtl"
-                    className="z-100000 fixed bottom-0 w-full bg-[var(--primary-color1)]/30 backdrop-blur-xl border-t-[3px] border-[var(--primary-color1)] py-[7vh] max-md:py-[5vh]"
+                    className="z-100000 fixed bottom-[3vh] right-[2vw] w-[40vw] max-md:w-[97vw] rounded-2xl shadow-2xl bg-[var(--primary-color1)]/30 backdrop-blur-xl border-[2px] border-[var(--primary-color1)] py-6 max-md:py-8 max-md:right-[50%] max-md:transform max-md:translate-x-1/2 max-md:scale-[0.9]"
                 >
                     {type === "text" ? (
                         <div
@@ -46,21 +52,21 @@ const ChallengPopUp: React.FC<ChallengPopUpProp> = ({ text, onSubmit, type, ques
                                 {text}
                             </div>
                             <div
-                                className="flex gap-[3.4rem] max-md:flex-col max-md:gap-[0.6rem]"
+                                className="flex flex-col gap-[1rem] max-md:gap-[0.6rem]"
                             >
                                 <Button
                                     buttonType="button-primary"
-                                    classname="md:scale-[1.3] scale-[1.1] rounded-xl shadow-xl"
-                                    onClick={onAccept}
+                                    classname="rounded-xl shadow-xl"
+                                    onClick={handleOpenChallenge}
                                 >
-                                    اره انجامش دادم
+                                    بزن بریم
                                 </Button>
                                 <Button
                                     buttonType="button-secondary"
-                                    classname="md:scale-[1.3] scale-[1.1] rounded-xl shadow-xl text-[white]"
+                                    classname="rounded-xl shadow-xl text-[white]"
                                     onClick={onClose}
                                 >
-                                    نه حوصلشو نداشتم
+                                    نه حوصله ندارم
                                 </Button>
                             </div>
                         </div>

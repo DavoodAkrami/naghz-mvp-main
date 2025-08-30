@@ -88,6 +88,7 @@ const Header = () => {
 
     const parts = pathName.split('/').filter(Boolean);
     const hideHeader = parts[0] === 'courses' && parts.length > 1;
+    const noHeaderPages = pathName.includes('challenge');
 
 
     useEffect(() => {
@@ -135,7 +136,7 @@ const Header = () => {
         );
     }
 
-    if (hideHeader) return null;
+    if (hideHeader || noHeaderPages) return null;
 
     return (
         <>
