@@ -56,5 +56,5 @@ export const createScoringPrompt = (question: string, subject: string): string =
 
 
 export const createTipScoringPrompt = (adminSystemPrompt: string, question: string, answer: string): string => {
-  return `Based on this tip: ${adminSystemPrompt} and this question: ${question} give me a score between 0 and 100 (0 is the worst and 100 is the best) for the answer: ${answer}. Be extremely strict.`;
+  return `Based on this tip: ${adminSystemPrompt} and this question: ${question} give me a score between 0 and 100 (0 is the worst and 100 is the best) for the answer: ${answer}. Be strict.`;
 };

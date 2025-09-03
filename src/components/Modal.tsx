@@ -8,9 +8,10 @@ export interface modalPropsType  {
     children: ReactNode;
     onClose?: () => void;
     classname?: string;
+    direction?: "rtl" | "ltr";
 }
 
-const Modal: React.FC<modalPropsType> = ({ children, onClose, onOpen, classname}) => {
+const Modal: React.FC<modalPropsType> = ({ children, onClose, onOpen, classname, direction = "rtl"}) => {
 
     return (
         <AnimatePresence>
@@ -22,6 +23,7 @@ const Modal: React.FC<modalPropsType> = ({ children, onClose, onOpen, classname}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
             onClick={onClose}
+            dir={direction}
         >
             <div 
                 className={clsx(

@@ -311,6 +311,9 @@ const Learning: React.FC<LearningPropsType> = ({ id, page_type= "text", text, he
                 wrongSound,
                 successSound
             }))
+            if (user?.id) {
+                dispatch(reduceHeart(user.id));
+            }
         } else if (test_type === "Input" && page_type === "testNext" && give_point) {
             if (userAnswer.trim() === "") {
                 wrongSound.play();

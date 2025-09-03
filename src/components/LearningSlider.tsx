@@ -1,12 +1,21 @@
+"use client"
 import React, { useEffect, useMemo, useState } from "react"
 import { MdKeyboardArrowLeft } from "react-icons/md";
 import Learning from "./Learning";
-import Button from "./Button";
 import { LearningPropsType } from "./Learning";
 import { AnimatePresence, motion } from "framer-motion";
 import { supabase } from "@/config/supabase";
-import { useSelector } from "react-redux";
-import { RootState } from "@/store/store";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/store/store";
+import ButtonLoading from "./ButtonLoading";
+import { IoHeartSharp } from "react-icons/io5";
+import { fetchUserHearts } from "@/store/slices/heartSlice";
+import { RxCross2 } from "react-icons/rx";
+import { usePathname, useRouter } from "next/navigation";
+import Modal from "./Modal";
+import Button from "./Button";
+
+
 
 type DbPage = {
   id: string;
@@ -55,9 +64,19 @@ const LearningSlider: React.FC<LearningSliderProps> = (props: LearningSliderProp
   const [optionsByPageId, setOptionsByPageId] = useState<Record<string, DbOption[]>>({});
   const [loading, setLoading] = useState<boolean>(true);
   const [direction, setDirection] = useState<1 | -1>(1);
+  const router = useRouter();
+  const pathname = usePathname();
+  const [isConfirmCloseModalOpen, setisConfirmCloseModalOpen] = useState(false);
   
   
   const { nextPageId } = useSelector((state: RootState) => state.ai);
+  const { hearts, heartsLoading } = useSelector((state: RootState) => state.hearts);
+  const { user } = useSelector((state: RootState) => state.auth);
+  const dispatch = useDispatch<AppDispatch>();
+
+  useEffect(() => {
+    dispatch(fetchUserHearts(user?.id || ""));
+  }, [currentIndex])
 
   useEffect(() => {
     const loadPages = async () => {
@@ -191,8 +210,6 @@ const LearningSlider: React.FC<LearningSliderProps> = (props: LearningSliderProp
       system_prompt: page.system_prompt || ""
     };
   }, [pages, currentIndex, optionsByPageId, props.course_id, props.pageLength]);
-
-  // Collect all images for preloading
   const allImages = useMemo(() => {
     return pages
       .map(page => page.image)
@@ -224,14 +241,72 @@ const LearningSlider: React.FC<LearningSliderProps> = (props: LearningSliderProp
                 className="text-[2rem] cursor-pointer"
             />
         </Button>
-        <div className="w-[70%] max-md:w-[85%] mx-auto bg-gray-700 rounded-full h-3">
+        <div className="w-[70%] max-md:w-[70%] mx-auto bg-gray-700 rounded-full h-4">
           <motion.div
-            className="bg-[var(--accent-color1)] h-3 rounded-full"
+            className="bg-[var(--accent-color1)] h-4 rounded-full"
             initial={{ width: '0%' }}
             animate={{ width: `${((currentIndex + 1) / (pages.length || props.pageLength)) * 100}%` }}
             transition={{ duration: 0.6, ease: "easeOut" }}
           />
         </div>
+        <div
+          className="flex gap-[10px] items-center justify-center"
+        >
+          <div>
+            {heartsLoading ? (
+              <ButtonLoading size="md" color="primary" />
+            ) : (
+              <div className="flex gap-[8px] max-md:scale-[0.8] max-md:gap-[4px] items-center text-[1.5rem]">
+                <IoHeartSharp className="text-red-500 mb-[3px]"/>
+                <span>
+                  {hearts}
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+        <div
+          className="flex items-center justify-center cursor-pointer"
+          onClick={() => {
+            setisConfirmCloseModalOpen(true);
+          }}
+        >
+            <RxCross2 className="text-[1.5rem] ml-[10px] mb-[3px]"/>
+        </div>
+        <Modal
+          onOpen={isConfirmCloseModalOpen}
+          onClose={() => setisConfirmCloseModalOpen(false)}
+        >
+          <div>
+            <h1
+              className="h2 mb-[2rem]"
+            >آیا می خواهید از درس خارج شوید؟</h1>
+            <div
+              className="flex gap-[10px] w-full"
+            >
+              <Button
+                onClick={() => setisConfirmCloseModalOpen(false)}
+                buttonType="button-secondary"
+                classname="rounded-xl shadow-xl w-full"
+              >
+                خیر
+              </Button>
+              <Button
+                onClick={() => {
+                  const path = pathname || "/";
+                  const segments = path.split("/").filter(Boolean);
+                  const parent = segments.slice(0, -1).join("/");
+                  const target = "/" + parent;
+                  router.push(target === "/" ? "/" : target);
+                }}
+                buttonType="button-primary"
+                classname="rounded-xl shadow-xl w-full"
+              >
+                بله
+              </Button>
+            </div>
+          </div>
+        </Modal>
       </div>
 
       <AnimatePresence initial={false} custom={direction} mode="wait">

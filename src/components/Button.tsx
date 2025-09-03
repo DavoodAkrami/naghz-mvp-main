@@ -4,7 +4,7 @@ import clsx from "clsx";
 export interface ButtonProp extends React.ButtonHTMLAttributes<HTMLButtonElement> {
     children: React.ReactNode;
     buttonType?: "button-primary" | "button-secondary";
-    classname: string;
+    classname?: string;
 }
 
 const Button: React.FC<ButtonProp> = ({ buttonType, classname, children, ...props }) => {
